@@ -25,7 +25,7 @@ export default function Home() {
           toast.success("Welcome back! 👋");
           router.push(`/profiles/user/${user.uid}`)
         } else {
-          router.push("/auth/landing")
+          router.push("/landing")
         }
       }, 1500);
     })
