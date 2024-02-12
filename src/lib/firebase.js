@@ -16,13 +16,13 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
-export const getAuth = () => firebase.auth();
-export const getGoogleAuthProvider = () => new firebase.auth.GoogleAuthProvider();
+export const auth = firebase.auth();
+export const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
+export const firestore = firebase.firestore();
 
-export const getFirestore = () => firebase.firestore();
-export const getFromMillis = () => firebase.firestore.Timestamp.fromMillis;
-export const getServerTimestamp = () => firebase.firestore.FieldValue.serverTimestamp;
-export const getIncrement = () => firebase.firestore.FieldValue.increment;
+export const fromMillis = firebase.firestore.Timestamp.fromMillis;
+export const serverTimestamp = firebase.firestore.FieldValue.serverTimestamp;
+export const increment = firebase.firestore.FieldValue.increment;
 
-export const getStorage = () => firebase.storage();
-export const getStateChanged = () => firebase.storage.TaskEvent.STATE_CHANGED;
+export const storage = firebase.storage();
+export const STATE_CHANGED = firebase.storage.TaskEvent.STATE_CHANGED;
