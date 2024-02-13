@@ -8,7 +8,6 @@ import { auth, firestore } from "@/lib/firebase";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
 import { Select } from "@/components/ui/select";
 import WithAuth from "@/components/WithAuth";
 
@@ -100,7 +99,7 @@ function SetupPage() {
             </div>
 
             {/* profile picture */}
-            <div className="w-full">
+            {/* <div className="w-full">
               <label className="flex gap-2 items-center text-sm font-medium text-gray-700">
                   Profile Picture
                   <span className="text-raisin_black text-xs">(JPG, PNG, or GIF).</span>
@@ -119,7 +118,7 @@ function SetupPage() {
                       </div>
                   )}
               </div>
-          </div>
+          </div> */}
 
           <div className='flex flex-col w-full'>
               {/* about */}

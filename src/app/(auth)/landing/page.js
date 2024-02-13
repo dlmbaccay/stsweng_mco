@@ -38,7 +38,7 @@ export default function Landing() {
    */  
   const handleSignIn = async () => {
     if (email === '' || password === '') {
-      toast.error('Please fill in all fields.');
+      toast.error('Enter your email and password.');
       return;
     } else {
       toast.loading('Signing in...');
@@ -47,23 +47,27 @@ export default function Landing() {
       .then((userCredential) => {
         // sign the user in
         const user = userCredential.user;
-        console.log('Signed in user:', user);
 
         // clear fields
         setEmail('');
         setPassword('');
-
         toast.dismiss();
-        toast.success('Signed in successfully!');
-        
-        if (userHasNoPriorData) {
-          router.push('/setup');
+
+        // check if user is already verified
+        if (user.emailVerified) {          
+          toast.success('Signed in successfully!');
+          if (userHasNoPriorData) {
+            router.push('/setup');
+          } else {
+            router.push('/home');
+          }
         } else {
-          router.push('/home');
+          toast.error('Account not verified. Please check your email for verification instructions.');
+          // Automatic Sign Out for non-verified users
+          auth.signOut()
         }
         
-        // redirect to home page
-        router.push('/home');
+        
       }).catch((error) => {
           console.log(error);
           toast.dismiss();
