@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
 
 export default function Landing() {
-
+  
   const [ email, setEmail ] = useState('');
   const [ password, setPassword ] = useState('');
   const [ confirm_password, setConfirmPassword ] = useState('');
@@ -21,6 +21,72 @@ export default function Landing() {
 
   const [ loggingIn, isLoggingIn ] = useState(false);
   const [ signingUp, isSigningUp ] = useState(true); // default for now, but loggingIn will be the default in production
+
+  /**
+   * handleSignIn function
+   * 
+   * @param {string} email - The email of the user
+   * @param {string} password - The password of the user
+   * 
+   * This function handles the sign in process of an existing
+   * user. It takes an email and password as arguments 
+   * which are then passed through Firebase's 
+   * signInWithEmailAndPassword method to authenticate the user.
+   * 
+   * If the authentication is successful, the user is redirected
+   * to the home page. If an error occurs, a toast message is displayed.
+   */  
+  const handleSignIn = async () => {
+    if (email === '' || password === '') {
+      toast.error('Please fill in all fields.');
+      return;
+    } else {
+      toast.loading('Signing in...');
+
+      auth.signInWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        // sign the user in
+        const user = userCredential.user;
+        console.log('Signed in user:', user);
+
+        // clear fields
+        setEmail('');
+        setPassword('');
+
+        toast.dismiss();
+        toast.success('Signed in successfully!');
+        
+        if (userHasNoPriorData) {
+          router.push('/setup');
+        } else {
+          router.push('/home');
+        }
+        
+        // redirect to home page
+        router.push('/home');
+      }).catch((error) => {
+          console.log(error);
+          toast.dismiss();
+          toast.error('Invalid email or password. Please try again.');
+      });
+    }
+  }
+
+  /**
+   * userHasNoPriorData helper function
+   * 
+   * This function checks if the user has prior data in the database.
+   * It performs a query or check in the Firebase database using the userId.
+   * If the user has prior data, it returns true; otherwise, it returns false.
+   * 
+   * @param {string} userId - The ID of the user
+   * @returns {boolean} - True if the user has prior data, false otherwise
+   */
+  const userHasNoPriorData = async (userId) => {
+    // Perform a query or check in the Firebase database to determine if the user has prior data
+    const userDataSnapshot = await firestore.collection("userData").doc(userId).get();
+    return !userDataSnapshot.exists;
+  }
 
   /**
    * handleSignUp function
@@ -113,46 +179,29 @@ export default function Landing() {
    */
 
   async function handleGooglePopUp() {
-    await auth.signInWithPopup(googleAuthProvider).then((result) => {
-      // Signed in 
-      const user = result.user;
-      
+    try {
+        const result = await auth.signInWithPopup(googleAuthProvider);
+        const user = result.user;
 
-      toast.success('Signed in with Google');
+        toast.success('Signed in with Google');
 
-      return user;
-    }).then((user) => {
-      // Fetch the username from Firestore
-      const ref = firestore.collection('users').doc(user.uid);
-
-      ref.get().then((doc) => {
-        const username = doc.data()?.username;
-
-        if (!username) {
-            // If email is verified but no username, redirect to AccountSetup
+        // check if user has no prior data
+        if (userHasNoPriorData(user.uid)) {
             toast(`Let's set up your account!`, { icon: '👏' });
             router.push('/setup');
         } else {
-          // If old user (email verified and has username), redirect to Home
+            setEmail('');
+            setPassword('');
 
-          // Clear fields
-          setEmail('');
-          setPassword('');
-
-          toast('Welcome back', { icon: '👏' });
-          router.push('/home'); // can only be tested when login and account setup functionality is complete
+            toast('Welcome back', { icon: '👏' });
+            router.push('/home');
         }
-      }).catch((error) => {
+    } catch (error) {
         toast.dismiss();
         toast.error(error.message);
-        console.log(error.message);
-      });
-    }).catch((error) => {
-      toast.dismiss();
-      toast.error(error.message)
-      console.log(error.message)
-    })
-  }
+        console.error(error.message);
+    }
+}
 
   return (
     <div className="w-full h-screen flex flex-col items-center justify-center">
@@ -303,13 +352,13 @@ export default function Landing() {
             {/* buttons */}
             <div className="w-full flex flex-col gap-3">
               <Button
-                // onClick={handleLogIn}
+                onClick={handleSignIn}
               >
                 Log In
               </Button>
 
               <Button 
-                // onClick={handleGooglePopUp}
+                onClick={handleGooglePopUp}
                 className="flex gap-1"
                >
                   <p> Continue with </p>

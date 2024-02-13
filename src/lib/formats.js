@@ -16,3 +16,17 @@ export function checkPassword(password) {
   const regex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,16}$/;
   return regex.test(password);
 }
+
+export function checkUsername(val) {
+  const username = val.toLowerCase().trim();
+  const regex = /^[a-zA-Z0-9]+(?:[_.][a-zA-Z0-9]+)*$/;
+
+  return regex.test(username);
+}
+
+export function checkDisplayName(val) {
+  const displayname = val;
+  const regex = /\s\s/;
+
+  return !regex.test(displayname);
+}
