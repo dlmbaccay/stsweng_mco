@@ -18,15 +18,18 @@ export function checkPassword(password) {
 }
 
 export function checkUsername(val) {
-  const username = val.toLowerCase().trim();
   const regex = /^[a-zA-Z0-9]+(?:[_.][a-zA-Z0-9]+)*$/;
-
-  return regex.test(username);
+  return regex.test(val) && val.length >= 3 && val.length <= 15;
 }
 
 export function checkDisplayName(val) {
-  const displayname = val;
-  const regex = /\s\s/;
+  const regex = /^[^\s]+(\s+[^\s]+)*$/;
 
-  return !regex.test(displayname);
+  return regex.test(val) && val.length >= 1 && val.length <= 30;
+}
+
+export function checkLocation(val) {
+  const regex = /^[^\s]+(\s+[^\s]+)*$/;
+
+  return regex.test(val) && val.length >= 2 && val.length <= 30;
 }

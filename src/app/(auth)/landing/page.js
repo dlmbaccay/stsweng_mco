@@ -251,13 +251,13 @@ export default function Landing() {
                   <>
                     <div className="mt-4 flex flex-row w-full pl-2 gap-4">
                       <div>
-                        <p className={`text-xs ${/^.{8,16}$/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>Be 8-16 characters long.</p>
-                        <p className={`text-xs ${/[A-Z]/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>Contain at least one uppercase letter.</p>
-                        <p className={`text-xs ${/[a-z]/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>Contain at least one lowercase letter.</p>
+                        <p className={`text-xs ${/^.{8,16}$/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>- Be 8-16 characters long.</p>
+                        <p className={`text-xs ${/[A-Z]/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>- Contain at least one uppercase letter.</p>
+                        <p className={`text-xs ${/[a-z]/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>- Contain at least one lowercase letter.</p>
                       </div>
                       <div>
-                        <p className={`text-xs ${/[0-9]/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>Contain at least one digit.</p>
-                        <p className={`text-xs ${/\W/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>Contain at least one special character.</p>
+                        <p className={`text-xs ${/[0-9]/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>- Contain at least one digit.</p>
+                        <p className={`text-xs ${/\W/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>- Contain at least one special character.</p>
                       </div>
                     </div>
                   </>
