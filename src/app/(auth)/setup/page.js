@@ -2,33 +2,53 @@
 
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useState, useEffect } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { auth, firestore } from "@/lib/firebase";
+import { auth, firestore, storage } from "@/lib/firebase";
+import { checkDisplayName, checkLocation, checkUsername } from "@/lib/formats";
+import { isUsernameTaken} from "@/lib/crud";
+import { handleFilePreview } from "@/lib/helper-functions";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
+import { PhoneInput } from "@/components/ui/phone-input";
+import { Textarea } from "@/components/ui/textarea";
 import WithAuth from "@/components/WithAuth";
 
 
 function SetupPage() {
 
-  const router = useRouter();
-  const user = useAuthState(auth);
-
-  const handleSignOut = () => {
-    auth.signOut()
-    .then(() => {
-      router.push('/landing');
-      toast.success('Signed out');
-      console.log('Signed out');
-    })
-  }
-  
-    const [usernameFormValue, setUsernameFormValue] = useState('');
-    const [displayName, setDisplayName] = useState('');
+    const router = useRouter();
+    const user = auth.currentUser;
     const [loading, setLoading] = useState(false);
+
+    // Form value variables
+    const [username, setUsername] = useState('');
+    const [displayName, setDisplayName] = useState('');
+    const [about, setAbout] = useState('');
+    const [gender, setGender] = useState('');
+    const [birthdate, setBirthdate] = useState(null);
+    const [location, setLocation] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [userPhoto, setUserPhoto] = useState('');
+    const [previewUrl, setPreviewUrl] = useState('/images/profilePictureHolder.jpg');
+
+    const [submitDisabled, setSubmitDisabled] = useState(false);
+
+
+    // Tooltip variables
+    const [showUsernameTooltip, setShowUsernameTooltip] = useState(false);
+    const [showDisplayNameTooltip, setShowDisplayNameTooltip] = useState(false);
+    const [showLocationTooltip, setShowLocationTooltip] = useState(false);
+
+    const handleSignOut = () => {
+        auth.signOut().then(() => {
+            router.push('/landing');
+            toast.success('Signed out');
+            console.log('Signed out');
+        })
+    }
 
     useEffect(() => {
         const checkUserSetup = async () => {
@@ -37,32 +57,115 @@ function SetupPage() {
                 const doc = await userRef.get();
                 if (doc.exists && doc.data().username) {
                     toast.error("You've already set up your account!");
-                    router.push(`/Home`);
+                    router.push(`/home`);
                 }
             }
         };
         checkUserSetup();
-    }, [user, router]);
+    }, []);
 
-    const handleUsernameChange = (event) => {
-        const username = event.target.value.toLowerCase().trim();
-        setUsernameFormValue(username);
+    const handleFileChange = (event) => {
+        var temp = handleFilePreview(event.target.files[0]);
+        if (temp == null) {
+            setUserPhoto('');
+            setPreviewUrl('/images/profilePictureHolder.jpg');
+        } else {
+            setUserPhoto(temp[0]);
+            setPreviewUrl(temp[1]);
+        }
+        
     };
-
-    const handleDisplayNameChange = (event) => {
-        const displayName = event.target.value.trim();
-        setDisplayName(displayName);
-    };
-
-    const handleFileSelect = (event) => {
-      const displayName = event.target.value.trim();
-      setDisplayName(displayName);
-  };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        // Your form submission logic here
+
+        let usernameTaken = await isUsernameTaken(username);
+
+        if (usernameTaken){
+            toast.error('Username is already taken!');
+            return;
+        }
+    
+        try {
+            setSubmitDisabled(true);
+            toast.loading('Setting up your account...');
+    
+            const storagePath = `userProfile/${user.uid}/profilePic`;
+            const storageRef = storage.ref().child(storagePath);
+    
+            if (userPhoto) {
+                await uploadUserPhoto(storageRef);
+            }
+    
+            await saveUserData();
+    
+            toast.success(`Welcome to BantayBuddy, ${username}!`);
+            router.push(`/user/${username}`);
+        } catch (error) {
+            toast.error('An error occurred while setting up your account.');
+            console.error(error);
+        } finally {
+            setSubmitDisabled(false);
+            toast.dismiss();
+        }
     };
+    
+    const uploadUserPhoto = async (storageRef) => {
+        const uploadTask = storageRef.put(userPhoto);
+    
+        await new Promise((resolve, reject) => {
+            uploadTask.on(
+                'state_changed',
+                (snapshot) => {
+                    // Handle progress updates here
+                    const progress = Math.round(
+                        (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                    );
+                    // Update progress state if needed
+                },
+                (error) => {
+                    // Handle error here
+                    reject(error);
+                },
+                () => {
+                    // Handle successful upload here
+                    toast.success('Photo uploaded successfully!');
+                    resolve();
+                }
+            );
+        });
+    };
+    
+    const saveUserData = async () => {
+        const userDoc = firestore.doc(`users/${user.uid}`);
+        const batch = firestore.batch();
+    
+        batch.set(userDoc, {
+            username: username,
+            displayName: displayName,
+            userPhotoURL: userPhoto ? await getUserPhotoURL() : "",
+            about: about,
+            email: user.email,
+            followers: [],
+            following: [],
+            hidden: [],
+            coverPhotoURL: "",
+            gender: gender,
+            birthdate: birthdate,
+            location: location,
+            phoneNumber: phoneNumber,
+            uid: user.uid
+        });
+    
+        await batch.commit();
+    };
+    
+    const getUserPhotoURL = async () => {
+        const storagePath = `userProfile/${user.uid}/profilePic`;
+        const storageRef = storage.ref().child(storagePath);
+        return await storageRef.getDownloadURL();
+    };
+    
 
 
   return (
@@ -80,10 +183,27 @@ function SetupPage() {
                     <span>Username</span>
                     <span className="text-red-500"> *</span>
                 </label>
-                <Input type="text" id="username" value={usernameFormValue} className={`outline-none mt-2 p-2 border rounded-md w-full`} placeholder="Enter your username" required 
-                    maxLength={15}
+                <Input 
+                    type="text"
+                    id="username" 
+                    value={username} 
+                    className={`outline-none mt-2 p-2 border rounded-md w-full ${username === '' ? '': !checkUsername(username) ? 'border-red-500' : 'border-green-500'}`} 
+                    placeholder="Enter your username" 
+                    required
+                    onFocus={() => setShowUsernameTooltip(true)}
+                    onBlur={() => setShowUsernameTooltip(false)}
                     minLength={3}
-                    onChange={handleUsernameChange} />
+                    onChange={(e) => setUsername(e.target.value.toLowerCase())} />
+                
+                { showUsernameTooltip  && (
+                    <div className="mt-4 flex flex-row w-full pl-2 gap-4">
+                        <div>
+                            <p className={`text-xs ${username.length >= 3 && username.length <= 15 ? 'text-green-500' : 'text-slate-400'}`}>- Be 3-15 characters long.</p>
+                            <p className={`text-xs ${/^[a-zA-Z0-9]+(?:[_.][a-zA-Z0-9]+)*$/.test(username) ? 'text-green-500' : 'text-slate-400'}`}>- Start and end with alphanumeric characters.</p>
+                            <p className={`text-xs ${/^[a-zA-Z0-9]+(?:[_.][a-zA-Z0-9]+)*$/.test(username) ? 'text-green-500' : 'text-slate-400'}`}>- Underscores or periods must be in between alphanumeric characters.</p>
+                        </div>
+                    </div>
+                )}
             </div>
             
             {/* Display Name */}
@@ -92,71 +212,152 @@ function SetupPage() {
                     <span>Display Name</span>
                     <span className="text-red-500"> *</span>
                 </label>
-                <Input type="text" id="display-name" value={displayName} className={`outline-none mt-2 p-2 border rounded-md w-full`} placeholder="What would you like us to call you?" required
+                <Input 
+                    type="text" 
+                    id="display-name" 
+                    value={displayName} 
+                    className={`outline-none mt-2 p-2 border rounded-md w-full ${displayName === '' ? '': !checkDisplayName(displayName) ? 'border-red-500' : 'border-green-500'}`} 
+                    placeholder="What would you like us to call you?" 
+                    required
+                    onFocus={() => setShowDisplayNameTooltip(true)}
+                    onBlur={() => setShowDisplayNameTooltip(false)}
                     maxLength={30}
                     minLength={1}
-                    onChange={handleDisplayNameChange} />
+                    onChange={(e) => setDisplayName(e.target.value)} />
+                
+                { showDisplayNameTooltip  && (
+                    <div className="mt-4 flex flex-row w-full pl-2 gap-4">
+                        <div>
+                            <p className={`text-xs ${displayName.length >= 1 && displayName.length <= 30 ? 'text-green-500' : 'text-slate-400'}`}>- Be 1-30 characters long.</p>
+                            <p className={`text-xs ${/^[^\s]+(\s+[^\s]+)*$/.test(displayName) ? 'text-green-500' : 'text-slate-400'}`}>- No blank spaces on either ends.</p>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {/* profile picture */}
-            {/* <div className="w-full">
-              <label className="flex gap-2 items-center text-sm font-medium text-gray-700">
-                  Profile Picture
-                  <span className="text-raisin_black text-xs">(JPG, PNG, or GIF).</span>
-              </label>
-              <div className="mt-2 w-full">
-                  <input type="file"  onChange={handleFileSelect} accept="image/x-png,image/gif,image/jpeg" className='text-sm mb-4'/>
-                  {!previewUrl && (
-                      <div className='relative mx-auto w-52 h-52 drop-shadow-md rounded-full aspect-square'>
-                          <Image src={'/images/profilePictureHolder.jpg'} alt="Profile Picture" layout="fill" style={{objectFit: 'cover'}} className='rounded-full'/>
-                      </div>
-                  )}
+            {/* Location */}
+            <div className="w-full mt-4">
+                <label htmlFor="location" className="block text-sm font-medium text-raisin_black">
+                    <span>Location</span>
+                    <span className="text-red-500"> *</span>
+                </label>
+                <Input 
+                    type="text" 
+                    id="location" 
+                    value={location} 
+                    className={`outline-none mt-2 p-2 border rounded-md w-full ${location === '' ? '': !checkLocation(location) ? 'border-red-500' : 'border-green-500'}`} 
+                    placeholder="Where are you from?" 
+                    required
+                    onFocus={() => setShowLocationTooltip(true)}
+                    onBlur={() => setShowLocationTooltip(false)}
+                    maxLength={30}
+                    minLength={1}
+                    onChange={(e) => setLocation(e.target.value)} />
+                
+                { showLocationTooltip  && (
+                    <div className="mt-4 flex flex-row w-full pl-2 gap-4">
+                        <div>
+                            <p className={`text-xs ${location.length >= 1 && location.length <= 30 ? 'text-green-500' : 'text-slate-400'}`}>- Be 2-30 characters long.</p>
+                            <p className={`text-xs ${/^[^\s]+(\s+[^\s]+)*$/.test(location) ? 'text-green-500' : 'text-slate-400'}`}>- No blank spaces on either ends.</p>
+                        </div>
+                    </div>
+                )}
+            </div>
 
-                  {previewUrl && (
-                      <div className='relative mx-auto w-52 h-52 drop-shadow-md rounded-full aspect-square'>
-                          <Image src={previewUrl} alt="Preview" layout="fill" style={{objectFit: 'cover'}} className='rounded-full'/>
-                      </div>
-                  )}
-              </div>
-          </div> */}
+            {/* Phone Number */}
+            <div className="w-full mt-4">
+                <label htmlFor="phone-number" className="block text-sm font-medium text-raisin_black">
+                    <span>Phone Number</span>
+                    <span className="text-red-500"> *</span>
+                </label>
+                <PhoneInput 
+                    defaultCountry="PH"
+                    value={phoneNumber} 
+                    onChange={setPhoneNumber} 
+                    className={`outline-none mt-2 border rounded-md w-full`} 
+                    placeholder="Enter your phone number" 
+                    required
+                    />
+            </div>
 
-          <div className='flex flex-col w-full'>
-              {/* about */}
-              <div className="w-full mb-1">
-                  <label htmlFor="about" className="block text-sm font-medium text-gray-700">About</label>
-                  <textarea id='about' className="mt-2 p-2 border rounded-md w-full resize-none" rows="3" maxLength="100" placeholder="Tell us about yourself..." />
-              </div>
+            {/* Profile Picture */}
+            <div className="w-full mt-4">
+                <label htmlFor="profile-pic" className="block text-sm font-medium text-raisin_black">
+                    Profile Picture
+                    <span className="text-raisin_black text-xs"> (JPG, PNG, or GIF).</span>
+                </label>
+                <Input type="file"  onChange={handleFileChange} accept="image/x-png,image/gif,image/jpeg" className='outline-none mt-2 border rounded-md w-full'/>
+                {!previewUrl && (
+                    <div className='relative mx-auto w-52 h-52 drop-shadow-md rounded-full aspect-square'>
+                        <Image src={'/images/profilePictureHolder.jpg'} alt="Profile Picture" layout="fill" style={{objectFit: 'cover'}} className='rounded-full'/>
+                    </div>
+                )}
 
-              {/* gender */}
-              <div className="w-full mb-4">
-                  <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
-                      <span>Gender</span>
-                      <span className="text-red-500"> *</span>
-                  </label>
-                  <select id="genderSelect" name="gender" className="mt-1 p-2 text-md border rounded-md w-full" required>
-                      <option value="None">Prefer Not to Say</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                  </select>
-              </div>
+                {previewUrl && (
+                    <div className='relative mx-auto w-52 h-52 drop-shadow-md rounded-full aspect-square'>
+                        <Image src={previewUrl} alt="Preview" layout="fill" style={{objectFit: 'cover'}} className='rounded-full'/>
+                    </div>
+                )}
+            </div>
 
-              {/* birthdate */}
-              <div className="w-full mb-4">
-                  <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700">
-                      <span>Birthdate</span>
-                      <span className="text-red-500"> *</span>
-                  </label>
-                  <input type="date" id="birthdate" name="birthdate" className="mt-1 p-2 border text-md rounded-md w-full" max="9999-12-31" required/>
-              </div>
-          </div>
+            {/* About */}
+            <div className="w-full mt-4">
+                <label htmlFor="about" className="block text-sm font-medium text-raisin_black">
+                    <span>About</span>
+                </label>
+                <Textarea 
+                    type="text" 
+                    id="about" 
+                    value={about} 
+                    className={`outline-none mt-2 p-2 border rounded-md w-full`} 
+                    placeholder="Tell us about yourself!" 
+                    maxLength={100}
+                    minLength={1}
+                    onChange={(e) => setAbout(e.target.value)} />
+            </div>
+
+            {/* Gender */}
+            <div className="w-full mt-4">
+                <label htmlFor="gender" className="block text-sm font-medium text-raisin_black">
+                    <span>Gender</span>
+                    <span className="text-red-500"> *</span>
+                </label>
+                <Select required onValueChange={(value) => setGender(value)} defaultValue="">
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Male">Male</SelectItem>
+                        <SelectItem value="Female">Female</SelectItem>
+                        <SelectItem value="Non-Binary">Non-Binary</SelectItem>
+                    </SelectContent>
+                </Select>
+
+            </div>
+
+            {/* Birthdate */}
+            <div className="w-full mt-4">
+                <label htmlFor="birthdate" className="block text-sm font-medium text-raisin_black">
+                    <span>Birthdate</span>
+                    <span className="text-red-500"> *</span>
+                </label>
+                <Input 
+                    type="date" 
+                    id="birthdate" 
+                    name="birthdate"
+                    className={`outline-none mt-2 p-2 border rounded-md w-full`} 
+                    placeholder="Tell us about yourself!" 
+                    max="9999-12-31"
+                    required
+                    onChange={(e) => setBirthdate(e.target.value)} />
+            </div>
 
             {/* Buttons */}
             <div className="flex flex-col-reverse md:flex-row md:justify-end gap-4 mt-6">
                 <Button onClick={handleSignOut} colorScheme="black" variant="solid">
                     Sign Out
                 </Button>
-                <Button type='submit' colorScheme="xanthous" variant="solid">
+                <Button type='submit' colorScheme="xanthous" variant="solid" disabled={submitDisabled}>
                     Submit
                 </Button>
             </div>
