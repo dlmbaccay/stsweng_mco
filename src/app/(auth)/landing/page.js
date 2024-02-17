@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import Image from "next/image";
+
 
 export default function Landing() {
   
@@ -207,8 +209,71 @@ export default function Landing() {
     }
   }
 
+  function PostShowcase() {
+    const authorDisplayName = signingUp ? 'Pooch' : 'Barker';
+    const authorUsername = signingUp ? 'pawsomepooch' : 'barknplay';
+    const authorPhotoURL = signingUp ? '/images/sample-user2-image.png' : '/images/sample-user1-image.png';
+    const postDate = signingUp ? '31/11/6 at 21:00' : '23/9/6 at 16:30';
+    const postBody = signingUp ? 'Whisker Wonderland! 🐾🌿 Playtime in the park with our curious cats. Watching them explore and frolic is pure joy! #CatsofthePark #PurrfectDay' : 'Park Adventures with Max! 🐶🌳 Our Golden Retriever loves chasing frisbees and making friends. #GoldenDays #HappyPaws 🐾';
+    const imageUrls = signingUp ? ['/images/sample-user2-post.png'] : ['/images/sample-user1-post.png'];
+
+    return (
+      <Card className='outline drop-shadow-md w-[650px] min-h-[500px] rounded-3xl p-6 flex flex-col'>
+          {/* Header */}
+          <div id="post-header" className='flex flex-row'>
+
+            <div className='flex flex-row'>
+              {/* User Image */}
+              <div id="user-image">
+                <Image width={50} height={50} src={authorPhotoURL} alt="user image" className='rounded-full shadow-md'/>
+              </div>
+
+              <div id='post-meta' className='ml-4 h-full items-center justify-center'>
+                  <div id='user-meta' className='flex flex-row gap-2 '>
+                    {/* Display Name */}
+                    <div id='display-name' className='font-bold'>
+                      <p>{authorDisplayName}</p>
+                    </div>
+
+                    <div className='font-bold'>
+                      ·
+                    </div>
+
+                    {/* Username */}
+                    <div id='display-name'>
+                      <p>@{authorUsername}</p>
+                    </div>
+                  </div>
+    
+                  {/* Publish Date */}
+                  <div id='publish-date'>
+                    <p>{postDate}</p>
+                  </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Body */}
+          <div id='post-body' className='mt-4 flex flex-col'>
+            <div id='post-text'>
+              <p className='whitespace-pre-line text-justify'>{postBody}</p>
+            </div>
+            
+            {/* Image Carousel */}
+            <div id="post-image" className='mt-4 h-[310px] w-auto flex items-center justify-center relative'>
+              <Image src={imageUrls[0]} alt="post image" 
+                  layout='fill'
+                  objectFit='cover'
+                  className='rounded-lg'
+              />
+            </div>
+          </div>
+      </Card>
+    )
+  }
+
   return (
-    <div className="w-full h-screen flex flex-col items-center justify-center">
+    <div className="w-full h-screen flex flex-row gap-10 items-center justify-center">
 
       <Card className="w-[600px] h-[500px] flex flex-col items-center justify-center outline rounded-3xl drop-shadow-lg">
         
@@ -390,6 +455,8 @@ export default function Landing() {
           }
         </CardContent>
       </Card>
+
+      <PostShowcase />
     </div>
   )
 }
