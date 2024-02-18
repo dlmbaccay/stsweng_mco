@@ -279,7 +279,6 @@ export default function Landing() {
         
         <CardHeader className="flex flex-row items-center justify-center">
           <p className="font-bold text-2xl">BantayBuddy</p>
-          <ModeToggle />
         </CardHeader>
         
         <CardContent className="w-full items-center justify-center flex">
@@ -376,7 +375,7 @@ export default function Landing() {
               </div>
 
               {/* redirect to log in */}
-              <div className="text-sm flex gap-1 w-full items-center justify-center">
+              <div className="text-xs md:text-sm flex gap-1 w-full items-center justify-center">
                 Already have an account? 
                 <button 
                   onClick={() => {
@@ -440,7 +439,7 @@ export default function Landing() {
               </div>
 
               {/* redirect to sign up */}
-              <div className="text-sm flex gap-1 w-full items-center justify-center">
+              <div className="text-xs md:text-sm flex gap-1 w-full items-center justify-center">
                 Don&apos;t have an account?
                 <button 
                   onClick={() => {

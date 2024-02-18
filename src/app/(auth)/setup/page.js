@@ -170,14 +170,12 @@ function SetupPage() {
 
 
   return (
-    <div className="flex items-center justify-center mt-16 mb-16">
-      <Card className="mx-20 w-fit h-full border border-slate-400 justify-center items-center flex">
-        <form onSubmit={handleSubmit} className="bg-snow rounded-md p-8 pb-5 w-full md:w-[800px] h-full md:h-fit flex flex-col overflow-y-scroll md:overflow-hidden">
+    <div className="flex items-center justify-center md:mt-16 md:mb-16 w-full md:pl-16 md:pr-16">
+      <Card className="h-full outline justify-center items-center flex w-full">
+        <form onSubmit={handleSubmit} className="bg-snow md:rounded-md p-8 w-full md:w-[800px] h-full md:h-fit flex flex-col overflow-y-scroll md:overflow-hidden">
 
             <h1 className="font-bold text-xl">Let&apos;s create your BantayBuddy account!</h1>
             
-            <ModeToggle />
-
             {/* Username */}
             <div className="w-full mt-4">
                 <label htmlFor="username" className="block text-sm font-medium text-raisin_black">
@@ -356,10 +354,10 @@ function SetupPage() {
 
             {/* Buttons */}
             <div className="flex flex-col-reverse md:flex-row lg:justify-end md:justify-end sm:justify-center gap-4 mt-6">
-                <Button onClick={handleSignOut} className="border border-slate-400 bg-snow text-secondary-background hover:bg-background hover:font-bold w-full md:w-20 lg:w-20 xl:w-20">
+                <Button onClick={handleSignOut} className="border border-slate-400 bg-snow text-secondary-background hover:bg-background hover:font-bold w-full md:w-20 lg:w-20 xl:w-20 transition-all">
                     Sign out
                 </Button>
-                <Button type='submit' disabled={submitDisabled} className="hover:opacity-80 w-full md:w-20 lg:w-20 xl:w-20">
+                <Button type='submit' disabled={submitDisabled} className="hover:opacity-80 w-full md:w-20 lg:w-20 xl:w-20 transition-all">
                     Submit
                 </Button>
             </div>
