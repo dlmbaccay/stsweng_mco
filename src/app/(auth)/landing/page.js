@@ -218,64 +218,64 @@ export default function Landing() {
     const imageUrls = signingUp ? ['/images/sample-user2-post.png'] : ['/images/sample-user1-post.png'];
 
     return (
-      <Card className='outline drop-shadow-md w-[650px] min-h-[500px] rounded-3xl p-6 flex flex-col'>
-          {/* Header */}
-          <div id="post-header" className='flex flex-row'>
+      <Card className='border border-slate-400 drop-shadow-md w-[650px] min-h-[500px] rounded-3xl p-6 flex flex-col hidden lg:flex mr-10'>
+      {/* Header */}
+      <div id="post-header" className='flex flex-row'>
 
-            <div className='flex flex-row'>
-              {/* User Image */}
-              <div id="user-image">
-                <Image width={50} height={50} src={authorPhotoURL} alt="user image" className='rounded-full shadow-md'/>
-              </div>
-
-              <div id='post-meta' className='ml-4 h-full items-center justify-center'>
-                  <div id='user-meta' className='flex flex-row gap-2 '>
-                    {/* Display Name */}
-                    <div id='display-name' className='font-bold'>
-                      <p>{authorDisplayName}</p>
-                    </div>
-
-                    <div className='font-bold'>
-                      ·
-                    </div>
-
-                    {/* Username */}
-                    <div id='display-name'>
-                      <p>@{authorUsername}</p>
-                    </div>
-                  </div>
-    
-                  {/* Publish Date */}
-                  <div id='publish-date'>
-                    <p>{postDate}</p>
-                  </div>
-              </div>
-            </div>
+        <div className='flex flex-row'>
+          {/* User Image */}
+          <div id="user-image">
+            <Image width={50} height={50} src={authorPhotoURL} alt="user image" className='rounded-full shadow-md'/>
           </div>
 
-          {/* Body */}
-          <div id='post-body' className='mt-4 flex flex-col'>
-            <div id='post-text'>
-              <p className='whitespace-pre-line text-justify'>{postBody}</p>
-            </div>
-            
-            {/* Image Carousel */}
-            <div id="post-image" className='mt-4 h-[310px] w-auto flex items-center justify-center relative'>
-              <Image src={imageUrls[0]} alt="post image" 
-                  layout='fill'
-                  objectFit='cover'
-                  className='rounded-lg'
-              />
-            </div>
+          <div id='post-meta' className='ml-4 h-full items-center justify-center'>
+              <div id='user-meta' className='flex flex-row gap-2 '>
+                {/* Display Name */}
+                <div id='display-name' className='font-bold'>
+                  <p>{authorDisplayName}</p>
+                </div>
+
+                <div className='font-bold'>
+                  ·
+                </div>
+
+                {/* Username */}
+                <div id='display-name'>
+                  <p>@{authorUsername}</p>
+                </div>
+              </div>
+
+              {/* Publish Date */}
+              <div id='publish-date'>
+                <p>{postDate}</p>
+              </div>
           </div>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div id='post-body' className='mt-4 flex flex-col'>
+        <div id='post-text'>
+          <p className='whitespace-pre-line text-justify'>{postBody}</p>
+        </div>
+        
+        {/* Image Carousel */}
+        <div id="post-image" className='mt-4 h-[310px] w-auto flex items-center justify-center relative'>
+          <Image src={imageUrls[0]} alt="post image" 
+              layout='fill'
+              objectFit='cover'
+              className='rounded-lg'
+          />
+        </div>
+      </div>
       </Card>
     )
   }
 
   return (
-    <div className="w-full h-screen flex flex-row gap-10 items-center justify-center">
+    <div className="w-full h-screen flex flex-row items-center justify-center p-1">
 
-      <Card className="w-[600px] h-[500px] flex flex-col items-center justify-center outline rounded-3xl drop-shadow-lg">
+      <Card className="w-[600px] h-[500px] flex flex-col items-center justify-center border border-slate-400 rounded-3xl drop-shadow-lg m-10">
         
         <CardHeader className="flex flex-row items-center justify-center">
           <p className="font-bold text-2xl">BantayBuddy</p>
@@ -297,7 +297,7 @@ export default function Landing() {
                     placeholder="Email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="outline rounded-lg drop-shadow-sm"
+                    className="border border-slate-400 rounded-lg drop-shadow-sm"
                   />
                 </div>
 
@@ -311,7 +311,7 @@ export default function Landing() {
                     onFocus={() => setShowPasswordTooltip(true)}
                     onBlur={() => setShowPasswordTooltip(false)}
                     onChange={(e) => setPassword(e.target.value)}
-                    className={`outline rounded-lg drop-shadow-sm ${password === '' ? '': !checkPassword(password) ? 'border border-red-500' : 'border border-green-500'}`}
+                    className={`border border-slate-400 rounded-lg drop-shadow-sm ${password === '' ? '': !checkPassword(password) ? 'border border-red-500' : 'border border-green-500'}`}
                   />
 
                   { showPasswordTooltip  && (
@@ -341,7 +341,7 @@ export default function Landing() {
                     onBlur={() => setShowConfirmPasswordTooltip(false)}
                     value={confirm_password}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={`outline rounded-lg drop-shadow-sm
+                    className={`border border-slate-400 rounded-lg drop-shadow-sm
                       ${confirm_password === '' ? '' : confirm_password === password ? 'border border-green-500' : 'border border-red-500'}
                     `}
                   />
@@ -404,7 +404,7 @@ export default function Landing() {
                     placeholder="Email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="outline rounded-lg" 
+                    className="border border-slate-400 rounded-lg" 
                   />
                 </div>
 
@@ -416,7 +416,7 @@ export default function Landing() {
                     placeholder="Password" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="outline rounded-lg"
+                    className="border border-slate-400 rounded-lg"
                   />
                 </div>
               </div>
