@@ -332,7 +332,7 @@ function SetupPage() {
                         <SelectItem value="Male">Male</SelectItem>
                         <SelectItem value="Female">Female</SelectItem>
                         <SelectItem value="Non-Binary">Non-Binary</SelectItem>
-                        <SelectItem value="Non-Binary">Prefer Not to Say</SelectItem>
+                        <SelectItem value="Prefer not to Say">Prefer Not to Say</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
