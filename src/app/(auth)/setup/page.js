@@ -171,8 +171,8 @@ function SetupPage() {
 
   return (
     <div className="flex items-center justify-center mt-16 mb-16">
-      <Card className="w-fit h-full outline justify-center items-center flex">
-        <form onSubmit={handleSubmit} className="bg-snow rounded-md p-8 pb-5 w-full md:w-[1000px] h-full md:h-fit flex flex-col overflow-y-scroll md:overflow-hidden">
+      <Card className="mx-20 w-fit h-full border border-slate-400 justify-center items-center flex">
+        <form onSubmit={handleSubmit} className="bg-snow rounded-md p-8 pb-5 w-full md:w-[800px] h-full md:h-fit flex flex-col overflow-y-scroll md:overflow-hidden">
 
             <h1 className="font-bold text-xl">Let&apos;s create your BantayBuddy account!</h1>
             
@@ -189,7 +189,7 @@ function SetupPage() {
                     type="text"
                     id="username" 
                     value={username} 
-                    className={`outline mt-2 p-2 border rounded-md w-full ${username === '' ? '': !checkUsername(username) ? 'border-red-500' : 'border-green-500'}`} 
+                    className={`border border-slate-400 mt-2 p-2 rounded-md w-full ${username === '' ? '': !checkUsername(username) ? 'border-red-500' : 'border-green-500'}`} 
                     placeholder="Enter your username" 
                     required
                     onFocus={() => setShowUsernameTooltip(true)}
@@ -218,7 +218,7 @@ function SetupPage() {
                     type="text" 
                     id="display-name" 
                     value={displayName} 
-                    className={`outline mt-2 p-2 border rounded-md w-full ${displayName === '' ? '': !checkDisplayName(displayName) ? 'border-red-500' : 'border-green-500'}`} 
+                    className={`border border-slate-400 mt-2 p-2 rounded-md w-full ${displayName === '' ? '': !checkDisplayName(displayName) ? 'border-red-500' : 'border-green-500'}`} 
                     placeholder="What would you like us to call you?" 
                     required
                     onFocus={() => setShowDisplayNameTooltip(true)}
@@ -247,7 +247,7 @@ function SetupPage() {
                     type="text" 
                     id="location" 
                     value={location} 
-                    className={`outline mt-2 p-2 border rounded-md w-full ${location === '' ? '': !checkLocation(location) ? 'border-red-500' : 'border-green-500'}`} 
+                    className={`border border-slate-400 mt-2 p-2 rounded-md w-full ${location === '' ? '': !checkLocation(location) ? 'border-red-500' : 'border-green-500'}`} 
                     placeholder="Where are you from?" 
                     required
                     onFocus={() => setShowLocationTooltip(true)}
@@ -276,7 +276,7 @@ function SetupPage() {
                     defaultCountry="PH"
                     value={phoneNumber} 
                     onChange={setPhoneNumber} 
-                    className={`outline mt-2 border rounded-md w-full`} 
+                    className={`border border-slate-400 mt-2 rounded-md w-full`} 
                     placeholder="Enter your phone number" 
                     required
                     />
@@ -288,7 +288,7 @@ function SetupPage() {
                     Profile Picture
                     <span className="text-raisin_black text-xs"> (JPG, PNG, or GIF).</span>
                 </label>
-                <Input type="file"  onChange={handleFileChange} accept="image/x-png,image/gif,image/jpeg" className='outline mt-2 mb-10 border rounded-md w-full'/>
+                <Input type="file"  onChange={handleFileChange} accept="image/x-png,image/gif,image/jpeg" className='border border-slate-400 mt-2 mb-10 rounded-md w-full'/>
                 {!previewUrl && (
                     <div className='relative mx-auto w-52 h-52 drop-shadow-md rounded-full aspect-square'>
                         <Image src={'/images/profilePictureHolder.jpg'} alt="Profile Picture" layout="fill" style={{objectFit: 'cover'}} className='rounded-full'/>
@@ -311,7 +311,7 @@ function SetupPage() {
                     type="text" 
                     id="about" 
                     value={about} 
-                    className={`outline mt-2 p-2 border rounded-md w-full`} 
+                    className={`border border-slate-400 mt-2 p-2 rounded-md w-full`} 
                     placeholder="Tell us about yourself!" 
                     maxLength={100}
                     minLength={1}
@@ -325,13 +325,14 @@ function SetupPage() {
                     <span className="text-red-500"> *</span>
                 </label>
                 <Select required onValueChange={(value) => setGender(value)} defaultValue="">
-                    <SelectTrigger className="outline">
+                    <SelectTrigger className="border border-slate-400">
                         <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="Male">Male</SelectItem>
                         <SelectItem value="Female">Female</SelectItem>
                         <SelectItem value="Non-Binary">Non-Binary</SelectItem>
+                        <SelectItem value="Non-Binary">Prefer Not to Say</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
@@ -346,7 +347,7 @@ function SetupPage() {
                     type="date" 
                     id="birthdate" 
                     name="birthdate"
-                    className={`outline mt-2 p-2 border rounded-md w-full`} 
+                    className={`border border-slate-400 mt-2 p-2 rounded-md w-full`} 
                     placeholder="Tell us about yourself!" 
                     max="9999-12-31"
                     required
@@ -354,11 +355,11 @@ function SetupPage() {
             </div>
 
             {/* Buttons */}
-            <div className="flex flex-col-reverse md:flex-row md:justify-end gap-4 mt-6">
-                <Button onClick={handleSignOut} className="bg-secondary text-secondary-foreground hover:bg-secondary hover:opacity-80">
-                    Sign Out
+            <div className="flex flex-col-reverse md:flex-row lg:justify-end md:justify-end sm:justify-center gap-4 mt-6">
+                <Button onClick={handleSignOut} className="border border-slate-400 bg-snow text-secondary-background hover:bg-background hover:font-bold w-full md:w-20 lg:w-20 xl:w-20">
+                    Sign out
                 </Button>
-                <Button type='submit' disabled={submitDisabled} className="hover:opacity-80">
+                <Button type='submit' disabled={submitDisabled} className="hover:opacity-80 w-full md:w-20 lg:w-20 xl:w-20">
                     Submit
                 </Button>
             </div>
