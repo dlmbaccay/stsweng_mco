@@ -9,6 +9,9 @@ import { checkPassword } from "@/lib/formats";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import Image from "next/image";
+
 
 export default function Landing() {
   
@@ -181,7 +184,6 @@ export default function Landing() {
    * If an error occurs, a toast message is displayed.
    * 
    */
-
   async function handleGooglePopUp() {
     try {
         const result = await auth.signInWithPopup(googleAuthProvider);
@@ -205,188 +207,256 @@ export default function Landing() {
         toast.error(error.message);
         console.error(error.message);
     }
-}
+  }
 
-  return (
-    <div className="w-full h-screen flex flex-col items-center justify-center">
+  function PostShowcase() {
+    const authorDisplayName = signingUp ? 'Pooch' : 'Barker';
+    const authorUsername = signingUp ? 'pawsomepooch' : 'barknplay';
+    const authorPhotoURL = signingUp ? '/images/sample-user2-image.png' : '/images/sample-user1-image.png';
+    const postDate = signingUp ? '31/11/6 at 21:00' : '23/9/6 at 16:30';
+    const postBody = signingUp ? 'Whisker Wonderland! 🐾🌿 Playtime in the park with our curious cats. Watching them explore and frolic is pure joy! #CatsofthePark #PurrfectDay' : 'Park Adventures with Max! 🐶🌳 Our Golden Retriever loves chasing frisbees and making friends. #GoldenDays #HappyPaws 🐾';
+    const imageUrls = signingUp ? ['/images/sample-user2-post.png'] : ['/images/sample-user1-post.png'];
 
-      <div className="w-[600px] h-[500px] flex flex-col items-center justify-center border outline rounded-3xl gap-6">
-        <div className="flex items-center justify-center gap-2">
-          <p className="font-bold text-2xl">BantayBuddy</p>
-          <ModeToggle />
+    return (
+      <Card className='border border-slate-400 drop-shadow-md w-[650px] min-h-[500px] rounded-3xl p-6 flex flex-col hidden lg:flex mr-10'>
+      {/* Header */}
+      <div id="post-header" className='flex flex-row'>
+
+        <div className='flex flex-row'>
+          {/* User Image */}
+          <div id="user-image">
+            <Image width={50} height={50} src={authorPhotoURL} alt="user image" className='rounded-full shadow-md'/>
+          </div>
+
+          <div id='post-meta' className='ml-4 h-full items-center justify-center'>
+              <div id='user-meta' className='flex flex-row gap-2 '>
+                {/* Display Name */}
+                <div id='display-name' className='font-bold'>
+                  <p>{authorDisplayName}</p>
+                </div>
+
+                <div className='font-bold'>
+                  ·
+                </div>
+
+                {/* Username */}
+                <div id='display-name'>
+                  <p>@{authorUsername}</p>
+                </div>
+              </div>
+
+              {/* Publish Date */}
+              <div id='publish-date'>
+                <p>{postDate}</p>
+              </div>
+          </div>
         </div>
-        
-        { signingUp ?
-          <div className="w-[80%] flex flex-col gap-6">
-            
-            {/* inputs */}
-            <div className="flex flex-col items-center justify-center gap-4">
-              
-              {/* email */}
-              <div className="w-full items-center">
-                <Input 
-                  type="email" 
-                  id="email" 
-                  placeholder="Email" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="border outline rounded-lg"
-                />
-              </div>
-
-              {/* password */}
-              <div className="w-full items-center">
-                <Input 
-                  type="password" 
-                  id="password" 
-                  placeholder="Password" 
-                  value={password}
-                  onFocus={() => setShowPasswordTooltip(true)}
-                  onBlur={() => setShowPasswordTooltip(false)}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className={`border outline rounded-lg ${password === '' ? '': !checkPassword(password) ? 'border border-red-500' : 'border border-green-500'}`}
-                />
-
-                { showPasswordTooltip  && (
-                  <>
-                    <div className="mt-4 flex flex-row w-full pl-2 gap-4">
-                      <div>
-                        <p className={`text-xs ${/^.{8,16}$/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>- Be 8-16 characters long.</p>
-                        <p className={`text-xs ${/[A-Z]/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>- Contain at least one uppercase letter.</p>
-                        <p className={`text-xs ${/[a-z]/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>- Contain at least one lowercase letter.</p>
-                      </div>
-                      <div>
-                        <p className={`text-xs ${/[0-9]/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>- Contain at least one digit.</p>
-                        <p className={`text-xs ${/\W/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>- Contain at least one special character.</p>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* confirm password */}
-              <div className="w-full items-center">
-                <Input 
-                  type="password" 
-                  id="confirm_password" 
-                  placeholder="Confirm Password" 
-                  onFocus={() => setShowConfirmPasswordTooltip(true)}
-                  onBlur={() => setShowConfirmPasswordTooltip(false)}
-                  value={confirm_password}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className={`border outline rounded-lg
-                    ${confirm_password === '' ? '' : confirm_password === password ? 'border border-green-500' : 'border border-red-500'}
-                  `}
-                />
-
-                { 
-                  showConfirmPasswordTooltip &&
-                  (
-                    confirm_password === '' ? null : confirm_password === password ? 
-                    <p className="mt-2 pl-2 text-xs text-green-500">Passwords match!</p> : 
-                    <p className="mt-2 pl-2 text-xs text-red-500">Passwords do not match.</p>
-                  )
-                }
-              </div>  
-            </div>
-
-            {/* buttons */}
-            <div className="w-full flex flex-col gap-3">
-              <Button
-                onClick={handleSignUp}
-              >
-                Sign Up
-              </Button>
-
-              <Button 
-                onClick={handleGooglePopUp}
-                className="flex gap-1"
-              >
-                  <p> Continue with </p>
-                  <FcGoogle/>
-              </Button>
-            </div>
-
-            {/* redirect to log in */}
-            <div className="text-sm flex gap-1 w-full items-center justify-center">
-              Already have an account? 
-              <button 
-                onClick={() => {
-                  isSigningUp(false);
-                  isLoggingIn(true);
-                }}
-                className="hover:underline">
-                Log In
-              </button>
-            </div>
-          </div> : null
-        }
-
-        { loggingIn ? 
-          <div className="w-[80%] flex flex-col gap-8">
-            
-            {/* inputs */}
-            <div className="flex flex-col items-center justify-center gap-4">
-              
-              {/* email */}
-              <div className="w-full items-center">
-                <Input 
-                  type="email" 
-                  id="email" 
-                  placeholder="Email" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="border outline rounded-lg"
-                />
-              </div>
-
-              {/* password */}
-              <div className="w-full items-center">
-                <Input 
-                  type="password" 
-                  id="password" 
-                  placeholder="Password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="border outline rounded-lg"
-                />
-              </div>
-            </div>
-
-            {/* buttons */}
-            <div className="w-full flex flex-col gap-3">
-              <Button
-                onClick={handleSignIn}
-              >
-                Log In
-              </Button>
-
-              <Button 
-                onClick={handleGooglePopUp}
-                className="flex gap-1"
-               >
-                  <p> Continue with </p>
-                  <FcGoogle />
-              </Button>
-            </div>
-
-            {/* redirect to sign up */}
-            <div className="text-sm flex gap-1 w-full items-center justify-center">
-              Don&apos;t have an account?
-              <button 
-                onClick={() => {
-                  isSigningUp(true);
-                  isLoggingIn(false);
-                }}
-                className="hover:underline">
-                Sign Up
-              </button> 
-            </div>
-          </div> : null
-        }
-
       </div>
 
+      {/* Body */}
+      <div id='post-body' className='mt-4 flex flex-col'>
+        <div id='post-text'>
+          <p className='whitespace-pre-line text-justify'>{postBody}</p>
+        </div>
+        
+        {/* Image Carousel */}
+        <div id="post-image" className='mt-4 h-[310px] w-auto flex items-center justify-center relative'>
+          <Image src={imageUrls[0]} alt="post image" 
+              layout='fill'
+              objectFit='cover'
+              className='rounded-lg'
+          />
+        </div>
+      </div>
+      </Card>
+    )
+  }
+
+  return (
+    <div className="w-full h-screen flex flex-row items-center justify-center p-1">
+
+      <Card className="w-[600px] h-[500px] flex flex-col items-center justify-center border border-slate-400 rounded-3xl drop-shadow-lg m-10">
+        
+        <CardHeader className="flex flex-row items-center justify-center">
+          <p className="font-bold text-2xl">BantayBuddy</p>
+          <ModeToggle />
+        </CardHeader>
+        
+        <CardContent className="w-full items-center justify-center flex">
+          { signingUp ?
+            <div className="w-[80%] flex flex-col gap-6">
+              
+              {/* inputs */}
+              <div className="flex flex-col items-center justify-center gap-4">
+                
+                {/* email */}
+                <div className="w-full items-center">
+                  <Input 
+                    type="email" 
+                    id="email" 
+                    placeholder="Email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="border border-slate-400 rounded-lg drop-shadow-sm"
+                  />
+                </div>
+
+                {/* password */}
+                <div className="w-full items-center">
+                  <Input 
+                    type="password" 
+                    id="password" 
+                    placeholder="Password" 
+                    value={password}
+                    onFocus={() => setShowPasswordTooltip(true)}
+                    onBlur={() => setShowPasswordTooltip(false)}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={`border border-slate-400 rounded-lg drop-shadow-sm ${password === '' ? '': !checkPassword(password) ? 'border border-red-500' : 'border border-green-500'}`}
+                  />
+
+                  { showPasswordTooltip  && (
+                    <>
+                      <div className="mt-4 flex flex-row w-full pl-2 gap-4 text-[12px] text-start">
+                        <div className="w-2/3">
+                          <p className={`${/^.{8,16}$/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>- Be 8-16 characters long.</p>
+                          <p className={`${/[A-Z]/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>- Contain at least one uppercase letter.</p>
+                          <p className={`${/[a-z]/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>- Contain at least one lowercase letter.</p>
+                        </div>
+                        <div className="w-fit"> 
+                          <p className={`${/[0-9]/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>- Contain at least one digit.</p>
+                          <p className={`${/\W/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>- Contain at least one special character.</p>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* confirm password */}
+                <div className="w-full items-center">
+                  <Input 
+                    type="password" 
+                    id="confirm_password" 
+                    placeholder="Confirm Password" 
+                    onFocus={() => setShowConfirmPasswordTooltip(true)}
+                    onBlur={() => setShowConfirmPasswordTooltip(false)}
+                    value={confirm_password}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className={`border border-slate-400 rounded-lg drop-shadow-sm
+                      ${confirm_password === '' ? '' : confirm_password === password ? 'border border-green-500' : 'border border-red-500'}
+                    `}
+                  />
+
+                  { 
+                    showConfirmPasswordTooltip &&
+                    (
+                      confirm_password === '' ? null : confirm_password === password ? 
+                      <p className="mt-2 pl-2 text-xs text-green-500">Passwords match!</p> : 
+                      <p className="mt-2 pl-2 text-xs text-red-500">Passwords do not match.</p>
+                    )
+                  }
+                </div>  
+              </div>
+
+              {/* buttons */}
+              <div className="w-full flex flex-col gap-3">
+                <Button
+                  onClick={handleSignUp}
+                  className="bg-primary text-primary-foreground hover:opacity-80 hover:drop-shadow-md transition-all" 
+                >
+                  Sign Up
+                </Button>
+
+                <Button 
+                  onClick={handleGooglePopUp}
+                  className="flex gap-1 bg-secondary text-secondary-foreground hover:bg-bsecondary hover:opacity-80 hover:drop-shadow-md transition-all"
+                >
+                    <p> Continue with </p>
+                    <FcGoogle/>
+                </Button>
+              </div>
+
+              {/* redirect to log in */}
+              <div className="text-sm flex gap-1 w-full items-center justify-center">
+                Already have an account? 
+                <button 
+                  onClick={() => {
+                    isSigningUp(false);
+                    isLoggingIn(true);
+                  }}
+                  className="hover:underline">
+                  Log In
+                </button>
+              </div>
+            </div> : null
+          }
+
+          { loggingIn ? 
+            <div className="w-[80%] flex flex-col gap-6">
+              
+              {/* inputs */}
+              <div className="flex flex-col items-center justify-center gap-4">
+                
+                {/* email */}
+                <div className="w-full items-center">
+                  <Input 
+                    type="email" 
+                    id="email" 
+                    placeholder="Email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="border border-slate-400 rounded-lg" 
+                  />
+                </div>
+
+                {/* password */}
+                <div className="w-full items-center">
+                  <Input 
+                    type="password" 
+                    id="password" 
+                    placeholder="Password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="border border-slate-400 rounded-lg"
+                  />
+                </div>
+              </div>
+
+              {/* buttons */}
+              <div className="w-full flex flex-col gap-3">
+                <Button
+                  onClick={handleSignIn}
+                  className="bg-primary text-primary-foreground hover:opacity-80 hover:drop-shadow-md transition-all" 
+                >
+                  Log In
+                </Button>
+
+                <Button 
+                  onClick={handleGooglePopUp}
+                  className="flex gap-1 bg-secondary text-secondary-foreground hover:bg-bsecondary hover:opacity-80 hover:drop-shadow-md transition-all"
+                >
+                    <p> Continue with </p>
+                    <FcGoogle />
+                </Button>
+              </div>
+
+              {/* redirect to sign up */}
+              <div className="text-sm flex gap-1 w-full items-center justify-center">
+                Don&apos;t have an account?
+                <button 
+                  onClick={() => {
+                    isSigningUp(true);
+                    isLoggingIn(false);
+                  }}
+                  className="hover:underline">
+                  Sign Up
+                </button> 
+              </div>
+            </div> : null
+          }
+        </CardContent>
+      </Card>
+
+      <PostShowcase />
     </div>
   )
 }

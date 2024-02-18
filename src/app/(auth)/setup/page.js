@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Textarea } from "@/components/ui/textarea";
 import WithAuth from "@/components/WithAuth";
+import { Card, CardHeader } from "@/components/ui/card";
 
 
 function SetupPage() {
@@ -169,25 +170,26 @@ function SetupPage() {
 
 
   return (
-    <div>
-      Profile Setup Page
-      <ModeToggle></ModeToggle>
-      <button onClick={handleSignOut}>Sign Out</button>
-      <div className="bg-gradient-to-tl from-jasmine via-citron to-[#7DD184] h-screen  justify-center items-center flex">
-        <form onSubmit={handleSubmit} className="bg-snow rounded-md p-8 pb-5 w-full md:w-[1000px] h-full md:h-fit flex flex-col overflow-y-scroll md:overflow-hidden">
-            <h1 className="font-shining text-xl">Let's create your BantayBuddy account!</h1>
+    <div className="flex items-center justify-center mt-16 mb-16">
+      <Card className="mx-20 w-fit h-full border border-slate-400 justify-center items-center flex">
+        <form onSubmit={handleSubmit} className="bg-snow rounded-md p-8 pb-5 w-full md:w-[800px] h-full md:h-fit flex flex-col overflow-y-scroll md:overflow-hidden">
+
+            <h1 className="font-bold text-xl">Let&apos;s create your BantayBuddy account!</h1>
             
+            <ModeToggle />
+
             {/* Username */}
             <div className="w-full mt-4">
                 <label htmlFor="username" className="block text-sm font-medium text-raisin_black">
                     <span>Username</span>
                     <span className="text-red-500"> *</span>
                 </label>
+
                 <Input 
                     type="text"
                     id="username" 
                     value={username} 
-                    className={`outline-none mt-2 p-2 border rounded-md w-full ${username === '' ? '': !checkUsername(username) ? 'border-red-500' : 'border-green-500'}`} 
+                    className={`border border-slate-400 mt-2 p-2 rounded-md w-full ${username === '' ? '': !checkUsername(username) ? 'border-red-500' : 'border-green-500'}`} 
                     placeholder="Enter your username" 
                     required
                     onFocus={() => setShowUsernameTooltip(true)}
@@ -216,7 +218,7 @@ function SetupPage() {
                     type="text" 
                     id="display-name" 
                     value={displayName} 
-                    className={`outline-none mt-2 p-2 border rounded-md w-full ${displayName === '' ? '': !checkDisplayName(displayName) ? 'border-red-500' : 'border-green-500'}`} 
+                    className={`border border-slate-400 mt-2 p-2 rounded-md w-full ${displayName === '' ? '': !checkDisplayName(displayName) ? 'border-red-500' : 'border-green-500'}`} 
                     placeholder="What would you like us to call you?" 
                     required
                     onFocus={() => setShowDisplayNameTooltip(true)}
@@ -245,7 +247,7 @@ function SetupPage() {
                     type="text" 
                     id="location" 
                     value={location} 
-                    className={`outline-none mt-2 p-2 border rounded-md w-full ${location === '' ? '': !checkLocation(location) ? 'border-red-500' : 'border-green-500'}`} 
+                    className={`border border-slate-400 mt-2 p-2 rounded-md w-full ${location === '' ? '': !checkLocation(location) ? 'border-red-500' : 'border-green-500'}`} 
                     placeholder="Where are you from?" 
                     required
                     onFocus={() => setShowLocationTooltip(true)}
@@ -274,7 +276,7 @@ function SetupPage() {
                     defaultCountry="PH"
                     value={phoneNumber} 
                     onChange={setPhoneNumber} 
-                    className={`outline-none mt-2 border rounded-md w-full`} 
+                    className={`border border-slate-400 mt-2 rounded-md w-full`} 
                     placeholder="Enter your phone number" 
                     required
                     />
@@ -286,7 +288,7 @@ function SetupPage() {
                     Profile Picture
                     <span className="text-raisin_black text-xs"> (JPG, PNG, or GIF).</span>
                 </label>
-                <Input type="file"  onChange={handleFileChange} accept="image/x-png,image/gif,image/jpeg" className='outline-none mt-2 border rounded-md w-full'/>
+                <Input type="file"  onChange={handleFileChange} accept="image/x-png,image/gif,image/jpeg" className='border border-slate-400 mt-2 mb-10 rounded-md w-full'/>
                 {!previewUrl && (
                     <div className='relative mx-auto w-52 h-52 drop-shadow-md rounded-full aspect-square'>
                         <Image src={'/images/profilePictureHolder.jpg'} alt="Profile Picture" layout="fill" style={{objectFit: 'cover'}} className='rounded-full'/>
@@ -309,7 +311,7 @@ function SetupPage() {
                     type="text" 
                     id="about" 
                     value={about} 
-                    className={`outline-none mt-2 p-2 border rounded-md w-full`} 
+                    className={`border border-slate-400 mt-2 p-2 rounded-md w-full`} 
                     placeholder="Tell us about yourself!" 
                     maxLength={100}
                     minLength={1}
@@ -323,16 +325,16 @@ function SetupPage() {
                     <span className="text-red-500"> *</span>
                 </label>
                 <Select required onValueChange={(value) => setGender(value)} defaultValue="">
-                    <SelectTrigger>
+                    <SelectTrigger className="border border-slate-400">
                         <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="Male">Male</SelectItem>
                         <SelectItem value="Female">Female</SelectItem>
                         <SelectItem value="Non-Binary">Non-Binary</SelectItem>
+                        <SelectItem value="Non-Binary">Prefer Not to Say</SelectItem>
                     </SelectContent>
                 </Select>
-
             </div>
 
             {/* Birthdate */}
@@ -345,7 +347,7 @@ function SetupPage() {
                     type="date" 
                     id="birthdate" 
                     name="birthdate"
-                    className={`outline-none mt-2 p-2 border rounded-md w-full`} 
+                    className={`border border-slate-400 mt-2 p-2 rounded-md w-full`} 
                     placeholder="Tell us about yourself!" 
                     max="9999-12-31"
                     required
@@ -353,16 +355,16 @@ function SetupPage() {
             </div>
 
             {/* Buttons */}
-            <div className="flex flex-col-reverse md:flex-row md:justify-end gap-4 mt-6">
-                <Button onClick={handleSignOut} colorScheme="black" variant="solid">
-                    Sign Out
+            <div className="flex flex-col-reverse md:flex-row lg:justify-end md:justify-end sm:justify-center gap-4 mt-6">
+                <Button onClick={handleSignOut} className="border border-slate-400 bg-snow text-secondary-background hover:bg-background hover:font-bold w-full md:w-20 lg:w-20 xl:w-20">
+                    Sign out
                 </Button>
-                <Button type='submit' colorScheme="xanthous" variant="solid" disabled={submitDisabled}>
+                <Button type='submit' disabled={submitDisabled} className="hover:opacity-80 w-full md:w-20 lg:w-20 xl:w-20">
                     Submit
                 </Button>
             </div>
         </form>
-      </div>
+      </Card>
     </div>
   )
 }
