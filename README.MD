@@ -1,3 +1,3 @@
-# Dev Branch
+# Main Branch
 
-### Deployed in: dev-bantaybuddy.vercel.app
+### Deployed in: bantaybuddy.vercel.app
