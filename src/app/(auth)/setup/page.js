@@ -63,7 +63,7 @@ function SetupPage() {
             }
         };
         checkUserSetup();
-    }, []);
+    }, [router, user]);
 
     const handleFileChange = (event) => {
         var temp = handleFilePreview(event.target.files[0]);

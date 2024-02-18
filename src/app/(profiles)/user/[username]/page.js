@@ -29,7 +29,7 @@ export default function UserProfile() {
       }
     }
     getUserData();
-  }, []);
+  }, [urlParams.username]);
 
   const handleSignOut = () => {
     auth.signOut()

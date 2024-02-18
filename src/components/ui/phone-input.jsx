@@ -54,6 +54,8 @@ const InputComponent = forwardRef(({ className, ...props }, ref) => (
   />
 ));
 
+InputComponent.displayName = "InputComponent";
+
 const CountrySelect = ({
   disabled,
   value,
