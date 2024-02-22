@@ -22,8 +22,8 @@ export default function Landing() {
   const [ showConfirmPasswordTooltip, setShowConfirmPasswordTooltip ] = useState(false);
   const router = useRouter();
 
-  const [ loggingIn, isLoggingIn ] = useState(false);
-  const [ signingUp, isSigningUp ] = useState(true); // default for now, but loggingIn will be the default in production
+  const [ loggingIn, isLoggingIn ] = useState(true);
+  const [ signingUp, isSigningUp ] = useState(false); 
 
   /**
    * handleSignIn function
