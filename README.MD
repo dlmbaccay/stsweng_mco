@@ -1,3 +1,3 @@
 # Main Branch
 
-### Deployed in: bantaybuddy.vercel.app
+### Deployed production website in: bantaybuddy.vercel.app
