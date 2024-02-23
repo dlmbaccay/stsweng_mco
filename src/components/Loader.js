@@ -11,7 +11,7 @@ export default function Loader({ show }) {
             <div className="hamster__eye bg-black rounded-full"></div>
             <div className="hamster__nose bg-pink-300 rounded-full"></div>
           </div>
-          <div class="hamster__body bg-gray-300 rounded-full">
+          <div className="hamster__body bg-gray-300 rounded-full">
             <div className="hamster__limb--fr bg-yellow-500"></div>
             <div className="hamster__limb--fl bg-yellow-500"></div>
             <div className="hamster__limb--br bg-yellow-500"></div>
