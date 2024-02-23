@@ -1,3 +1,3 @@
 # Dev Branch
 
-### Deployed in: dev-bantaybuddy.vercel.app
+### Deployed (test) website in: dev-bantaybuddy.vercel.app
