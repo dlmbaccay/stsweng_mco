@@ -4,7 +4,7 @@ import { toast } from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { auth } from "@/lib/firebase";
-import { getDocumentByFieldValue } from "@/lib/crud";
+import { getDocumentByFieldValue } from "@/lib/firestore-crud";
 import { ModeToggle } from "@/components/mode-toggle";
 import  Loader from "@/components/Loader";
 
@@ -18,15 +18,26 @@ export default function UserProfile() {
   useEffect(() => {
     setLoading(true);
     async function getUserData() {
-      if (urlParams.username) {
-        try {
-          const data = await getDocumentByFieldValue('users', 'username', urlParams.username);
-          setUserData(data);
-          setLoading(false);
-        } catch (error) {
-          console.error('Error fetching user data:', error);
+        if (urlParams.username) {
+            try {
+                const response = await fetch(`/api/users?username=${urlParams.username}`, {
+                    method: 'GET' // Specify GET method
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setUserData(data); 
+                } else {
+                    // Assuming the API returns { message: '...' } on error
+                    const errorData = await response.json();
+                    throw new Error(errorData.message); 
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            } finally { // Add a 'finally' block
+                setLoading(false);  
+            }
         }
-      }
     }
     getUserData();
   }, [urlParams.username]);
@@ -49,6 +60,7 @@ export default function UserProfile() {
 
           {userData.displayName}
           {userData.uid}
+          <img src={userData.userPhotoURL ? userData.userPhotoURL : "/images/profilePictureHolder.jpg"} width={50} height={50}></img>
 
           <button onClick={handleSignOut}>Sign Out</button>
         </div>

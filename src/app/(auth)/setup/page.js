@@ -6,8 +6,8 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { auth, firestore, storage } from "@/lib/firebase";
 import { checkDisplayName, checkLocation, checkUsername } from "@/lib/formats";
-import { isUsernameTaken} from "@/lib/crud";
-import { handleFilePreview } from "@/lib/helper-functions";
+import { isUsernameTaken} from "@/lib/firestore-crud";
+import { handleImageFilePreview } from "@/lib/helper-functions";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { Textarea } from "@/components/ui/textarea";
 import WithAuth from "@/components/WithAuth";
 import { Card, CardHeader } from "@/components/ui/card";
+import { set } from "date-fns";
 
 
 function SetupPage() {
@@ -34,6 +35,7 @@ function SetupPage() {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [userPhoto, setUserPhoto] = useState('');
     const [previewUrl, setPreviewUrl] = useState('/images/profilePictureHolder.jpg');
+    const [userPhotoURL, setUserPhotoURL] = useState('');
 
     const [submitDisabled, setSubmitDisabled] = useState(false);
 
@@ -65,8 +67,15 @@ function SetupPage() {
         checkUserSetup();
     }, [router, user]);
 
+    /**
+     * Handles the change event of the file input element.
+     * This will set the preview image of their selected file 
+     * and assign it to the userPhoto variable.
+     * 
+     * @param {Event} event - The change event object.
+     */
     const handleFileChange = (event) => {
-        var temp = handleFilePreview(event.target.files[0]);
+        var temp = handleImageFilePreview(event.target.files[0]);
         if (temp == null) {
             setUserPhoto('');
             setPreviewUrl('/images/profilePictureHolder.jpg');
@@ -76,98 +85,61 @@ function SetupPage() {
         }
         
     };
-
+    
+    /**
+     * Handles the form submission event.
+     * This function sends requests to the server to check if the username is taken,
+     * upload the user's photo, and save the user's data.
+     * 
+     * @param {Event} event - The form submission event object.
+     */
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        let usernameTaken = await isUsernameTaken(username);
-
-        if (usernameTaken){
-            toast.error('Username is already taken!');
-            return;
-        }
-    
         try {
-            setSubmitDisabled(true);
-            toast.loading('Setting up your account...');
-    
-            const storagePath = `userProfile/${user.uid}/profilePic`;
-            const storageRef = storage.ref().child(storagePath);
-    
-            if (userPhoto) {
-                await uploadUserPhoto(storageRef);
+            // Check if username is taken
+            await fetch('/api/user-setup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'isUsernameTaken', username }) 
+            }).then(res => res.json()).then(data => {
+                if (data.usernameTaken) {
+                    toast.error('Username is already taken!');
+                    return;
+                }
+            });
+
+            // Photo Upload
+            if (!userPhoto){
+                // Set default user photo URL
+                setUserPhotoURL('https://firebasestorage.googleapis.com/v0/b/stsweng-bb.appspot.com/o/userProfile%2Fdefault%2FprofilePictureHolder.jpg?alt=media&token=a55bf8b9-f9f3-4a85-90a4-65d1f218b99a');
+            } else {
+                // Upload user photo
+                await fetch('/api/user-setup', {
+                    method: 'POST',
+                    // ... (Assume userPhoto is a File)
+                    body: JSON.stringify({ action: 'uploadUserPhoto', user, userPhoto }) 
+                }).then(response => response.json()).then(data => {
+                    setUserPhotoURL(data.url);
+                });
             }
-    
-            await saveUserData();
-    
-            toast.success(`Welcome to BantayBuddy, ${username}!`);
-            router.push(`/user/${username}`);
+
+            // Save User Data
+            await fetch('/api/user-setup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'saveUserData', user, username, displayName, userPhotoURL, about, gender, birthdate, location, phoneNumber /* ... */ }) 
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    toast.success(`Welcome to BantayBuddy, ${username}!`);
+                    router.push(`/user/${username}`);
+                }
+            });
         } catch (error) {
             toast.error('An error occurred while setting up your account.');
-            console.error(error);
-        } finally {
-            setSubmitDisabled(false);
-            toast.dismiss();
-        }
-    };
-    
-    const uploadUserPhoto = async (storageRef) => {
-        const uploadTask = storageRef.put(userPhoto);
-    
-        await new Promise((resolve, reject) => {
-            uploadTask.on(
-                'state_changed',
-                (snapshot) => {
-                    // Handle progress updates here
-                    const progress = Math.round(
-                        (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-                    );
-                    // Update progress state if needed
-                },
-                (error) => {
-                    // Handle error here
-                    reject(error);
-                },
-                () => {
-                    // Handle successful upload here
-                    toast.success('Photo uploaded successfully!');
-                    resolve();
-                }
-            );
-        });
-    };
-    
-    const saveUserData = async () => {
-        const userDoc = firestore.doc(`users/${user.uid}`);
-        const batch = firestore.batch();
-    
-        batch.set(userDoc, {
-            username: username,
-            displayName: displayName,
-            userPhotoURL: userPhoto ? await getUserPhotoURL() : "",
-            about: about,
-            email: user.email,
-            followers: [],
-            following: [],
-            hidden: [],
-            coverPhotoURL: "",
-            gender: gender,
-            birthdate: birthdate,
-            location: location,
-            phoneNumber: phoneNumber,
-            uid: user.uid
-        });
-    
-        await batch.commit();
-    };
-    
-    const getUserPhotoURL = async () => {
-        const storagePath = `userProfile/${user.uid}/profilePic`;
-        const storageRef = storage.ref().child(storagePath);
-        return await storageRef.getDownloadURL();
-    };
-    
-
+        } 
+    }
+      
 
   return (
     <div className="flex items-center justify-center md:mt-16 md:mb-16 w-full md:pl-16 md:pr-16">
@@ -349,6 +321,7 @@ function SetupPage() {
                     placeholder="Tell us about yourself!" 
                     max="9999-12-31"
                     required
+                    value = {birthdate}
                     onChange={(e) => setBirthdate(e.target.value)} />
             </div>
 

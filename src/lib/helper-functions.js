@@ -1,6 +1,6 @@
 import { toast } from 'react-hot-toast';
 
-export function handleFilePreview(file) {
+export function handleImageFilePreview(file) {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']; // Adjust allowed types as needed
 
     if (file) {
