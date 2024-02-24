@@ -1,8 +1,8 @@
 import { storage } from "./firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
-export async function uploadUserProfilePhoto(user, userPhotoFile) {
-    const storagePath = `userProfile/${user.uid}/profilePic`;
+export async function uploadUserProfilePhoto(userid, userPhotoFile) {
+    const storagePath = `userProfile/${userid}/profilePic`;
     const storageRef = ref(storage, storagePath);
     const uploadTask = uploadBytesResumable(storageRef, userPhotoFile);
 

@@ -98,7 +98,7 @@ function SetupPage() {
 
         try {
             // Check if username is taken
-            await fetch('/api/user-setup', {
+            await fetch('/api/user-setup/save-user-data', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'isUsernameTaken', username }) 
@@ -110,22 +110,22 @@ function SetupPage() {
             });
 
             // Photo Upload
-            if (!userPhoto){
-                // Set default user photo URL
-                setUserPhotoURL('https://firebasestorage.googleapis.com/v0/b/stsweng-bb.appspot.com/o/userProfile%2Fdefault%2FprofilePictureHolder.jpg?alt=media&token=a55bf8b9-f9f3-4a85-90a4-65d1f218b99a');
-            } else {
+            if (userPhoto) {
+                const formData = new FormData();
+                formData.append('user', user.uid);
+                formData.append('file', userPhoto);
+
                 // Upload user photo
-                await fetch('/api/user-setup', {
+                await fetch('/api/user-setup/upload-file', {
                     method: 'POST',
-                    // ... (Assume userPhoto is a File)
-                    body: JSON.stringify({ action: 'uploadUserPhoto', user, userPhoto }) 
-                }).then(response => response.json()).then(data => {
+                    body: formData
+                }).then(response => response.json()).then(data => {console.log(data);
                     setUserPhotoURL(data.url);
                 });
             }
 
             // Save User Data
-            await fetch('/api/user-setup', {
+            await fetch('/api/user-setup/save-user-data', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'saveUserData', user, username, displayName, userPhotoURL, about, gender, birthdate, location, phoneNumber /* ... */ }) 
