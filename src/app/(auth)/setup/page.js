@@ -65,7 +65,7 @@ function SetupPage() {
             }
         };
         checkUserSetup();
-    }, [router, user]);
+    }, []);
 
     /**
      * Handles the change event of the file input element.
@@ -104,7 +104,7 @@ function SetupPage() {
                 body: JSON.stringify({ action: 'isUsernameTaken', username }) 
             }).then(res => res.json()).then(data => {
                 if (data.usernameTaken) {
-                    toast.error('Username is already taken!');
+                    throw new Error("username taken");
                     return;
                 }
             });
@@ -112,6 +112,7 @@ function SetupPage() {
             // Photo Upload
             if (userPhoto) {
                 const formData = new FormData();
+                formData.append('action', "uploadProfile");
                 formData.append('user', user.uid);
                 formData.append('file', userPhoto);
 
@@ -119,24 +120,37 @@ function SetupPage() {
                 await fetch('/api/user-setup/upload-file', {
                     method: 'POST',
                     body: formData
-                }).then(response => response.json()).then(data => {console.log(data);
+                }).then(response => response.json()).then(async data => {
+                    console.log(data);
                     setUserPhotoURL(data.url);
+                    // Save User Data
+                    await saveUserData(data.url);
+                });
+            } else {
+                // Save User Data
+                await saveUserData(userPhotoURL);
+            }
+
+            async function saveUserData(photoURL) {
+                await fetch('/api/user-setup/save-user-data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'saveUserData', user, username, displayName, userPhotoURL: photoURL, about, gender, birthdate, location, phoneNumber /* ... */ }) 
+                }).then(response => response.json()).then(data => {
+                    if (data.success) {
+                        toast.success(`Welcome to BantayBuddy, ${username}!`);
+                        router.push(`/user/${username}`);
+                    }
                 });
             }
 
-            // Save User Data
-            await fetch('/api/user-setup/save-user-data', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'saveUserData', user, username, displayName, userPhotoURL, about, gender, birthdate, location, phoneNumber /* ... */ }) 
-            }).then(response => response.json()).then(data => {
-                if (data.success) {
-                    toast.success(`Welcome to BantayBuddy, ${username}!`);
-                    router.push(`/user/${username}`);
-                }
-            });
+            
         } catch (error) {
-            toast.error('An error occurred while setting up your account.');
+            if (error.message === 'username taken'){
+                toast.error('Username is already taken!');
+            } else {
+                toast.error('An error occurred while setting up your account.');
+            }
         } 
     }
       

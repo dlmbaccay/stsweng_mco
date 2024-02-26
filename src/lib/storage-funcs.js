@@ -13,3 +13,16 @@ export async function uploadUserProfilePhoto(userid, userPhotoFile) {
     const downloadURL = await getDownloadURL(storageRef);
     return downloadURL;
 }
+
+export async function uploadUserCoverPhoto(userid, coverPhotoFile) {
+    const storagePath = `userProfile/${userid}/coverPhoto`;
+    const storageRef = ref(storage, storagePath);
+    const uploadTask = uploadBytesResumable(storageRef, coverPhotoFile);
+
+    // ... Handle upload progress, error handling if desired
+
+    await uploadTask; // Wait for the upload to complete
+
+    const downloadURL = await getDownloadURL(storageRef);
+    return downloadURL;
+}

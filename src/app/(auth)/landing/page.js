@@ -47,7 +47,7 @@ export default function Landing() {
       toast.loading('Signing in...');
 
       auth.signInWithEmailAndPassword(email, password)
-      .then((userCredential) => {
+      .then(async (userCredential) => {
         // sign the user in
         const user = userCredential.user;
 
@@ -59,7 +59,8 @@ export default function Landing() {
         // check if user is already verified
         if (user.emailVerified) {          
           toast.success('Signed in successfully!');
-          if (userHasNoPriorData) {
+          const hasNoData = await userHasNoPriorData(user.uid);
+          if (hasNoData) {
             router.push('/setup');
           } else {
             router.push('/home');
@@ -91,7 +92,7 @@ export default function Landing() {
    */
   const userHasNoPriorData = async (userId) => {
     // Perform a query or check in the Firebase database to determine if the user has prior data
-    const userDataSnapshot = await firestore.collection("userData").doc(userId).get();
+    const userDataSnapshot = await firestore.collection("users").doc(userId).get();
     return !userDataSnapshot.exists;
   }
 
@@ -191,8 +192,9 @@ export default function Landing() {
 
         toast.success('Signed in with Google');
 
+        const hasNoData = await userHasNoPriorData(user.uid);
         // check if user has no prior data
-        if (userHasNoPriorData(user.uid)) {
+        if (hasNoData) {
             toast(`Let's set up your account!`, { icon: '👏' });
             router.push('/setup');
         } else {

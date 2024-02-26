@@ -3,15 +3,13 @@ import { NextResponse } from 'next/server';
 import { getDocumentByFieldValue } from '@/lib/firestore-crud';
 
 
-export async function GET(request) {
+export async function GET(request) {    
     const { searchParams } = new URL(request.url);
     const username = searchParams.get('username');
-    // const body = await request.json();
-    // const { action, user, username, displayName, userPhoto, userPhotoURL, about, gender, birthdate, location, phoneNumber } = body;
-    console.log(username);
+    
     try {
         
-        const userDoc = await getDocumentByFieldValue('users', 'username', username);
+        const userDoc = await getDocumentByFieldValue('users', 'username', username );
         if (userDoc) {
             return NextResponse.json(userDoc, {status: 200});
         } else {
