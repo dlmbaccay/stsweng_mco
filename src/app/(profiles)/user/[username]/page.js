@@ -20,49 +20,70 @@ export default function UserProfile() {
     const [loading, setLoading] = useState(true);
 
     const [activeTab, setActiveTab] = useState('posts');
-
     const [ currentUser, setCurrentUser ] = useState([]);
 
     useEffect(() => {
         setLoading(true); 
     
+        /**
+         * Subscribes to authentication state changes.
+         * @type {function}
+         */
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
             if (user) { // User is signed in
                 // Fetch profile data
                 try {
-                    const response = await fetch(`/api/users/via-username?username=${urlParams.username}`, {
-                        method: 'GET' // Specify GET method
-                    });
+                    /**
+                     * Fetches the profile data for the specified username.
+                     * @param {string} username - The username to fetch the data for.
+                     * @returns {Promise<object>} The profile data.
+                     */
+                    const fetchProfileData = async (username) => {
+                        const response = await fetch(`/api/users/via-username?username=${username}`, {
+                            method: 'GET' // Specify GET method
+                        });
 
-                    if (response.ok) {
-                        const data = await response.json();
-                        setUserData(data); 
-                    } else {
-                        // Assuming the API returns { message: '...' } on error
-                        const errorData = await response.json();
-                        throw new Error(errorData.message); 
-                    }
+                        if (response.ok) {
+                            const data = await response.json();
+                            setUserData(data);
+                        } else {
+                            // Assuming the API returns { message: '...' } on error
+                            const errorData = await response.json();
+                            throw new Error(errorData.message);
+                        }
+                    };
+
+                    await fetchProfileData(urlParams.username);
                 } catch (error) {
                     console.error('Error fetching user data:', error);
-                } 
+                }
 
                 // Fetch signed-in user's data
                 try {
-                    const response = await fetch(`/api/users/via-id?id=${user.uid}`, {
-                        method: 'GET' // Specify GET method
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        setCurrentUser(data); 
-                    } else {
-                        // Assuming the API returns { message: '...' } on error
-                        const errorData = await response.json();
-                        throw new Error(errorData.message); 
-                    }
+                    /**
+                     * Fetches the data for the currently signed-in user.
+                     * @param {string} userId - The ID of the signed-in user.
+                     * @returns {Promise<object>} The user data.
+                     */
+                    const fetchCurrentUser = async (userId) => {
+                        const response = await fetch(`/api/users/via-id?id=${userId}`, {
+                            method: 'GET' // Specify GET method
+                        });
+                        if (response.ok) {
+                            const data = await response.json();
+                            setCurrentUser(data);
+                        } else {
+                            // Assuming the API returns { message: '...' } on error
+                            const errorData = await response.json();
+                            throw new Error(errorData.message);
+                        }
+                    };
+
+                    await fetchCurrentUser(user.uid);
                 } catch (error) {
                     console.error('Error fetching current user data:', error);
                 } finally { // Add a 'finally' block
-                    setLoading(false);  
+                    setLoading(false);
                 }
             } else {
                 // Handle the case when no user is signed in (optional)
@@ -73,20 +94,69 @@ export default function UserProfile() {
         return unsubscribe; // Clean-up function for the observer
     }, [urlParams.username]);
 
+    
+    /**
+     * This useEffect hook is responsible for fetching and updating the data of the user whose profile is being viewed.
+     * It subscribes to changes in the user's data in the Firestore database and updates the user's data on the page accordingly.
+     * The cleanup function is returned to unsubscribe from the Firestore listener when the component unmounts.
+     */
+    useEffect(() => {
+        let unsubscribe;
+
+        if (userData) { // info of the user whose profile is being viewed
+            const userRef = firestore.collection('users').doc(userData.uid);
+            // Whenever the user's data in the database changes, update the user's data on the page
+            unsubscribe = userRef.onSnapshot((doc) => {
+                const newData = doc.data();
+                // Prevent infinite loop by setting data only when there is a difference
+                if (JSON.stringify(newData) !== JSON.stringify(userData)) {
+                    setUserData(newData);
+                }
+            });
+        } 
+
+        return () => unsubscribe; // Cleanup function
+    }, [userData]);
+    
+    /**
+     * This useEffect hook is responsible for fetching and updating the data of the current user.
+     * It subscribes to changes in the current user's data in the Firestore database and updates the current user's data on the page accordingly.
+     * The cleanup function is returned to unsubscribe from the Firestore listener when the component unmounts.
+     * This is for the viewer of the page.
+     */
+    useEffect(() => {
+        let unsubscribe;
+    
+        if (currentUser) { // info of the current user
+            const userRef = firestore.collection('users').doc(currentUser.uid);
+            // Whenever the user's data in the database changes, update the user's data on the page
+            unsubscribe = userRef.onSnapshot((doc) => {
+                const newData = doc.data();
+                // Prevent infinite loop by setting data only when there is a difference
+                if (JSON.stringify(newData) !== JSON.stringify(currentUser)) {
+                    setCurrentUser(newData);
+                }
+            });
+        } 
+    
+        return () => unsubscribe; // Cleanup function
+    }, [currentUser]);
+
     return (
         <>
-            { loading ? <Loader show={true} /> : (
+            { loading ? <Loader show={true} /> : (userData && 
                 <div className="flex">
                     {/* Side Navbar */}
-                    <div className="w-20 z-50">
+                    <div className="min-w-20 z-50 fixed">
                         <ExpandedNavBar props={{
                             uid : currentUser.uid,
                             username: currentUser.username, 
-                            userPhotoURL: currentUser.userPhotoURL
+                            userPhotoURL: currentUser.userPhotoURL,
+                            expand_lock: false,
                         }}/>
                     </div>
                     
-                    <div className="w-full h-screen relative">
+                    <div className="w-full h-screen fixed z-10 ml-20">
                         {/* Cover Photo */}
                         <div className="h-1/5">
                             <CoverPhoto src={userData.coverPhotoURL ? userData.coverPhotoURL : "/images/cover0-image.png"} alt="cover photo"></CoverPhoto>
@@ -127,11 +197,11 @@ export default function UserProfile() {
                                 {/* Followers and Following Section */}
                                 <div className="flex flex-row mx-auto p-6"> 
                                     <div className="w-1/2 px-2 mx-4 flex flex-col items-center"> 
-                                        <p className="text-base tracking-wide">{userData.followers.length}</p>
+                                        <p className="text-base tracking-wide">{userData.followers && userData.followers.length}</p>
                                         <p className="text-lg tracking-wide dark:text-light_yellow text-muted_blue font-medium">Followers</p>
                                     </div>
                                     <div className="w-1/2 px-2 mx-4 flex flex-col items-center">
-                                        <p className="text-base tracking-wide">{userData.following.length}</p>
+                                        <p className="text-base tracking-wide">{userData.following && userData.following.length}</p>
                                         <p className="text-lg tracking-wide dark:text-light_yellow text-muted_blue font-medium">Following</p>
                                     </div>
                                 </div>

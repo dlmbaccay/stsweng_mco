@@ -11,9 +11,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import RoundImage from "@/components/round-image"
+import Loader from "../Loader"
 
 
 export function EditUserProfile({props}) {
+    const [loading, setLoading] = useState(false);
+
     const { uid, displayName, userPhotoURL, coverPhotoURL, about, location, gender, birthdate, phoneNumber } = props;
 
     const [newDisplayName, setNewDisplayName] = useState(displayName);
@@ -57,6 +60,7 @@ export function EditUserProfile({props}) {
 
     const handleSaveProfileChanges = async (event) => {
         event.preventDefault();
+        setLoading(true)
         try {
             let newPhotoUrl;
             let newCoverUrl;
@@ -77,9 +81,13 @@ export function EditUserProfile({props}) {
     
             // Save User Data
             await saveUserData((newPhotoUrl ? newPhotoUrl : userPhotoURL), (newCoverUrl ? newCoverUrl : coverPhotoURL));
+            setLoading(false);
+            toast.success('Profile changes saved!')
+            
     
         } catch (error) {
             console.error(error);
+            setLoading(false);
             toast.error('An error occurred while updating your profile.');
         } 
     }
@@ -131,157 +139,159 @@ export function EditUserProfile({props}) {
         });
     }
 
-    
-    
-
     return (
         <Dialog>
             <DialogTrigger asChild>
                 <Button variant="outline" className="mx-auto text-lg dark:bg-light_yellow bg-muted_blue px-6 text-dark_gray mt-6 font-medium">Edit</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[600px] lg:max-w-[1080px]">
-                <DialogHeader>
-                    <DialogTitle>Edit Profile Information</DialogTitle>
-                    <DialogDescription>
-                        Make changes to your profile here. Click save when you're done.
-                    </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleSaveProfileChanges}>
-                    <div className="flex flex-row w-full mb-4">
-                        <div className="flex flex-col items-center w-1/3 p-4">
-                            <div className="flex flex-col items-center">
-                                <Label htmlFor="user-photo" className="text-center text-md">
-                                    <span className="">Change Profile Picture</span>
-                                    <div className="mt-4">
-                                        <RoundImage src={previewUrl ? previewUrl : '/images/profilePhotoHolder.jpg'} alt="Profile Picture" className="rounded-full object-cover cursor-pointer" />
-                                    </div>
-                                </Label>
-                                <Input type="file" className="hidden" onChange={handleUserPhotoChange} id="user-photo" />
+                {loading ? <Loader show={loading}/> : 
+                    <>
+                        <DialogHeader>
+                            <DialogTitle>Edit Profile Information</DialogTitle>
+                            <DialogDescription>
+                                Make changes to your profile here. Click save when you're done.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handleSaveProfileChanges}>
+                            <div className="flex flex-row w-full mb-4">
+                                <div className="flex flex-col items-center w-1/3 p-4">
+                                    <div className="flex flex-col items-center">
+                                        <Label htmlFor="user-photo" className="text-center text-md">
+                                            <span className="">Change Profile Picture</span>
+                                            <div className="mt-4">
+                                                <RoundImage src={previewUrl ? previewUrl : '/images/profilePhotoHolder.jpg'} alt="Profile Picture" className="rounded-full object-cover cursor-pointer" />
+                                            </div>
+                                        </Label>
+                                        <Input type="file" className="hidden" onChange={handleUserPhotoChange} id="user-photo" />
 
-                                <Label htmlFor="cover-photo" className="text-center text-md mt-4">
-                                    <span className="">Change Cover Photo</span>
-                                    <div className="mt-4 w-64 h-36 relative">
-                                        <Image src={coverPreviewUrl ? coverPreviewUrl : '/images/cover0-image.png'} alt="Cover Photo" layout="fill" className="rounded-lg object-cover hover:object-scale-down transition-all delay-300 cursor-pointer" />
+                                        <Label htmlFor="cover-photo" className="text-center text-md mt-4">
+                                            <span className="">Change Cover Photo</span>
+                                            <div className="mt-4 w-64 h-36 relative">
+                                                <Image src={coverPreviewUrl ? coverPreviewUrl : '/images/cover0-image.png'} alt="Cover Photo" layout="fill" className="rounded-lg object-cover hover:object-scale-down transition-all delay-300 cursor-pointer" />
+                                            </div>
+                                        </Label>
+                                        <Input type="file" className="hidden" onChange={handleCoverPhotoChange} id="cover-photo" />
                                     </div>
-                                </Label>
-                                <Input type="file" className="hidden" onChange={handleCoverPhotoChange} id="cover-photo" />
-                            </div>
-                        </div>
-                        <div className="flex flex-col w-2/3 px-20">
-                            <div className="flex flex-col items-left">
-                                <Label htmlFor="display-name" className="text-left text-lg font-normal">
-                                    Display Name
-                                </Label>
-                                <Input 
-                                    type="text" 
-                                    id="display-name" 
-                                    value={newDisplayName} 
-                                    className={`border border-slate-400 mt-2 p-2 rounded-md w-full ${newDisplayName === '' ? '': !checkDisplayName(newDisplayName) ? 'border-red-500' : 'border-green-500'}`} 
-                                    placeholder="What would you like us to call you?" 
-                                    required
-                                    onFocus={() => setShowDisplayNameTooltip(true)}
-                                    onBlur={() => setShowDisplayNameTooltip(false)}
-                                    maxLength={30}
-                                    minLength={1}
-                                    onChange={(e) => setNewDisplayName(e.target.value)} />
-                                
-                                { showDisplayNameTooltip  && (
-                                    <div className="mt-4 flex flex-row w-full pl-2 gap-4">
-                                        <div>
-                                            <p className={`text-xs ${newDisplayName.length >= 1 && newDisplayName.length <= 30 ? 'text-green-500' : 'text-slate-400'}`}>- Be 1-30 characters long.</p>
-                                            <p className={`text-xs ${/^[^\s]+(\s+[^\s]+)*$/.test(newDisplayName) ? 'text-green-500' : 'text-slate-400'}`}>- No blank spaces on either ends.</p>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <Label htmlFor="location" className="text-left text-lg font-normal mt-2">
-                                    Location
-                                </Label>
-                                <Input 
-                                    type="text" 
-                                    id="location" 
-                                    value={newLocation} 
-                                    className={`border border-slate-400 mt-2 p-2 rounded-md w-full ${newLocation === '' ? '': !checkLocation(newLocation) ? 'border-red-500' : 'border-green-500'}`} 
-                                    placeholder="Where do you live?" 
-                                    required
-                                    onFocus={() => setShowLocationTooltip(true)}
-                                    onBlur={() => setShowLocationTooltip(false)}
-                                    maxLength={30}
-                                    minLength={1}
-                                    onChange={(e) => setNewLocation(e.target.value)} />
-                                
-                                { showLocationTooltip  && (
-                                    <div className="mt-4 flex flex-row w-full pl-2 gap-4">
-                                        <div>
-                                            <p className={`text-xs ${newLocation.length >= 1 && newLocation.length <= 30 ? 'text-green-500' : 'text-slate-400'}`}>- Be 1-30 characters long.</p>
-                                            <p className={`text-xs ${/^[^\s]+(\s+[^\s]+)*$/.test(newLocation) ? 'text-green-500' : 'text-slate-400'}`}>- No blank spaces on either ends.</p>
-                                        </div>
-                                    </div>
-                                )}
-                                <Label htmlFor="about" className="text-left text-lg font-normal mt-2">
-                                    About
-                                </Label>
-                                <Textarea 
-                                    type="text" 
-                                    id="about" 
-                                    value={newAbout} 
-                                    className={`border border-slate-400 mt-2 p-2 rounded-md w-full`} 
-                                    placeholder="Tell us about yourself!" 
-                                    maxLength={100}
-                                    minLength={1}
-                                    onChange={(e) => setNewAbout(e.target.value)} />
-                                <div className="mt-4">
-                                    {/* Gender */}
-                                    <div className="flex flex-row mt-2 items-center">
-                                        <p className="text-base tracking-wide font-semibold w-1/3">Gender</p>
-                                        <Select required onValueChange={(value) => setNewGender(value)} defaultValue={newGender}>
-                                            <SelectTrigger className="border border-slate-400">
-                                                <SelectValue placeholder="Select gender" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="Male">Male</SelectItem>
-                                                <SelectItem value="Female">Female</SelectItem>
-                                                <SelectItem value="Non-Binary">Non-Binary</SelectItem>
-                                                <SelectItem value="Prefer not to Say">Prefer Not to Say</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    {/* Birthday */}
-                                    <div className="flex flex-row mt-2 items-center">
-                                        <p className="text-base tracking-wide font-semibold w-1/3">Birthday</p>
+                                </div>
+                                <div className="flex flex-col w-2/3 px-20">
+                                    <div className="flex flex-col items-left">
+                                        <Label htmlFor="display-name" className="text-left text-lg font-normal">
+                                            Display Name
+                                        </Label>
                                         <Input 
-                                            type="date" 
-                                            id="birthdate" 
-                                            name="birthdate"
+                                            type="text" 
+                                            id="display-name" 
+                                            value={newDisplayName} 
+                                            className={`border border-slate-400 mt-2 p-2 rounded-md w-full ${newDisplayName === '' ? '': !checkDisplayName(newDisplayName) ? 'border-red-500' : 'border-green-500'}`} 
+                                            placeholder="What would you like us to call you?" 
+                                            required
+                                            onFocus={() => setShowDisplayNameTooltip(true)}
+                                            onBlur={() => setShowDisplayNameTooltip(false)}
+                                            maxLength={30}
+                                            minLength={1}
+                                            onChange={(e) => setNewDisplayName(e.target.value)} />
+                                        
+                                        { showDisplayNameTooltip  && (
+                                            <div className="mt-4 flex flex-row w-full pl-2 gap-4">
+                                                <div>
+                                                    <p className={`text-xs ${newDisplayName.length >= 1 && newDisplayName.length <= 30 ? 'text-green-500' : 'text-slate-400'}`}>- Be 1-30 characters long.</p>
+                                                    <p className={`text-xs ${/^[^\s]+(\s+[^\s]+)*$/.test(newDisplayName) ? 'text-green-500' : 'text-slate-400'}`}>- No blank spaces on either ends.</p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <Label htmlFor="location" className="text-left text-lg font-normal mt-2">
+                                            Location
+                                        </Label>
+                                        <Input 
+                                            type="text" 
+                                            id="location" 
+                                            value={newLocation} 
+                                            className={`border border-slate-400 mt-2 p-2 rounded-md w-full ${newLocation === '' ? '': !checkLocation(newLocation) ? 'border-red-500' : 'border-green-500'}`} 
+                                            placeholder="Where do you live?" 
+                                            required
+                                            onFocus={() => setShowLocationTooltip(true)}
+                                            onBlur={() => setShowLocationTooltip(false)}
+                                            maxLength={30}
+                                            minLength={1}
+                                            onChange={(e) => setNewLocation(e.target.value)} />
+                                        
+                                        { showLocationTooltip  && (
+                                            <div className="mt-4 flex flex-row w-full pl-2 gap-4">
+                                                <div>
+                                                    <p className={`text-xs ${newLocation.length >= 1 && newLocation.length <= 30 ? 'text-green-500' : 'text-slate-400'}`}>- Be 1-30 characters long.</p>
+                                                    <p className={`text-xs ${/^[^\s]+(\s+[^\s]+)*$/.test(newLocation) ? 'text-green-500' : 'text-slate-400'}`}>- No blank spaces on either ends.</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <Label htmlFor="about" className="text-left text-lg font-normal mt-2">
+                                            About
+                                        </Label>
+                                        <Textarea 
+                                            type="text" 
+                                            id="about" 
+                                            value={newAbout} 
                                             className={`border border-slate-400 mt-2 p-2 rounded-md w-full`} 
                                             placeholder="Tell us about yourself!" 
-                                            max="9999-12-31"
-                                            required
-                                            value = {newBirthdate}
-                                            onChange={(e) => setNewBirthdate(e.target.value)} />
-                                    </div>
+                                            maxLength={100}
+                                            minLength={1}
+                                            onChange={(e) => setNewAbout(e.target.value)} />
+                                        <div className="mt-4">
+                                            {/* Gender */}
+                                            <div className="flex flex-row mt-2 items-center">
+                                                <p className="text-base tracking-wide font-semibold w-1/3">Gender</p>
+                                                <Select required onValueChange={(value) => setNewGender(value)} defaultValue={newGender}>
+                                                    <SelectTrigger className="border border-slate-400">
+                                                        <SelectValue placeholder="Select gender" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="Male">Male</SelectItem>
+                                                        <SelectItem value="Female">Female</SelectItem>
+                                                        <SelectItem value="Non-Binary">Non-Binary</SelectItem>
+                                                        <SelectItem value="Prefer not to Say">Prefer Not to Say</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
 
-                                    {/* Phone Number */}
-                                    <div className="flex flex-row mt-2 items-center">
-                                        <p className="text-base tracking-wide font-semibold w-1/3">Phone Number</p>
-                                        <PhoneInput 
-                                            defaultCountry="PH"
-                                            value={newPhoneNumber} 
-                                            onChange={setNewPhoneNumber} 
-                                            className={`border border-slate-400 mt-2 rounded-md w-full`} 
-                                            placeholder="Enter your phone number" 
-                                            required
-                                            />
+                                            {/* Birthday */}
+                                            <div className="flex flex-row mt-2 items-center">
+                                                <p className="text-base tracking-wide font-semibold w-1/3">Birthday</p>
+                                                <Input 
+                                                    type="date" 
+                                                    id="birthdate" 
+                                                    name="birthdate"
+                                                    className={`border border-slate-400 mt-2 p-2 rounded-md w-full`} 
+                                                    placeholder="Tell us about yourself!" 
+                                                    max="9999-12-31"
+                                                    required
+                                                    value = {newBirthdate}
+                                                    onChange={(e) => setNewBirthdate(e.target.value)} />
+                                            </div>
+
+                                            {/* Phone Number */}
+                                            <div className="flex flex-row mt-2 items-center">
+                                                <p className="text-base tracking-wide font-semibold w-1/3">Phone Number</p>
+                                                <PhoneInput 
+                                                    defaultCountry="PH"
+                                                    value={newPhoneNumber} 
+                                                    onChange={setNewPhoneNumber} 
+                                                    className={`border border-slate-400 mt-2 rounded-md w-full`} 
+                                                    placeholder="Enter your phone number" 
+                                                    required
+                                                    />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button type="submit">Save changes</Button>
-                    </DialogFooter>
-                </form>
+                            <DialogFooter>
+                                <Button type="submit">Save changes</Button>
+                            </DialogFooter>
+                        </form>
+                    </>
+                }
+                
             </DialogContent>
         </Dialog>
     )
