@@ -24,6 +24,7 @@ module.exports = {
         dark_gray: "#323031",
         light_blue: "#00C4DD",
         muted_blue: "#028090",
+        light_yellow: "#FADA91",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -77,6 +78,9 @@ module.exports = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      spacing: {
+        '1/5': "20%",
+      }
     },
   },
   plugins: [require("tailwindcss-animate")],

@@ -10,7 +10,8 @@ export const metadata = {
   description: "Social Media App with Pets",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+
   return (
     <html lang="en">
       <body className={inter.className}>
