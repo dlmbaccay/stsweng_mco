@@ -7,7 +7,7 @@ import { ModeToggle } from "@/components/mode-toggle";
 import Loader from "@/components/Loader";
 import ExpandedNavBar from "@/components/nav/navbar";
 
-function homePage() {
+function HomePage() {
     const [loading, setLoading] = useState(true);
     const [ currentUser, setCurrentUser ] = useState([]);
 
@@ -77,4 +77,4 @@ function homePage() {
   )
 }
 
-export default WithAuth(homePage);
+export default WithAuth(HomePage);

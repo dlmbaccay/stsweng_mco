@@ -37,7 +37,7 @@ export default function ExpandedNavBar({props}) {
             document.addEventListener('mousedown', handleClickOutside);
             return () => document.removeEventListener('mousedown', handleClickOutside);
         }
-    }, []);
+    });
 
     // const handleClick = (event) => {
     //     // Check if the event target is the background div

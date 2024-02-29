@@ -65,7 +65,7 @@ function SetupPage() {
             }
         };
         checkUserSetup();
-    }, []);
+    });
 
     /**
      * Handles the change event of the file input element.
