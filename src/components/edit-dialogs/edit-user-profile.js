@@ -142,7 +142,7 @@ export function EditUserProfile({props}) {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="outline" className="px-3 h-[35px] bg-primary text-primary-foreground gap-2 flex items-center justify-center">
+                <Button className="px-3 h-[35px]  gap-2 flex items-center justify-center">
                     <i class="fa-solid fa-pencil" />
                     Edit Profile
                 </Button>
@@ -289,7 +289,7 @@ export function EditUserProfile({props}) {
                                 </div>
                             </div>
                             <DialogFooter>
-                                <Button type="submit">Save changes</Button>
+                                <Button type="submit" className="mt-6">Save Changes</Button>
                             </DialogFooter>
                         </form>
                     </>

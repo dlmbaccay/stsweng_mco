@@ -159,3 +159,15 @@ module.exports.isUsernameTaken = async (username) => {
     }
 };
 
+module.exports.createPetDocument = async (collection, documentId, data) => {
+    try {
+        // Add the data to the Firestore database
+        await firestore.collection(collection).doc(documentId).set(data);
+
+        // Return the ID of the newly created document
+        return documentId;
+    } catch (error) {
+        console.error('Error creating pet document:', error);
+        throw error;
+    }
+}
