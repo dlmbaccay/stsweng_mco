@@ -98,6 +98,13 @@ function SetupPage() {
 
         try {
             // Check if username is taken
+            /** Send a POST request to the server through the `save-user-data` route to check 
+             *  if the username is taken, and return a value to indicate if the username is taken.
+             *  
+             *  @param {String} action - The name of the action that the server will perform  
+             *  @param {String} username - The username to check. 
+             *  
+             */
             await fetch('/api/user-setup/save-user-data', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -110,6 +117,14 @@ function SetupPage() {
             });
 
             // Photo Upload
+            /** Send a POST request to the server through the `save-user-data` route to upload 
+             *  a file chosen by the user to the firebase storage. The server will return the URL of the uploaded file.
+             *  
+             *  @param {String} action - The name of the action that the server will perform.
+             *  @param {String} user.uid - The id of the user.
+             *  @param {String} userPhoto - The user's profile picture.
+             *  
+             */
             if (userPhoto) {
                 const formData = new FormData();
                 formData.append('action', "uploadProfile");
@@ -130,7 +145,22 @@ function SetupPage() {
                 // Save User Data
                 await saveUserData(userPhotoURL);
             }
-
+            
+            /** Send a POST request to the server to save the user data
+             *  by attaching the data to the body. 
+             *  
+             *  @param {String} action - The name of the action that the server will perform  
+             *  @param {String} user - The user ID of the signed-in user.
+             *  @param {String} username - The username of the signed-in user.
+             *  @param {String} displayName - The display name of the signed-in user.
+             *  @param {String} userPhotoURL - The URL of the user's profile picture.
+             *  @param {String} about - The about section of the user's profile.
+             *  @param {String} gender - The gender of the user.
+             *  @param {String} birthdate - The birthdate of the user.
+             *  @param {String} location - The location of the user.
+             *  @param {String} phoneNumber - The phone number of the user.
+             *  
+             */
             async function saveUserData(photoURL) {
                 await fetch('/api/user-setup/save-user-data', {
                     method: 'POST',
