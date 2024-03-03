@@ -142,7 +142,10 @@ export function EditUserProfile({props}) {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="outline" className="mx-auto text-lg dark:bg-light_yellow bg-muted_blue px-6 text-dark_gray mt-6 font-medium">Edit</Button>
+                <Button variant="outline" className="px-3 h-[35px] bg-primary text-primary-foreground gap-2 flex items-center justify-center">
+                    <i class="fa-solid fa-pencil" />
+                    Edit Profile
+                </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[600px] lg:max-w-[1080px]">
                 {loading ? <Loader show={loading}/> : 
