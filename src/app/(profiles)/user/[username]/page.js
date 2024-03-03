@@ -297,12 +297,13 @@ function UserProfile() {
                                         <Card className="text-sm p-4 drop-shadow-md rounded-sm">
                                             <p className="mb-4">Pets Container</p>
 
-                                            <CreatePetProfile props={{
+                                            { userData && <CreatePetProfile props={{
                                                 uid: userData.uid,
                                                 username: userData.username,
                                                 displayName: userData.displayName,
                                                 location: userData.location,
-                                            }}/>
+                                                coverPhotoURL: userData.coverPhotoURL,
+                                            }}/> }
                                         </Card>
                                     )}
                                 </div>

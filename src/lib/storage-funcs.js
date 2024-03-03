@@ -27,8 +27,8 @@ export async function uploadUserCoverPhoto(userid, coverPhotoFile) {
     return downloadURL;
 }
 
-export async function uploadPetProfilePhoto(petid, petPhotoFile) {
-    const storagePath = `petProfile/${petid}/profilePic`;
+export async function uploadPetProfilePhoto(petID, petPhotoFile) {
+    const storagePath = `petProfile/${petID}/profilePic`;
     const storageRef = ref(storage, storagePath);
     const uploadTask = uploadBytesResumable(storageRef, petPhotoFile);
 

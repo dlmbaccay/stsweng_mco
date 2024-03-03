@@ -12,15 +12,16 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import RoundImage from "@/components/round-image"
 import Loader from "@/components/Loader"
+import { set } from "date-fns"
 
 
 export function CreatePetProfile({props}) {
     const [loading, setLoading] = useState(false);
 
-    const { uid, displayName, userPhotoURL, coverPhotoURL, about, location, gender, birthdate, phoneNumber } = props;
+    const { uid, username, displayName, location, coverPhotoURL } = props;
 
     const [ petName, setPetName ] = useState('');
-    const [ petPhoto, setPetPhoto ] = useState('');
+    const [ petPhotoURL, setPetPhotoURL ] = useState('');
     const [ petBreed, setPetBreed ] = useState('');
     const [ petSex, setPetSex ] = useState('');
     const [ petAbout, setPetAbout ] = useState('');
@@ -40,7 +41,7 @@ export function CreatePetProfile({props}) {
             setUserPhoto('');
             setPreviewUrl('/images/profilePictureHolder.jpg');
         } else {
-            setPetPhoto(temp[0]);
+            setPetPhotoURL(temp[0]);
             setPetPhotoPreviewUrl(temp[1]);
         }
     };
@@ -48,15 +49,62 @@ export function CreatePetProfile({props}) {
     const handleSubmit = async (event) => {
         event.preventDefault();
         
-        // try {
-        //     // upload pet photo
-        //     if(petPhoto) {
-        //         const formData = new FormData();
-        //         formData.append('action', 'uploadPetProfilePhoto');
-        //         formData.append('petid', uid);
-        //     }
-        // }
-    }
+        try {
+            if (petPhotoURL) {
+                // Create a new document in the 'pets' collection with the given data
+                const petID = firestore.collection("pets").doc().id;
+
+                const formData = new FormData();
+                formData.append('action', "uploadPetProfile");
+                formData.append('pet', petID);
+                formData.append('file', petPhotoURL);
+
+                // Upload user photo
+                await fetch('/api/pet-setup/upload-file', {
+                    method: 'POST',
+                    body: formData
+                }).then(response => response.json()).then(async data => {
+                    console.log(data);
+                    setPetPhotoURL(data.url);
+                    // save pet data
+                    await savePetData(data.url);
+                });
+            } else {
+                const petID = firestore.collection("pets").doc().id;
+                await savePetData(petID, petPhotoURL);
+            }
+
+            async function savePetData(petID, petPhotoURL) {
+                await fetch('/api/pet-setup/save-pet-data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'savePetData',
+                        petID, petID,
+                        petOwnerUsername: username,
+                        petOwnerDisplayName: displayName,
+                        petOwnerCoverPhotoURL: coverPhotoURL,
+                        petName: petName,
+                        petPhoto: petPhotoURL,
+                        petBreed: petBreed,
+                        petSex: petSex,
+                        petAbout: petAbout,
+                        petBirthplace: petBirthplace,
+                        petBirthdate: petBirthdate,
+                        petFavoriteFood: petFavoriteFood,
+                        petHobbies: petHobbies
+                    })
+                }).then(response => response.json()).then(data => {
+                    if (data.success) {
+                        toast.success(`${petName}'s profile created successfully!`);
+                        router.push(`/pet/${petName}`);
+                    }
+                });
+            }
+        } catch (error) {
+            toast.error('Error creating pet profile. Please try again.');
+        }
+    };
 
     return (
         <Dialog>
@@ -267,7 +315,7 @@ export function CreatePetProfile({props}) {
                                     className="bg-red-500 hover:bg-red-600"
                                     onClick={() => {
                                         setPetName('');
-                                        setPetPhoto('');
+                                        setPetPhotoURL('');
                                         setPetBreed('');
                                         setPetSex('');
                                         setPetAbout('');
