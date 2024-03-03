@@ -5,15 +5,16 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import { auth, firestore } from "@/lib/firebase";
-import { getDocumentByFieldValue } from "@/lib/firestore-crud";
-import { ModeToggle } from "@/components/mode-toggle";
 import  Loader from "@/components/Loader";
-import ExpandedNavBar from "@/components/nav/navbar";
+import NavBar from "@/components/nav/navbar";
 import CoverPhoto from "@/components/ui/cover-photo";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { EditUserProfile } from "@/components/edit-dialogs/edit-user-profile";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
 import WithAuth from "@/components/WithAuth";
+import { FollowButton } from "@/components/profile/follow-user-button";
+import { CreatePost } from "@/components/post-components/create-post";
 
 function UserProfile() {
     const router = useRouter();
@@ -127,8 +128,8 @@ function UserProfile() {
             { loading ? <Loader show={true} /> : ( currentUser && 
                 <div className="flex">
                     {/* Side Navbar */}
-                    <div className="min-w-20 z-50 fixed">
-                        <ExpandedNavBar props={{
+                    <div className="min-h-16 w-full z-50 fixed">
+                        <NavBar props={{
                             uid : currentUser.uid,
                             username: currentUser.username, 
                             userPhotoURL: currentUser.userPhotoURL,
@@ -137,19 +138,19 @@ function UserProfile() {
                     </div>
                     
                     { userData &&
-                        <div className="w-full h-screen fixed z-10 ml-20 flex flex-col items-center justify-start">
+                        <div className="w-full h-screen fixed z-10 mt-16 flex flex-col items-center justify-start">
                             {/* Cover Photo */}
-                            <div className="h-[30%] w-[60%]">
+                            <div className="h-[30%] w-[60%] border-red">
                                 <CoverPhoto 
                                     src={userData.coverPhotoURL ? userData.coverPhotoURL : "/images/cover0-image.png"}
-                                    alt="cover photo" />
+                                    alt="cover photo"/>
                             </div>
 
                             {/* Profile Details */}
                             <div className="flex items-start justify-start w-[60%] h-[110px] px-10">
                                 {/* Profile Photo */}
                                 <div className="-translate-y-14 flex items-center justify-center w-[20%]">
-                                    <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.png" : userData.userPhotoURL} alt="user photo" width={175} height={175} className="border-2 rounded-full aspect-square object-cover" />
+                                    <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.png" : userData.userPhotoURL} alt="user photo" width={175} height={175} className="border-2 border-dark_gray rounded-full aspect-square object-cover" />
                                 </div>
 
                                 {/* Display Name, Username, Followers, Following */}
@@ -191,7 +192,13 @@ function UserProfile() {
                                         }}/>
                                     ):(
                                         // Follow Button 
-                                        <Button className="mx-auto text-lg dark:bg-light_yellow bg-muted_blue px-6 text-dark_gray mt-6 font-medium">Follow</Button>
+                                        <FollowButton props={{
+                                                profileUser_uid: userData.uid,
+                                                profileUser_name: userData.username,
+                                                currentUser_uid: currentUser.uid,
+                                                profileUser_followers: userData.followers,
+                                                currentUser_following: currentUser.following
+                                        }}/>
                                     )}
                                 </div>
                             </div>
@@ -266,9 +273,25 @@ function UserProfile() {
                                     </div>
 
                                     {activeTab == 'posts' ? (
-                                        <Card className="text-sm p-4 drop-shadow-md rounded-sm">
-                                            <p>Posts Container</p>
-                                        </Card>
+                                        <>
+                                            <Card className="drop-shadow-md rounded-sm mb-2">
+                                                <div className="flex flex-row items-center w-full my-2">
+                                                    <div className="ml-4">
+                                                        <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.png" : userData.userPhotoURL} alt="user photo" width={44} height={44} className="rounded-full aspect-square object-cover" />
+                                                    </div>
+                                                    <div className="w-full mx-4">
+                                                        <CreatePost props={{
+                                                            uid: userData.uid,
+                                                            username: userData.username
+                                                        }}/>
+                                                    </div>
+                                                </div>
+                                                <hr className="border-b border-light_yellow mx-4 mb-2"/>
+                                            </Card>
+                                            <Card className="text-sm p-4 drop-shadow-md rounded-sm">
+                                                <p>Posts Container</p>
+                                            </Card>
+                                        </>
                                     ): (
                                         <Card className="text-sm p-4 drop-shadow-md rounded-sm">
                                             <p>Pets Container</p>

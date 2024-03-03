@@ -13,6 +13,7 @@ export default function CoverPhoto(props) {
           layout="fill"
           objectFit="cover"
           objectPosition="center"
+          className='rounded-b-lg'
         />
       </div>
     </div>
