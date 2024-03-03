@@ -11,6 +11,7 @@ import CoverPhoto from "@/components/ui/cover-photo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EditUserProfile } from "@/components/edit-dialogs/edit-user-profile";
+import { CreatePetProfile } from "@/components/create-pet-profile";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
 import WithAuth from "@/components/WithAuth";
 import { FollowButton } from "@/components/profile/follow-user-button";
@@ -149,12 +150,12 @@ function UserProfile() {
                             {/* Profile Details */}
                             <div className="flex items-start justify-start w-[60%] h-[110px] px-10">
                                 {/* Profile Photo */}
-                                <div className="-translate-y-14 flex items-center justify-center w-[20%]">
+                                <div className="-translate-y-12 flex items-center justify-center w-[20%]">
                                     <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.png" : userData.userPhotoURL} alt="user photo" width={175} height={175} className="border-2 border-dark_gray rounded-full aspect-square object-cover" />
                                 </div>
 
                                 {/* Display Name, Username, Followers, Following */}
-                                <div className="flex flex-col gap-2 h-full justify-end w-[60%]">
+                                <div className="flex flex-col gap-2 h-full justify-end w-[60%] ml-4">
                                     {/* Display Name and Username Section */}
                                     <div className="flex flex-col">
                                         <p className="font-semibold text-3xl tracking-wide">{userData.displayName}</p>
@@ -294,32 +295,17 @@ function UserProfile() {
                                         </>
                                     ): (
                                         <Card className="text-sm p-4 drop-shadow-md rounded-sm">
-                                            <p>Pets Container</p>
+                                            <p className="mb-4">Pets Container</p>
+
+                                            <CreatePetProfile props={{
+                                                uid: userData.uid,
+                                                username: userData.username,
+                                                displayName: userData.displayName,
+                                                location: userData.location,
+                                            }}/>
                                         </Card>
                                     )}
                                 </div>
-                                
-
-                                {/* <div className="w-3/4 border-t-2 border-gray h-full">
-                                    <div className="flex flex-row border-gray border-b-2">
-                                        <div className="w-1/5 border-gray border-r-2 text-center items-center">
-                                            <p className={`text-lg py-1 font-semibold ${activeTab == 'posts' ? "bg-muted_blue dark:bg-light_yellow dark:text-gray" : ""} cursor-pointer`} onClick={() => setActiveTab('posts')}>Posts</p>
-                                        </div>
-                                        <div className="w-1/5 border-gray border-r-2 text-center items-center">
-                                            <p className={`text-lg py-1 font-semibold ${activeTab == 'pets' ? "bg-muted_blue dark:bg-light_yellow dark:text-gray" : ""} cursor-pointer`} onClick={() => setActiveTab('pets')}>Pets</p>
-                                        </div>
-                                        
-                                    </div>
-                                    {activeTab == 'posts' ? (
-                                    <div>
-                                        <p>Posts Container</p>
-                                    </div>
-                                ): (
-                                    <div>
-                                        <p>Pets Container</p>
-                                    </div>
-                                )}
-                                </div> */}
                             </div>
                         </div> 
                     }
