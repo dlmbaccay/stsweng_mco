@@ -326,31 +326,16 @@ function UserProfile() {
                                         </>
                                     ): (
                                         <Card className="text-sm p-4 drop-shadow-md rounded-sm">
-
+                                            
                                             { userData && userPets && <PetsContainer props={{
-                                                userID: userData.uid,
-                                                pets: userPets
-                                            }}/>}
-
-                                            {/* { userPets && 
-                                                userPets.map((pet, index) =>
-                                                    <Card key={index} className="mb-4 flex gap-2 items-center justify-center w-fit h-fit hover:bg-white dark:hover:bg-dark_gray px-6 py-4 hover:drop-shadow-md cursor-pointer">
-                                                        <Image src={pet.petPhotoURL == "" ? "/images/petPictureHolder.png" : pet.petPhotoURL} alt="pet photo" width={100} height={100} className="rounded-full aspect-square object-cover" />
-                                                        <div className="ml-2 flex flex-col items-start justify-center">
-                                                            <p className="text-lg font-bold">{pet.petName}</p>
-                                                            <p className="text-sm italic">{pet.petBreed}</p>
-                                                        </div>
-                                                    </Card>
-                                                )
-                                            } */}
-
-                                            { userData && <CreatePetProfile props={{
                                                 uid: userData.uid,
                                                 username: userData.username,
                                                 displayName: userData.displayName,
                                                 location: userData.location,
                                                 coverPhotoURL: userData.coverPhotoURL,
-                                            }}/> }
+                                                pets: userPets
+                                            }}/>}
+                                            
                                         </Card>
                                     )}
                                 </div>

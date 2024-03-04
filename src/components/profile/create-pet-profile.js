@@ -114,9 +114,10 @@ export function CreatePetProfile({props}) {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                 <Button className="rounded-full w-[60px] h-[60px]">
-                    <i className="fa-solid fa-paw text-3xl flex items-center justify-center"/>
-                </Button>
+                 <div className="flex items-center justify-center text-wrap gap-4 w-1/2 h-[150px] hover:bg-white dark:hover:bg-dark_gray px-12 py-4 hover:drop-shadow-md cursor-pointer rounded-md">
+                    <i className="fa-solid fa-paw text-4xl flex items-center justify-center bg-muted_blue text-white dark:text-dark_gray dark:bg-light_yellow w-[100px] h-[100px] rounded-full flex-shrink-0"/>
+                    <p className="font-bold mt-2 break-words flex text-lg text-center">Create Pet Profile</p>
+                </div>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[600px] lg:max-w-[1080px]">
                 {loading ? <Loader show={loading}/> : 
