@@ -363,3 +363,46 @@
 }
 
 /* loading hamster -end- */
+
+/* background image */
+ .backgroundImage::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/images/login-and-signup-cover.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 1;
+  z-index: -1; 
+ }
+
+ /* setup page background image*/
+.setup-page-background::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 200%;
+  background-image: url('/images/login-and-signup-cover.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 1;
+  z-index: -1;
+ }
+
+ /* dark mode for login page */
+ @media (prefers-color-scheme: dark) {
+  .backgroundImage::before {
+     opacity: 0.3;
+  }
+  .setup-page-background::before {
+    opacity: 0.3;
+  }
+ }
+
+ 
+ 
