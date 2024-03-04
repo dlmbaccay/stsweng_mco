@@ -142,7 +142,6 @@ module.exports.getDocumentByFieldValue = async (collection, field, value) => {
     }
 };
 
-
 // Export the function to check for documents with a specific username
 module.exports.isUsernameTaken = async (username) => {
     try {

@@ -16,6 +16,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, 
 import WithAuth from "@/components/WithAuth";
 import { FollowButton } from "@/components/profile/follow-user-button";
 import { CreatePost } from "@/components/post-components/create-post";
+import { PetsContainer } from "@/components/profile/pet-container";
 
 function UserProfile() {
     const router = useRouter();
@@ -23,8 +24,10 @@ function UserProfile() {
     const [userData, setUserData] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const [ activeTab, setActiveTab ] = useState('posts');
-    const [ currentUser, setCurrentUser ] = useState([]);
+    const [ activeTab, setActiveTab ] = useState('pets');
+    const [ currentUser, setCurrentUser ] = useState([{}]);
+
+    const [ userPets, setUserPets ] = useState([]);
 
     useEffect(() => {
         setLoading(true); 
@@ -123,6 +126,34 @@ function UserProfile() {
     
         return () => unsubscribe; // Cleanup function
     }, [currentUser]);
+    
+    /**
+     * This useEffect hook is responsible for fetching and updating the pets of the user whose profile is being viewed.
+     * It fetches the pets of the user from the Firestore database and updates the user's pets on the page accordingly.
+     * 
+     */
+    useEffect(() => {
+        // Fetch user pets
+        if (userData) {
+
+            const fetchUserPets = async () => {
+                const response = await fetch(`/api/pets/retrieve-user-pets?uid=${userData.uid}`, {
+                    method: 'GET' // Specify GET method
+                });
+    
+                if (response.ok) {
+                    const data = await response.json();
+                    setUserPets(data.userPets);
+                } else {
+                    // Assuming the API returns { message: '...' } on error
+                    const errorData = await response.json();
+                    throw new Error(errorData.message);
+                }
+            };
+
+            fetchUserPets();
+        }
+    }, [userData]);
 
     return (
         <>
@@ -295,7 +326,23 @@ function UserProfile() {
                                         </>
                                     ): (
                                         <Card className="text-sm p-4 drop-shadow-md rounded-sm">
-                                            <p className="mb-4">Pets Container</p>
+
+                                            { userData && userPets && <PetsContainer props={{
+                                                userID: userData.uid,
+                                                pets: userPets
+                                            }}/>}
+
+                                            {/* { userPets && 
+                                                userPets.map((pet, index) =>
+                                                    <Card key={index} className="mb-4 flex gap-2 items-center justify-center w-fit h-fit hover:bg-white dark:hover:bg-dark_gray px-6 py-4 hover:drop-shadow-md cursor-pointer">
+                                                        <Image src={pet.petPhotoURL == "" ? "/images/petPictureHolder.png" : pet.petPhotoURL} alt="pet photo" width={100} height={100} className="rounded-full aspect-square object-cover" />
+                                                        <div className="ml-2 flex flex-col items-start justify-center">
+                                                            <p className="text-lg font-bold">{pet.petName}</p>
+                                                            <p className="text-sm italic">{pet.petBreed}</p>
+                                                        </div>
+                                                    </Card>
+                                                )
+                                            } */}
 
                                             { userData && <CreatePetProfile props={{
                                                 uid: userData.uid,
