@@ -11,6 +11,7 @@ export async function POST(request) {
             case 'savePetData':
                 const petData = {
                     petOwnerID: petOwnerID,
+                    petID: petID,
                     petOwnerUsername: petOwnerUsername,
                     petOwnerDisplayName: petOwnerDisplayName,
                     petOwnerCoverPhotoURL: petOwnerCoverPhotoURL,
