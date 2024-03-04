@@ -325,7 +325,7 @@ function UserProfile() {
                                             </Card>
                                         </>
                                     ): (
-                                        <Card className="text-sm p-4 drop-shadow-md rounded-sm">
+                                        <Card className="p-4 rounded-md drop-shadow-md">
                                             
                                             { userData && userPets && <PetsContainer props={{
                                                 uid: userData.uid,
