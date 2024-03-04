@@ -84,6 +84,7 @@ export function CreatePetProfile({props}) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'savePetData',
+                        petOwnerID: uid,
                         petID: petID,
                         petOwnerUsername: username,
                         petOwnerDisplayName: displayName,
