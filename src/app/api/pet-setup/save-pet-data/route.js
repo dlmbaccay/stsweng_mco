@@ -1,22 +1,21 @@
 // app/user-actions/route.js
 import { NextResponse } from 'next/server';
-import { createPetDocument } from '@/lib/firestore-crud';
-import { firestore } from '@/lib/firebase';
+import { createPetDocument, uploadPetPhotoURL } from '@/lib/firestore-crud';
 
 export async function POST(request) {
     const body = await request.json();
-    const { action, petID, petOwnerUsername, petOwnerDisplayName, petOwnerCoverPhotoURL, petName, petPhoto, petBreed, petSex, petAbout, petBirthplace, petBirthdate, petFavoriteFood, petHobbies } = body;
+    const { action, petID, petOwnerUsername, petOwnerDisplayName, petOwnerCoverPhotoURL, petName, petBreed, petSex, petAbout, petBirthplace, petBirthdate, petFavoriteFood, petHobbies } = body;
+    const petPhotoURL = body.petPhotoURL;
 
     try {
         switch (action) {
             case 'savePetData':
-                
                 const petData = {
                     petOwnerUsername: petOwnerUsername,
                     petOwnerDisplayName: petOwnerDisplayName,
                     petOwnerCoverPhotoURL: petOwnerCoverPhotoURL,
                     petName: petName,
-                    petPhoto: petPhoto,
+                    petPhotoURL: petPhotoURL,
                     petBreed: petBreed,
                     petSex: petSex,
                     petAbout: petAbout,

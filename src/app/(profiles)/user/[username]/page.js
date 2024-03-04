@@ -11,7 +11,7 @@ import CoverPhoto from "@/components/ui/cover-photo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EditUserProfile } from "@/components/edit-dialogs/edit-user-profile";
-import { CreatePetProfile } from "@/components/create-pet-profile";
+import { CreatePetProfile } from "@/components/profile/create-pet-profile";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
 import WithAuth from "@/components/WithAuth";
 import { FollowButton } from "@/components/profile/follow-user-button";

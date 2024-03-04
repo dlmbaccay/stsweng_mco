@@ -1,5 +1,6 @@
 import Image from "next/image"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { toast } from "react-hot-toast"
 import { handleImageFilePreview } from "@/lib/helper-functions"
 import { checkDisplayName, checkLocation } from "@/lib/formats"
@@ -13,12 +14,15 @@ import { Textarea } from "@/components/ui/textarea"
 import RoundImage from "@/components/round-image"
 import Loader from "@/components/Loader"
 import { set } from "date-fns"
+import { firestore } from "@/lib/firebase"
 
 
 export function CreatePetProfile({props}) {
     const [loading, setLoading] = useState(false);
 
     const { uid, username, displayName, location, coverPhotoURL } = props;
+
+    const router = useRouter();
 
     const [ petName, setPetName ] = useState('');
     const [ petPhotoURL, setPetPhotoURL ] = useState('');
@@ -67,7 +71,7 @@ export function CreatePetProfile({props}) {
                     console.log(data);
                     setPetPhotoURL(data.url);
                     // save pet data
-                    await savePetData(data.url);
+                    await savePetData(petID, data.url);
                 });
             } else {
                 const petID = firestore.collection("pets").doc().id;
@@ -80,12 +84,12 @@ export function CreatePetProfile({props}) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'savePetData',
-                        petID, petID,
+                        petID: petID,
                         petOwnerUsername: username,
                         petOwnerDisplayName: displayName,
                         petOwnerCoverPhotoURL: coverPhotoURL,
                         petName: petName,
-                        petPhoto: petPhotoURL,
+                        petPhotoURL: petPhotoURL,
                         petBreed: petBreed,
                         petSex: petSex,
                         petAbout: petAbout,
@@ -97,7 +101,7 @@ export function CreatePetProfile({props}) {
                 }).then(response => response.json()).then(data => {
                     if (data.success) {
                         toast.success(`${petName}'s profile created successfully!`);
-                        router.push(`/pet/${petName}`);
+                        router.push(`/pet/${petID}`);
                     }
                 });
             }

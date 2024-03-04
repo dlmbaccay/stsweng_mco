@@ -1,4 +1,4 @@
-    import { firestore } from "./firebase";
+import { firestore } from "./firebase";
 
 // Export the fetch function
 module.exports.fetchData = async () => {
