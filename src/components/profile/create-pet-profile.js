@@ -40,6 +40,8 @@ export function CreatePetProfile({props}) {
 
     const [ petPhotoPreviewUrl, setPetPhotoPreviewUrl ] = useState('/images/profilePictureHolder.jpg');
 
+    const [ submitDisabled, setSubmitDisabled ] = useState(false);
+
     const handleFileChange = (event) => {
         var temp = handleImageFilePreview(event.target.files[0]);
         if (temp == null) {
@@ -53,8 +55,15 @@ export function CreatePetProfile({props}) {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+
+        if (petName === '' || petSex === '' || petBirthdate === '' || petBirthplace === '') {
+            toast.error('Please fill in all required fields.');
+            return;
+        }
         
         try {
+            setSubmitDisabled(true);
+            toast.loading('Creating pet profile...');
             if (petPhotoURL) {
                 // Create a new document in the 'pets' collection with the given data
                 const petID = firestore.collection("pets").doc().id;
@@ -102,6 +111,8 @@ export function CreatePetProfile({props}) {
                     })
                 }).then(response => response.json()).then(data => {
                     if (data.success) {
+                        setSubmitDisabled(false);
+                        toast.dismiss();
                         toast.success(`${petName}'s profile created successfully!`);
                         router.push(`/pet/${petID}`);
                     }
@@ -336,7 +347,9 @@ export function CreatePetProfile({props}) {
                                         }}
                                     >Cancel</Button>
                                 </DialogClose>
-                                <Button type="submit">Submit</Button>
+                                <Button type="submit"
+                                    disabled={submitDisabled}
+                                >Submit</Button>
                             </DialogFooter>
                         </form>
                     </>
