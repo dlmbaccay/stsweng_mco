@@ -120,7 +120,7 @@ export default function NavBar({props}) {
                         </div>
                     </button>
                     <DropdownMenu>
-                        <DropdownMenuTrigger><Image src={userPhotoURL} alt={'profile picture'} width={44} height={44} className='rounded-full aspect-square object-cover'/></DropdownMenuTrigger>
+                        <DropdownMenuTrigger><Image src={userPhotoURL ? userPhotoURL : "/images/profilePictureHolder.jpg"} alt={'profile picture'} width={44} height={44} className='rounded-full aspect-square object-cover'/></DropdownMenuTrigger>
                         <DropdownMenuContent className="mr-2">
                             <DropdownMenuLabel>
                                 <div className="flex flex-col">

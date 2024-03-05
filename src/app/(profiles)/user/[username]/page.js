@@ -159,7 +159,7 @@ function UserProfile() {
         <>
             { loading ? <Loader show={true} /> : ( currentUser && 
                 <div className="flex">
-                    {/* Side Navbar */}
+                    {/* Navbar */}
                     <div className="min-h-16 w-full z-50 fixed">
                         <NavBar props={{
                             uid : currentUser.uid,
@@ -173,16 +173,24 @@ function UserProfile() {
                         <div className="w-full h-screen fixed z-10 mt-16 flex flex-col items-center justify-start overflow-y-auto">
                             {/* Cover Photo */}
                             <div className="h-[30%] lg:w-[60%] xl:w-[60%] 2xl:w-[60%] w-full border-red">
-                                <CoverPhoto 
+                                {/* <CoverPhoto 
                                     src={userData.coverPhotoURL ? userData.coverPhotoURL : "/images/cover0-image.png"}
-                                    alt="cover photo"/>
+                                    alt="cover photo"/> */}
+                                <Image
+                                    src={userData.coverPhotoURL ? userData.coverPhotoURL : "/images/cover0-image.png"}
+                                    alt={"cover photo"}
+                                    width={0}
+                                    height={0}
+                                    sizes="100vw"
+                                    className='w-full h-full rounded-b-lg aspect-square object-cover'
+                                />
                             </div>
 
                             {/* Profile Details */}
-                            <div className="flex items-start justify-start lg:w-[60%] xl:w-[60%] 2xl:w-[60%] w-full h-[110px] px-10">
+                            <div className="flex items-start justify-start lg:w-[60%] xl:w-[60%] 2xl:w-[60%] w-full h-[110px] lg:px-10 px-5">
                                 {/* Profile Photo */}
                                 <div className="-translate-y-12 flex items-center justify-center w-[20%]">
-                                    <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.png" : userData.userPhotoURL} alt="user photo" width={175} height={175} className="border-2 border-dark_gray rounded-full aspect-square object-cover" />
+                                    <Image src={userData.userPhotoURL ? userData.userPhotoURL : "/images/profilePictureHolder.jpg"} alt="user photo" width={175} height={175} className="border-2 border-dark_gray rounded-full aspect-square object-cover" />
                                 </div>
 
                                 {/* Display Name, Username, Followers, Following */}
