@@ -4,11 +4,5 @@
       "@/*": ["./src/*"],
       "@components/*": ["./src/components/*"],
     }
-  },
-
-  "typeAcquisition": {
-    "include": [
-      "jest"
-    ]
   }
 }
