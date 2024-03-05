@@ -181,20 +181,20 @@ function PetProfile() {
 
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Pet Account Settings</DropdownMenuLabel>
-                                <DropdownMenuItem className="hover:bg-dark_blue hover:text-white hover:dark:bg-light_yellow hover:dark:text-black">
-                                  <DeletePetProfile props={{
-                                    petData: petData,
-                                    currentUser: currentUser,
-                                  }} />
-                                </DropdownMenuItem>
+                                <DeletePetProfile props={{
+                                  petData: petData,
+                                  currentUser: currentUser,
+                                }} />
                               </DropdownMenuContent>
                             </DropdownMenu>
+
+                            
                           </div>  
                           :
                           // <FollowButton props={{ currentUser: currentUser, petData: petData }} />
-                          <div>
-                            Follow
-                          </div>
+                          <Button className="px-3 h-[35px] gap-2 flex items-center justify-center">
+                              Follow
+                          </Button>
                       }
                       </div>
                   </div>

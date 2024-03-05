@@ -52,8 +52,7 @@ export function DeletePetProfile({props}) {
     return (
         <Dialog>
             <DialogTrigger>
-                <div className="px-4 py-2 flex items-center justify-center w-fit h-fit gap-2"
-                >
+                <div className="px-4 py-2 flex items-center justify-center w-fit h-fit gap-2 hover:bg-muted_blue hover:text-white hover:dark:bg-light_yellow hover:dark:text-black rounded-md text-sm">
                     <i class="fa-solid fa-trash" />
                     <p>Delete Pet Profile</p>
                 </div>
