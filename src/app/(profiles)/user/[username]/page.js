@@ -1,22 +1,22 @@
-"use client"
+    "use client"
 
-import { toast } from "react-hot-toast";
-import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
-import Image from "next/image";
-import { auth, firestore } from "@/lib/firebase";
-import  Loader from "@/components/Loader";
-import NavBar from "@/components/nav/navbar";
-import CoverPhoto from "@/components/ui/cover-photo";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { EditUserProfile } from "@/components/edit-dialogs/edit-user-profile";
-import { CreatePetProfile } from "@/components/profile/create-pet-profile";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
-import WithAuth from "@/components/WithAuth";
-import { FollowButton } from "@/components/profile/follow-user-button";
-import { CreatePost } from "@/components/post-components/create-post";
-import { PetsContainer } from "@/components/profile/pet-container";
+    import { toast } from "react-hot-toast";
+    import { useEffect, useState } from "react";
+    import { useRouter, useParams } from "next/navigation";
+    import Image from "next/image";
+    import { auth, firestore } from "@/lib/firebase";
+    import  Loader from "@/components/Loader";
+    import NavBar from "@/components/nav/navbar";
+    import CoverPhoto from "@/components/ui/cover-photo";
+    import { Button } from "@/components/ui/button";
+    import { Input } from "@/components/ui/input";
+    import { EditUserProfile } from "@/components/edit-dialogs/edit-user-profile";
+    import { CreatePetProfile } from "@/components/profile/create-pet-profile";
+    import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
+    import WithAuth from "@/components/WithAuth";
+    import { FollowButton } from "@/components/profile/follow-user-button";
+    import { CreatePost } from "@/components/post-components/create-post";
+    import { PetsContainer } from "@/components/profile/pet-container";
 
 function UserProfile() {
     const router = useRouter();
@@ -332,6 +332,7 @@ function UserProfile() {
                                                 username: userData.username,
                                                 displayName: userData.displayName,
                                                 location: userData.location,
+                                                userPhotoURL: userData.userPhotoURL,
                                                 coverPhotoURL: userData.coverPhotoURL,
                                                 pets: userPets
                                             }}/>}

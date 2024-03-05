@@ -5,7 +5,7 @@ import { Image } from 'next/image';
 
 export function PetsContainer({ props }) {
     
-    const { uid, username, displayName, location, coverPhotoURL, pets } = props;
+    const { uid, username, displayName, location, userPhotoURL, coverPhotoURL, pets } = props;
 
     return (
         <Card className="w-full flex items-center justify-center">
@@ -16,6 +16,7 @@ export function PetsContainer({ props }) {
                     username: username,
                     displayName: displayName,
                     location: location,
+                    userPhotoURL: userPhotoURL,
                     coverPhotoURL: coverPhotoURL
                 }}/>
                 

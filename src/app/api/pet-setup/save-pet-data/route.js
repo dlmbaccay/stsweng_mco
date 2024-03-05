@@ -4,7 +4,7 @@ import { createPetDocument, uploadPetPhotoURL } from '@/lib/firestore-crud';
 
 export async function POST(request) {
     const body = await request.json();
-    const { action, petOwnerID, petID, petOwnerUsername, petOwnerDisplayName, petOwnerCoverPhotoURL, petName, petPhotoURL, petBreed, petSex, petAbout, petBirthplace, petBirthdate, petFavoriteFood, petHobbies } = body;
+    const { action, petOwnerID, petID, petOwnerUsername, petOwnerDisplayName, petOwnerUserPhotoURL, petOwnerCoverPhotoURL, petName, petPhotoURL, petBreed, petSex, petAbout, petBirthplace, petBirthdate, petFavoriteFood, petHobbies } = body;
 
     try {
         switch (action) {
@@ -14,6 +14,7 @@ export async function POST(request) {
                     petID: petID,
                     petOwnerUsername: petOwnerUsername,
                     petOwnerDisplayName: petOwnerDisplayName,
+                    petOwnerUserPhotoURL: petOwnerUserPhotoURL,
                     petOwnerCoverPhotoURL: petOwnerCoverPhotoURL,
                     petName: petName,
                     petPhotoURL: petPhotoURL,

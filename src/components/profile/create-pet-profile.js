@@ -21,7 +21,7 @@ import { firestore } from "@/lib/firebase"
 export function CreatePetProfile({props}) {
     const [loading, setLoading] = useState(false);
 
-    const { uid, username, displayName, location, coverPhotoURL } = props;
+    const { uid, username, displayName, location, userPhotoURL, coverPhotoURL } = props;
 
     const router = useRouter();
 
@@ -98,6 +98,7 @@ export function CreatePetProfile({props}) {
                         petID: petID,
                         petOwnerUsername: username,
                         petOwnerDisplayName: displayName,
+                        petOwnerUserPhotoURL: userPhotoURL,
                         petOwnerCoverPhotoURL: coverPhotoURL,
                         petName: petName,
                         petPhotoURL: petPhotoURL,
