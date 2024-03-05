@@ -190,11 +190,11 @@ function UserProfile() {
                                     {/* Display Name and Username Section */}
                                     <div className="flex flex-col">
                                         <p className="font-semibold text-3xl tracking-wide">{userData.displayName}</p>
-                                        <p className="text-sm font-semibold tracking-wide text-muted_blue dark:text-light_yellow">@{userData.username}</p>
+                                        <p className=" font-semibold tracking-wide text-muted_blue dark:text-light_yellow">@{userData.username}</p>
                                     </div>
 
                                     {/* Followers and Following Section */}
-                                    <div className="flex flex-row justify-start gap-2 text-xs font-semibold"> 
+                                    <div className="flex flex-row justify-start gap-2 text-sm font-semibold"> 
                                         <div className="flex items-center gap-1"> 
                                             <p>{userData.followers && userData.followers.length}</p>
                                             <p className="dark:text-light_yellow text-muted_blue">Followers</p>
@@ -240,6 +240,7 @@ function UserProfile() {
 
                                 {/* About and Details Containers */}
                                 <div className="flex flex-col items-start lg:w-[30%] xl:w-[30%] 2xl:w-[30%] w-full gap-6">
+
                                     <Card className="drop-shadow-md flex flex-col w-full p-6 text-sm rounded-md">
                                         <div className="flex flex-col justify-start gap-4">
                                             <h1 className="tracking-wide font-bold text-lg text-muted_blue dark:text-light_yellow">About</h1>
