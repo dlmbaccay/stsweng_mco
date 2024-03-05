@@ -14,11 +14,21 @@ import { EditUserProfile } from "@/components/edit-dialogs/edit-user-profile";
 import { CreatePetProfile } from "@/components/profile/create-pet-profile";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
 import { EditPetProfile } from "@/components/edit-dialogs/edit-pet-profile";
+import { DeletePetProfile } from "@/components/profile/delete-pet-profile";
 import WithAuth from "@/components/WithAuth";
 import { FollowButton } from "@/components/profile/follow-user-button";
 import { CreatePost } from "@/components/post-components/create-post";
 import { PetsContainer } from "@/components/profile/pet-container";
 import { set } from "date-fns";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 function PetProfile() {
 
@@ -31,6 +41,8 @@ function PetProfile() {
   const [ activeTab, setActiveTab ] = useState("tagged posts"); // tagged posts and milestones
 
   const [ currentUser, setCurrentUser ] = useState(null); 
+
+  const [ showMisc, setShowMisc ] = useState(false);
 
   useEffect(() => {
     // get current user using auth and firestore
@@ -152,10 +164,32 @@ function PetProfile() {
                       {/* Edit Pet Profile / Follow Button */}
                       <div className="flex h-full items-end justify-end w-[20%]">
                         { currentUser.uid == petData.petOwnerID ?
-                          <EditPetProfile props={{ 
-                            petData: petData,
-                            currentUser: currentUser,
-                          }} />
+                          <div className="flex items-center justify-end gap-4">
+                            <EditPetProfile props={{ 
+                              petData: petData,
+                              currentUser: currentUser,
+                            }} />
+
+                            <DropdownMenu>
+                              <DropdownMenuTrigger className="flex items-center justify-center w-[35px] h-[35px] bg-muted_blue text-white dark:text-black dark:bg-light_yellow rounded-md hover:opacity-90 cursor-pointer">
+                                { showMisc ? 
+                                  <i className="fa-solid fa-ellipsis" onClick={() => setShowMisc(false)} />
+                                  :
+                                  <i className="fa-solid fa-ellipsis" onClick={() => setShowMisc(true)} />  
+                                }
+                              </DropdownMenuTrigger>
+
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Pet Account Settings</DropdownMenuLabel>
+                                <DropdownMenuItem className="hover:bg-dark_blue hover:text-white hover:dark:bg-light_yellow hover:dark:text-black">
+                                  <DeletePetProfile props={{
+                                    petData: petData,
+                                    currentUser: currentUser,
+                                  }} />
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>  
                           :
                           // <FollowButton props={{ currentUser: currentUser, petData: petData }} />
                           <div>
@@ -186,7 +220,7 @@ function PetProfile() {
                                     <p className="tracking-wide">{petData.petBirthplace}</p>
                                 </div>
 
-                                {/* Gender */}
+                                {/* Sex */}
                                 <div className="flex items-center justify-center gap-1">
                                     <i class="flex items-center justify-center  w-[20px] fa-solid fa-venus-mars" />
                                     <p className="tracking-wide">{petData.petSex}</p>
