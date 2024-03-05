@@ -9,7 +9,7 @@ export function PetsContainer({ props }) {
 
     return (
         <Card className="w-full flex items-center justify-center">
-            <div className="flex flex-wrap gap-4 items-center justify-center w-full py-4">
+            <div className="flex flex-wrap gap-4 justify-between w-full py-4 break-all">
 
                 <CreatePetProfile props={{
                     uid: uid,
