@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { EditUserProfile } from "@/components/edit-dialogs/edit-user-profile";
 import { CreatePetProfile } from "@/components/profile/create-pet-profile";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
+import { EditPetProfile } from "@/components/edit-dialogs/edit-pet-profile";
 import WithAuth from "@/components/WithAuth";
 import { FollowButton } from "@/components/profile/follow-user-button";
 import { CreatePost } from "@/components/post-components/create-post";
@@ -119,7 +120,7 @@ function PetProfile() {
                   <div className="flex items-start justify-start lg:w-[60%] xl:w-[60%] 2xl:w-[60%] w-full h-[110px] px-10">
                       {/* Profile Photo */}
                       <div className="-translate-y-12 flex items-center justify-center w-[20%]">
-                          <Image src={petData.petPhotoURL == "" ? "/images/profilePictureHolder.png" : petData.petPhotoURL} alt="pet photo" width={175} height={175} className="border-2 border-dark_gray rounded-full aspect-square object-cover" />
+                          <Image src={petData.petPhotoURL == "" ? "/images/profilePictureHolder.jpg" : petData.petPhotoURL} alt="pet photo" width={175} height={175} className="border-2 border-dark_gray rounded-full aspect-square object-cover" />
                       </div>
 
                       {/* Display Name, Username, Followers, Following */}
@@ -151,10 +152,10 @@ function PetProfile() {
                       {/* Edit Pet Profile / Follow Button */}
                       <div className="flex h-full items-end justify-end w-[20%]">
                         { currentUser.uid == petData.petOwnerID ?
-                          // <EditUserProfile props={{ petData: petData }} />
-                          <div>
-                            Edit Profile
-                          </div>
+                          <EditPetProfile props={{ 
+                            petData: petData,
+                            currentUser: currentUser,
+                          }} />
                           :
                           // <FollowButton props={{ currentUser: currentUser, petData: petData }} />
                           <div>
