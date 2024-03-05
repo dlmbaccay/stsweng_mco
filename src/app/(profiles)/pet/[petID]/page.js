@@ -132,7 +132,7 @@ function PetProfile() {
                   <div className="flex items-start justify-start lg:w-[60%] xl:w-[60%] 2xl:w-[60%] w-full h-[110px] px-10">
                       {/* Profile Photo */}
                       <div className="-translate-y-12 flex items-center justify-center w-[20%]">
-                          <Image src={petData.petPhotoURL == "" ? "/images/profilePictureHolder.jpg" : petData.petPhotoURL} alt="pet photo" width={175} height={175} className="border-2 border-dark_gray rounded-full aspect-square object-cover" />
+                          <Image src={petData.petPhotoURL == "" ? "/images/petPictureHolder.jpg" : petData.petPhotoURL} alt="pet photo" width={175} height={175} className="border-2 border-dark_gray rounded-full aspect-square object-cover" />
                       </div>
 
                       {/* Display Name, Username, Followers, Following */}

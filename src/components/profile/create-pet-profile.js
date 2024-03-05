@@ -38,7 +38,7 @@ export function CreatePetProfile({props}) {
     const [showDisplayNameTooltip, setShowDisplayNameTooltip] = useState(false);
     const [showLocationTooltip, setShowLocationTooltip] = useState(false);
 
-    const [ petPhotoPreviewUrl, setPetPhotoPreviewUrl ] = useState('/images/profilePictureHolder.jpg');
+    const [ petPhotoPreviewUrl, setPetPhotoPreviewUrl ] = useState('/images/petPictureHolder.jpg');
 
     const [ submitDisabled, setSubmitDisabled ] = useState(false);
 
@@ -46,7 +46,7 @@ export function CreatePetProfile({props}) {
         var temp = handleImageFilePreview(event.target.files[0]);
         if (temp == null) {
             setUserPhoto('');
-            setPreviewUrl('/images/profilePictureHolder.jpg');
+            setPreviewUrl('/images/petPictureHolder.jpg');
         } else {
             setPetPhotoURL(temp[0]);
             setPetPhotoPreviewUrl(temp[1]);
@@ -200,7 +200,7 @@ export function CreatePetProfile({props}) {
 
                                     {!petPhotoPreviewUrl && (
                                         <div className='relative mx-auto w-52 h-52 drop-shadow-md rounded-full aspect-square'>
-                                            <Image src={'/images/profilePictureHolder.jpg'} alt="Profile Picture" layout="fill" style={{objectFit: 'cover'}} className='rounded-full'/>
+                                            <Image src={'/images/petPictureHolder.jpg'} alt="Profile Picture" layout="fill" style={{objectFit: 'cover'}} className='rounded-full'/>
                                         </div>
                                     )}
 
@@ -344,7 +344,7 @@ export function CreatePetProfile({props}) {
                                             setPetBirthplace(location);
                                             setPetFavoriteFood('');
                                             setPetHobbies('');
-                                            setPetPhotoPreviewUrl('/images/profilePictureHolder.jpg');
+                                            setPetPhotoPreviewUrl('/images/petPictureHolder.jpg');
                                         }}
                                     >Cancel</Button>
                                 </DialogClose>

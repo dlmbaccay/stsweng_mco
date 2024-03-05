@@ -27,7 +27,7 @@ export function EditPetProfile({ props }) {
         var temp = handleImageFilePreview(event.target.files[0]);
         if (temp == null) {
             setPetPhoto('');
-            setPreviewUrl('images/profilePictureHolder.jpg');
+            setPreviewUrl('images/petPictureHolder.jpg');
         } else {
             setPetPhoto(temp[0]);
             setPreviewUrl(temp[1]);
@@ -134,7 +134,7 @@ export function EditPetProfile({ props }) {
                                     <Label htmlFor="pet-photo" className="text-center text-md">
                                         <span className="cursor-pointer">Change Profile Picture</span>
                                         <div className="mt-4 cursor-pointer hover:opacity-60">
-                                            <RoundImage src={previewUrl ? previewUrl : '/images/profilePhotoHolder.jpg'} alt="Profile Picture" className="rounded-full object-cover" />
+                                            <RoundImage src={previewUrl ? previewUrl : '/images/petPictureHolder.jpg'} alt="Profile Picture" className="rounded-full object-cover" />
                                         </div>
                                     </Label>
                                     <Input type="file" className="hidden" onChange={handleUserPhotoChange} id="pet-photo" />

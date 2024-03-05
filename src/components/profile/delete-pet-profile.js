@@ -59,7 +59,7 @@ export function DeletePetProfile({props}) {
             </DialogTrigger>
 
             <DialogContent className="flex flex-col items-center justify-center w-fit h-fit">
-                <Image src={petData.petPhotoURL == "" ? "/images/profilePictureHolder.jpg" : petData.petPhotoURL} alt="pet photo" width={100} height={100} className="rounded-full aspect-square object-cover drop-shadow-md" 
+                <Image src={petData.petPhotoURL == "" ? "/images/petPictureHolder.jpg" : petData.petPhotoURL} alt="pet photo" width={100} height={100} className="rounded-full aspect-square object-cover drop-shadow-md" 
                 />
                 <p>
                     Are you sure to delete <span className="font-bold">{petData.petName}&apos;s</span> profile?

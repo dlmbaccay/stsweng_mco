@@ -22,7 +22,7 @@ export function PetSnippetCard({ props }) {
             onClick={() => { router.push(`/pet/${petID}`) }}
         >
             <Image 
-                src={petPhotoURL == "" ? "/images/profilePictureHolder.jpg" : petPhotoURL} 
+                src={petPhotoURL == "" ? "/images/petPictureHolder.jpg" : petPhotoURL} 
                 alt="pet photo" width={100} height={100} 
                 className="rounded-full aspect-square object-cover"
                 
