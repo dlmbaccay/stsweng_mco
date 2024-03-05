@@ -1,6 +1,6 @@
 // app/users/route.js
 import { NextResponse } from 'next/server';
-import { getDocumentByFieldValue } from '@/lib/firestore-crud';
+import { getDocumentById } from '@/lib/firestore-crud';
 
 
 export async function GET(request) {    
@@ -9,7 +9,7 @@ export async function GET(request) {
     
     try {
         // fetch pet document by id
-        const petDoc = await getDocumentByFieldValue('pets', 'uid', id );
+        const petDoc = await getDocumentById('pets', id );
         if (petDoc) {
             return NextResponse.json(petDoc, {status: 200});
         } else {

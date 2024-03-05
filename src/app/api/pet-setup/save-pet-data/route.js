@@ -24,7 +24,8 @@ export async function POST(request) {
                     petBirthplace: petBirthplace,
                     petBirthdate: petBirthdate,
                     petFavoriteFood: petFavoriteFood,
-                    petHobbies: petHobbies
+                    petHobbies: petHobbies,
+                    followers: [],
                 };
 
                 await createPetDocument("pets", petID, petData);
