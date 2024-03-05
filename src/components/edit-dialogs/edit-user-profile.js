@@ -1,6 +1,7 @@
 import Image from "next/image"
 import { useState } from "react"
 import { toast } from "react-hot-toast"
+import { Loader2 } from "lucide-react"
 import { handleImageFilePreview } from "@/lib/helper-functions"
 import { checkDisplayName, checkLocation } from "@/lib/formats"
 import { Button } from "@/components/ui/button"
@@ -142,10 +143,12 @@ export function EditUserProfile({props}) {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="outline" className="mx-auto text-lg dark:bg-light_yellow bg-muted_blue px-6 text-dark_gray mt-6 font-medium">Edit</Button>
+                <Button className="px-3 h-[35px]  gap-2 flex items-center justify-center">
+                    <i class="fa-solid fa-pencil" />
+                    Edit Profile
+                </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[600px] lg:max-w-[1080px]">
-                {loading ? <Loader show={loading}/> : 
                     <>
                         <DialogHeader>
                             <DialogTitle>Edit Profile Information</DialogTitle>
@@ -286,11 +289,15 @@ export function EditUserProfile({props}) {
                                 </div>
                             </div>
                             <DialogFooter>
-                                <Button type="submit">Save changes</Button>
+                                {loading ? 
+                                    <Button disabled>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Please wait
+                                    </Button>
+                                :   <Button type="submit" className="mt-6">Save Changes</Button>}
                             </DialogFooter>
                         </form>
                     </>
-                }
                 
             </DialogContent>
         </Dialog>

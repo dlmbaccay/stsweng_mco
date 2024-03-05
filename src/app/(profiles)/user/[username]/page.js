@@ -1,100 +1,85 @@
-"use client"
+    "use client"
 
-import { toast } from "react-hot-toast";
-import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
-import Image from "next/image";
-import { auth, firestore } from "@/lib/firebase";
-import { getDocumentByFieldValue } from "@/lib/firestore-crud";
-import { ModeToggle } from "@/components/mode-toggle";
-import  Loader from "@/components/Loader";
-import ExpandedNavBar from "@/components/nav/navbar";
-import CoverPhoto from "@/components/ui/cover-photo";
-import { Button } from "@/components/ui/button";
-import { EditUserProfile } from "@/components/edit-dialogs/edit-user-profile";
+    import { toast } from "react-hot-toast";
+    import { useEffect, useState } from "react";
+    import { useRouter, useParams } from "next/navigation";
+    import Image from "next/image";
+    import { auth, firestore } from "@/lib/firebase";
+    import  Loader from "@/components/Loader";
+    import NavBar from "@/components/nav/navbar";
+    import CoverPhoto from "@/components/ui/cover-photo";
+    import { Button } from "@/components/ui/button";
+    import { Input } from "@/components/ui/input";
+    import { EditUserProfile } from "@/components/edit-dialogs/edit-user-profile";
+    import { CreatePetProfile } from "@/components/profile/create-pet-profile";
+    import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
+    import WithAuth from "@/components/WithAuth";
+    import { FollowButton } from "@/components/profile/follow-user-button";
+    import { CreatePost } from "@/components/post-components/create-post";
+    import { PetsContainer } from "@/components/profile/pet-container";
 
-export default function UserProfile() {
+function UserProfile() {
     const router = useRouter();
     const urlParams = useParams();
     const [userData, setUserData] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const [activeTab, setActiveTab] = useState('posts');
-    const [ currentUser, setCurrentUser ] = useState([]);
+    const [ activeTab, setActiveTab ] = useState('pets');
+    const [ currentUser, setCurrentUser ] = useState([{}]);
+
+    const [ userPets, setUserPets ] = useState([]);
 
     useEffect(() => {
         setLoading(true); 
     
-        /**
-         * Subscribes to authentication state changes.
-         * @type {function}
-         */
-        const unsubscribe = auth.onAuthStateChanged(async (user) => {
-            if (user) { // User is signed in
-                // Fetch profile data
-                try {
-                    /**
-                     * Fetches the profile data for the specified username.
-                     * @param {string} username - The username to fetch the data for.
-                     * @returns {Promise<object>} The profile data.
-                     */
-                    const fetchProfileData = async (username) => {
-                        const response = await fetch(`/api/users/via-username?username=${username}`, {
-                            method: 'GET' // Specify GET method
-                        });
+        // Fetch profile data
+        const fetchProfileData = async (username) => {
+            const response = await fetch(`/api/users/via-username?username=${username}`, {
+                method: 'GET' // Specify GET method
+            });
 
-                        if (response.ok) {
-                            const data = await response.json();
-                            setUserData(data);
-                        } else {
-                            // Assuming the API returns { message: '...' } on error
-                            const errorData = await response.json();
-                            throw new Error(errorData.message);
-                        }
-                    };
-
-                    await fetchProfileData(urlParams.username);
-                } catch (error) {
-                    console.error('Error fetching user data:', error);
-                }
-
-                // Fetch signed-in user's data
-                try {
-                    /**
-                     * Fetches the data for the currently signed-in user.
-                     * @param {string} userId - The ID of the signed-in user.
-                     * @returns {Promise<object>} The user data.
-                     */
-                    const fetchCurrentUser = async (userId) => {
-                        const response = await fetch(`/api/users/via-id?id=${userId}`, {
-                            method: 'GET' // Specify GET method
-                        });
-                        if (response.ok) {
-                            const data = await response.json();
-                            setCurrentUser(data);
-                        } else {
-                            // Assuming the API returns { message: '...' } on error
-                            const errorData = await response.json();
-                            throw new Error(errorData.message);
-                        }
-                    };
-
-                    await fetchCurrentUser(user.uid);
-                } catch (error) {
-                    console.error('Error fetching current user data:', error);
-                } finally { // Add a 'finally' block
-                    setLoading(false);
-                }
+            if (response.ok) {
+                const data = await response.json();
+                setUserData(data);
             } else {
-                // Handle the case when no user is signed in (optional)
+                // Assuming the API returns { message: '...' } on error
+                const errorData = await response.json();
+                throw new Error(errorData.message);
+            }
+        };
+
+        // Fetch signed-in user's data
+        const fetchCurrentUser = async (userId) => {
+            const response = await fetch(`/api/users/via-id?id=${userId}`, {
+                method: 'GET' // Specify GET method
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setCurrentUser(data);
+            } else {
+                // Assuming the API returns { message: '...' } on error
+                const errorData = await response.json();
+                throw new Error(errorData.message);
+            }
+        };
+
+        const fetchData = async () => {
+            try {
+                const user = await auth.currentUser;
+                await Promise.all([
+                    fetchProfileData(urlParams.username),
+                    fetchCurrentUser(user.uid)
+                ]);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            } finally {
                 setLoading(false);
             }
-        });
-    
-        return unsubscribe; // Clean-up function for the observer
-    }, [urlParams.username]);
+        };
 
-    
+        fetchData();
+    }, [urlParams]);
+
     /**
      * This useEffect hook is responsible for fetching and updating the data of the user whose profile is being viewed.
      * It subscribes to changes in the user's data in the Firestore database and updates the user's data on the page accordingly.
@@ -141,14 +126,42 @@ export default function UserProfile() {
     
         return () => unsubscribe; // Cleanup function
     }, [currentUser]);
+    
+    /**
+     * This useEffect hook is responsible for fetching and updating the pets of the user whose profile is being viewed.
+     * It fetches the pets of the user from the Firestore database and updates the user's pets on the page accordingly.
+     * 
+     */
+    useEffect(() => {
+        // Fetch user pets
+        if (userData) {
+
+            const fetchUserPets = async () => {
+                const response = await fetch(`/api/pets/retrieve-user-pets?uid=${userData.uid}`, {
+                    method: 'GET' // Specify GET method
+                });
+    
+                if (response.ok) {
+                    const data = await response.json();
+                    setUserPets(data.userPets);
+                } else {
+                    // Assuming the API returns { message: '...' } on error
+                    const errorData = await response.json();
+                    throw new Error(errorData.message);
+                }
+            };
+
+            fetchUserPets();
+        }
+    }, [userData]);
 
     return (
         <>
-            { loading ? <Loader show={true} /> : (userData && 
+            { loading ? <Loader show={true} /> : ( currentUser && 
                 <div className="flex">
                     {/* Side Navbar */}
-                    <div className="min-w-20 z-50 fixed">
-                        <ExpandedNavBar props={{
+                    <div className="min-h-16 w-full z-50 fixed">
+                        <NavBar props={{
                             uid : currentUser.uid,
                             username: currentUser.username, 
                             userPhotoURL: currentUser.userPhotoURL,
@@ -156,136 +169,184 @@ export default function UserProfile() {
                         }}/>
                     </div>
                     
-                    <div className="w-full h-screen fixed z-10 ml-20">
-                        {/* Cover Photo */}
-                        <div className="h-1/5">
-                            <CoverPhoto src={userData.coverPhotoURL ? userData.coverPhotoURL : "/images/cover0-image.png"} alt="cover photo"></CoverPhoto>
-                        </div>
-                        {/* Profile Details */}
-                        <div className="flex flex-row h-4/5">
-                            <div className="w-1/4 border-gray border-r-2 border-t-2 h-full relative flex flex-col">
-                                {/* Profile Photo */}
-                                <div className="h-1/6">
-                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                                        <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.png" : userData.userPhotoURL} alt="user photo" width={200} height={200} className="rounded-full aspect-square object-cover"></Image>
-                                    </div>
-                                </div>
-                                {/* Profile Display Name */}
-                                <p className="font-semibold text-xl tracking-wide mx-auto">{userData.displayName}</p>
-                                {/* Profile Username */}
-                                <p className="text-base tracking-wide mx-auto">@{userData.username}</p>
-                                
-                                {currentUser && currentUser.uid === userData.uid ? (
-                                    // Edit Button 
-                                    // <Button className="mx-auto text-lg dark:bg-light_yellow bg-muted_blue px-6 text-dark_gray mt-6 font-medium">Edit</Button>
-                                    <EditUserProfile props={{
-                                        uid: userData.uid,
-                                        displayName: userData.displayName,
-                                        userPhotoURL: userData.userPhotoURL ? userData.userPhotoURL : "",
-                                        coverPhotoURL: userData.coverPhotoURL ? userData.coverPhotoURL : "",
-                                        about: userData.about,
-                                        location: userData.location,
-                                        gender: userData.gender,
-                                        birthdate: userData.birthdate,
-                                        phoneNumber: userData.phoneNumber
-                                    }}/>
-                                ):(
-                                    // Follow Button 
-                                    <Button className="mx-auto text-lg dark:bg-light_yellow bg-muted_blue px-6 text-dark_gray mt-6 font-medium">Follow</Button>
-                                )}
-                                
-                                {/* Followers and Following Section */}
-                                <div className="flex flex-row mx-auto p-6"> 
-                                    <div className="w-1/2 px-2 mx-4 flex flex-col items-center"> 
-                                        <p className="text-base tracking-wide">{userData.followers && userData.followers.length}</p>
-                                        <p className="text-lg tracking-wide dark:text-light_yellow text-muted_blue font-medium">Followers</p>
-                                    </div>
-                                    <div className="w-1/2 px-2 mx-4 flex flex-col items-center">
-                                        <p className="text-base tracking-wide">{userData.following && userData.following.length}</p>
-                                        <p className="text-lg tracking-wide dark:text-light_yellow text-muted_blue font-medium">Following</p>
-                                    </div>
-                                </div>
-
-                                {/* Bio Section */}
-                                <div className="flex flex-col items-center mx-auto w-3/4 max-w-3/4">
-                                    <p className="text-lg tracking-wide font-semibold">About</p>
-                                    <p className="tracking-wide text-center break-words">{userData.about}</p>
-                                </div>
-
-                                {/* Other Details */}
-                                <div className="w-3/4 mx-auto items-center flex flex-col">
-                                    {/* Location */}
-                                    <div className="flex flex-row mt-2 items-center">
-                                        <svg class="w-6 h-6 text-muted_blue dark:text-light_yellow" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                                            <path fill-rule="evenodd" d="M12 2a8 8 0 0 1 6.6 12.6l-.1.1-.6.7-5.1 6.2a1 1 0 0 1-1.6 0L6 15.3l-.3-.4-.2-.2v-.2A8 8 0 0 1 11.8 2Zm3 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" clip-rule="evenodd"/>
-                                        </svg>
-  
-                                        <p className="text-base tracking-wide font-normal px-3">{userData.location}</p>
-                                    </div>
-
-                                    {/* Gender */}
-                                    <div className="flex flex-row mt-2">
-                                        <svg  class="w-6 h-6 text-muted_blue dark:text-light_yellow" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 640 512">
-                                            <path d="M256 384H208v-35.05C289.9 333.9 352 262.3 352 176c0-97.2-78.8-176-176-176c-97.2 0-176 78.8-176 176c0 86.26 62.1 157.9 144 172.1v35.05H96c-8.836 0-16 7.162-16 16v32c0 8.836 7.164 16 16 16h48v48c0 8.836 7.164 16 16 16h32c8.838 0 16-7.164 16-16v-48H256c8.838 0 16-7.164 16-16v-32C272 391.2 264.8 384 256 384zM176 272c-52.93 0-96-43.07-96-96c0-52.94 43.07-96 96-96c52.94 0 96 43.06 96 96C272 228.9 228.9 272 176 272zM624 0h-112.4c-21.38 0-32.09 25.85-16.97 40.97l29.56 29.56l-24.55 24.55c-29.97-20.66-64.81-31.05-99.74-31.05c-15.18 0-30.42 2.225-45.19 6.132c13.55 22.8 22.82 48.36 26.82 75.67c6.088-1.184 12.27-1.785 18.45-1.785c24.58 0 49.17 9.357 67.88 28.07c37.43 37.43 37.43 98.33 0 135.8c-18.71 18.71-43.3 28.07-67.88 28.07c-23.55 0-46.96-8.832-65.35-26.01c-15.92 18.84-34.93 35.1-56.75 47.35c11.45 5.898 20.17 16.3 23.97 28.82C331.5 406 365.7 416 400 416c45.04 0 90.08-17.18 124.5-51.55c60.99-60.99 67.73-155.6 20.47-224.1l24.55-24.55l29.56 29.56c4.889 4.889 10.9 7.078 16.8 7.078C628.2 152.4 640 142.8 640 128.4V16C640 7.164 632.8 0 624 0z"/>
-                                        </svg>
-                                        <p className="text-base tracking-wide font-normal px-3">{userData.gender}</p>
-                                    </div>
-
-                                    {/* Birthday */}
-                                    <div className="flex flex-row mt-2">
-                                        <svg class="w-6 h-6 text-muted_blue dark:text-light_yellow" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                                            <path fill-rule="evenodd" d="M5 5c.6 0 1-.4 1-1a1 1 0 1 1 2 0c0 .6.4 1 1 1h1c.6 0 1-.4 1-1a1 1 0 1 1 2 0c0 .6.4 1 1 1h1c.6 0 1-.4 1-1a1 1 0 1 1 2 0c0 .6.4 1 1 1a2 2 0 0 1 2 2v1c0 .6-.4 1-1 1H4a1 1 0 0 1-1-1V7c0-1.1.9-2 2-2ZM3 19v-7c0-.6.4-1 1-1h16c.6 0 1 .4 1 1v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Zm6-6c0-.6-.4-1-1-1a1 1 0 1 0 0 2c.6 0 1-.4 1-1Zm2 0a1 1 0 1 1 2 0c0 .6-.4 1-1 1a1 1 0 0 1-1-1Zm6 0c0-.6-.4-1-1-1a1 1 0 1 0 0 2c.6 0 1-.4 1-1ZM7 17a1 1 0 1 1 2 0c0 .6-.4 1-1 1a1 1 0 0 1-1-1Zm6 0c0-.6-.4-1-1-1a1 1 0 1 0 0 2c.6 0 1-.4 1-1Zm2 0a1 1 0 1 1 2 0c0 .6-.4 1-1 1a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
-                                        </svg>
-  
-                                        <p className="text-base tracking-wide font-normal px-3">{userData.birthdate}</p>
-                                    </div>
-
-                                    {/* Phone Number */}
-                                    <div className="flex flex-row mt-2">
-                                        <svg class="w-6 h-6 text-muted_blue dark:text-light_yellow" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M8 4a2.6 2.6 0 0 0-2 .9 6.2 6.2 0 0 0-1.8 6 12 12 0 0 0 3.4 5.5 12 12 0 0 0 5.6 3.4 6.2 6.2 0 0 0 6.6-2.7 2.6 2.6 0 0 0-.7-3L18 12.9a2.7 2.7 0 0 0-3.8 0l-.6.6a.8.8 0 0 1-1.1 0l-1.9-1.8a.8.8 0 0 1 0-1.2l.6-.6a2.7 2.7 0 0 0 0-3.8L10 4.9A2.6 2.6 0 0 0 8 4Z"/>
-                                        </svg>
-  
-                                        <p className="text-base tracking-wide font-normal px-3">{userData.phoneNumber}</p>
-                                    </div>
-
-                                    {/* Email */}
-                                    <div className="flex flex-row mt-2">
-                                        <svg class="w-6 h-6 text-muted_blue dark:text-light_yellow" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M2 5.6V18c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V5.6l-.9.7-7.9 6a2 2 0 0 1-2.4 0l-8-6-.8-.7Z"/>
-                                            <path d="M20.7 4.1A2 2 0 0 0 20 4H4a2 2 0 0 0-.6.1l.7.6 7.9 6 7.9-6 .8-.6Z"/>
-                                        </svg>
-  
-                                        <p className="text-base tracking-wide font-normal px-3">{userData.email}</p>
-                                    </div>
-                                </div>
-
+                    { userData &&
+                        <div className="w-full h-screen fixed z-10 mt-16 flex flex-col items-center justify-start overflow-y-auto">
+                            {/* Cover Photo */}
+                            <div className="h-[30%] lg:w-[60%] xl:w-[60%] 2xl:w-[60%] w-full border-red">
+                                <CoverPhoto 
+                                    src={userData.coverPhotoURL ? userData.coverPhotoURL : "/images/cover0-image.png"}
+                                    alt="cover photo"/>
                             </div>
-                            <div className="w-3/4 border-t-2 border-gray h-full">
-                                <div className="flex flex-row border-gray border-b-2">
-                                    <div className="w-1/5 border-gray border-r-2 text-center items-center">
-                                        <p className={`text-lg py-1 font-semibold ${activeTab == 'posts' ? "bg-muted_blue dark:bg-light_yellow dark:text-gray" : ""} cursor-pointer`} onClick={() => setActiveTab('posts')}>Posts</p>
+
+                            {/* Profile Details */}
+                            <div className="flex items-start justify-start lg:w-[60%] xl:w-[60%] 2xl:w-[60%] w-full h-[110px] px-10">
+                                {/* Profile Photo */}
+                                <div className="-translate-y-12 flex items-center justify-center w-[20%]">
+                                    <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.png" : userData.userPhotoURL} alt="user photo" width={175} height={175} className="border-2 border-dark_gray rounded-full aspect-square object-cover" />
+                                </div>
+
+                                {/* Display Name, Username, Followers, Following */}
+                                <div className="flex flex-col gap-2 h-full justify-end w-[60%] ml-4">
+                                    {/* Display Name and Username Section */}
+                                    <div className="flex flex-col">
+                                        <p className="font-semibold text-3xl tracking-wide">{userData.displayName}</p>
+                                        <p className="text-sm font-semibold tracking-wide text-muted_blue dark:text-light_yellow">@{userData.username}</p>
                                     </div>
-                                    <div className="w-1/5 border-gray border-r-2 text-center items-center">
-                                        <p className={`text-lg py-1 font-semibold ${activeTab == 'pets' ? "bg-muted_blue dark:bg-light_yellow dark:text-gray" : ""} cursor-pointer`} onClick={() => setActiveTab('pets')}>Pets</p>
+
+                                    {/* Followers and Following Section */}
+                                    <div className="flex flex-row justify-start gap-2 text-xs font-semibold"> 
+                                        <div className="flex items-center gap-1"> 
+                                            <p>{userData.followers && userData.followers.length}</p>
+                                            <p className="dark:text-light_yellow text-muted_blue">Followers</p>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <p>{userData.following && userData.following.length}</p>
+                                            <p className="dark:text-light_yellow text-muted_blue">Following</p>
+                                        </div>
                                     </div>
-                                    
                                 </div>
-                                {activeTab == 'posts' ? (
-                                <div>
-                                    <p>Posts Container</p>
+                                
+                                {/* Edit Profile / Follow Button */}
+                                <div className="flex h-full items-end justify-end w-[20%]">
+                                    {currentUser && currentUser.uid === userData.uid ? (
+                                        // Edit Button 
+                                        // <Button className="mx-auto text-lg dark:bg-light_yellow bg-muted_blue px-6 text-dark_gray mt-6 font-medium">Edit</Button>
+                                        <EditUserProfile props={{
+                                            uid: userData.uid,
+                                            displayName: userData.displayName,
+                                            userPhotoURL: userData.userPhotoURL ? userData.userPhotoURL : "",
+                                            coverPhotoURL: userData.coverPhotoURL ? userData.coverPhotoURL : "",
+                                            about: userData.about,
+                                            location: userData.location,
+                                            gender: userData.gender,
+                                            birthdate: userData.birthdate,
+                                            phoneNumber: userData.phoneNumber
+                                        }}/>
+                                    ):(
+                                        // Follow Button 
+                                        <FollowButton props={{
+                                                profileUser_uid: userData.uid,
+                                                profileUser_name: userData.username,
+                                                currentUser_uid: currentUser.uid,
+                                                profileUser_followers: userData.followers,
+                                                currentUser_following: currentUser.following
+                                        }}/>
+                                    )}
                                 </div>
-                            ): (
-                                <div>
-                                    <p>Pets Container</p>
-                                </div>
-                            )}
                             </div>
                             
-                        </div>
-                    </div> 
+                            {/* Main Container */}
+                            <div className="flex flex-col lg:flex-row lg:w-[60%] xl:w-[60%] 2xl:w-[60%] w-full px-10 mt-8">
+
+                                {/* About and Details Containers */}
+                                <div className="flex flex-col items-start lg:w-[30%] xl:w-[30%] 2xl:w-[30%] w-full gap-6">
+                                    <Card className="drop-shadow-md flex flex-col w-full p-6 text-sm rounded-md">
+                                        <div className="flex flex-col justify-start gap-4">
+                                            <h1 className="tracking-wide font-bold text-lg text-muted_blue dark:text-light_yellow">About</h1>
+                                            <p className="tracking-wide break-words">{userData.about}</p>
+                                        </div>
+                                    </Card>
+
+                                    <Card className="drop-shadow-md flex flex-col w-full p-6 text-sm rounded-md">
+                                        <h1 className="tracking-wide font-bold text-lg pb-4 text-muted_blue dark:text-light_yellow">Details</h1>
+
+                                        <div className="flex items-start flex-col gap-2 break-all">
+                                            {/* Location */}
+                                            <div className="flex items-center justify-center gap-1">
+                                                <i className="flex items-center justify-center  w-[20px] fa-solid fa-location-dot "/>
+                                                <p className="tracking-wide">{userData.location}</p>
+                                            </div>
+
+                                            {/* Gender */}
+                                            <div className="flex items-center justify-center gap-1">
+                                                <i class="flex items-center justify-center  w-[20px] fa-solid fa-venus-mars" />
+                                                <p className="tracking-wide">{userData.gender}</p>
+                                            </div>
+
+                                            {/* Birthday */}
+                                            <div className="flex items-center justify-center gap-1">
+                                                <i class="flex items-center justify-center  w-[20px] fa-solid fa-cake-candles" />
+                                                <p className="tracking-wide">{userData.birthdate}</p>
+                                            </div>
+
+                                            {/* Phone Number */}
+                                            <div className="flex items-center justify-center gap-1">
+                                                <i class="flex items-center justify-center  w-[20px] fa-solid fa-phone" />
+                                                <p className="tracking-wide">{userData.phoneNumber}</p>
+                                            </div>
+
+                                            {/* Email */}
+                                            <div className="flex items-center justify-center gap-1">
+                                                <i class="flex items-center justify-center  w-[20px] fa-solid fa-envelope" />
+                                                <p className="tracking-wide">{userData.email}</p>
+                                            </div>
+                                        </div>
+                                    </Card>
+                                </div>
+                                
+                                {/* Posts and Pets Containers */}
+                                <div className="lg:w-[70%] xl:w-[70%] 2xl:w-[70%] lg:mt-0 xl:mt-0 2xl:mt-0 mt-8 w-full lg:ml-6 xl:ml-6 2xl:ml-6">
+
+                                    {/* Tabs */}
+                                    <div className="mb-6 flex flex-row font-bold w-full h-[35px] text-sm bg-off_white dark:bg-gray drop-shadow-md rounded-l-sm rounded-r-sm">
+                                        <div
+                                            className={`transition-all w-1/2 flex items-center justify-center rounded-l-sm ${activeTab == 'posts' ? "bg-muted_blue dark:bg-light_yellow text-white dark:text-black" : "hover:bg-light_yellow dark:hover:bg-muted_blue cursor-pointer"}`} 
+                                            onClick={() => setActiveTab('posts')}
+                                        >
+                                            Posts
+                                        </div>
+
+                                        <div
+                                            className={`transition-all w-1/2 flex items-center justify-center rounded-r-sm ${activeTab == 'pets' ? "bg-muted_blue dark:bg-light_yellow text-white dark:text-black" : "hover:bg-light_yellow dark:hover:bg-muted_blue cursor-pointer"}`} 
+                                            onClick={() => setActiveTab('pets')}
+                                        >
+                                            Pets
+                                        </div>
+                                    </div>
+
+                                    {activeTab == 'posts' ? (
+                                        <>
+                                            <Card className="drop-shadow-md rounded-sm mb-2">
+                                                <div className="flex flex-row items-center w-full my-2">
+                                                    <div className="ml-4">
+                                                        <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.png" : userData.userPhotoURL} alt="user photo" width={44} height={44} className="rounded-full aspect-square object-cover" />
+                                                    </div>
+                                                    <div className="w-full mx-4">
+                                                        <CreatePost props={{
+                                                            uid: userData.uid,
+                                                            username: userData.username
+                                                        }}/>
+                                                    </div>
+                                                </div>
+                                                <hr className="border-b border-light_yellow mx-4 mb-2"/>
+                                            </Card>
+                                            <Card className="text-sm p-4 drop-shadow-md rounded-sm">
+                                                <p>Posts Container</p>
+                                            </Card>
+                                        </>
+                                    ): (
+                                        <Card className="p-4 rounded-md drop-shadow-md">
+                                            
+                                            { userData && userPets && <PetsContainer props={{
+                                                uid: userData.uid,
+                                                username: userData.username,
+                                                displayName: userData.displayName,
+                                                location: userData.location,
+                                                userPhotoURL: userData.userPhotoURL,
+                                                coverPhotoURL: userData.coverPhotoURL,
+                                                pets: userPets
+                                            }}/>}
+                                            
+                                        </Card>
+                                    )}
+                                </div>
+                            </div>
+                        </div> 
+                    }
                 </div>
             ) }
         </>
     )
-}
+}   
+
+export default WithAuth(UserProfile);

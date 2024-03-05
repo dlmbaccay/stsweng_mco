@@ -5,7 +5,7 @@ import { auth } from "@/lib/firebase";
 import WithAuth from "@/components/WithAuth";
 import { ModeToggle } from "@/components/mode-toggle";
 import Loader from "@/components/Loader";
-import ExpandedNavBar from "@/components/nav/navbar";
+import NavBar from "@/components/nav/navbar";
 
 function HomePage() {
     const [loading, setLoading] = useState(true);
@@ -60,15 +60,15 @@ function HomePage() {
       { loading ? <Loader show={true} /> : (currentUser && 
           <div className="flex">
               {/* Side Navbar */}
-              <div className="min-w-80 z-50 fixed">
-                  <ExpandedNavBar props={{
+              <div className="min-h-16 w-full z-50 fixed">
+                  <NavBar props={{
                       uid : currentUser.uid,
                       username: currentUser.username, 
                       userPhotoURL: currentUser.userPhotoURL,
                       expand_lock: true,
                   }}/>
               </div>
-              <div className="w-full h-screen fixed z-10 ml-80">
+              <div className="w-full h-screen fixed z-10 mt-16">
                 Home Page
               </div>
           </div>

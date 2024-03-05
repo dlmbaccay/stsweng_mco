@@ -3,6 +3,10 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast"
 import { ThemeProvider } from "@/components/theme-provider";
 
+import "@fortawesome/fontawesome-svg-core/styles.css";
+import { config } from "@fortawesome/fontawesome-svg-core";
+config.autoAddCss = false;
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {

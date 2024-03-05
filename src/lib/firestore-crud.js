@@ -142,7 +142,6 @@ module.exports.getDocumentByFieldValue = async (collection, field, value) => {
     }
 };
 
-
 // Export the function to check for documents with a specific username
 module.exports.isUsernameTaken = async (username) => {
     try {
@@ -159,3 +158,12 @@ module.exports.isUsernameTaken = async (username) => {
     }
 };
 
+module.exports.createPetDocument = async (collection, documentId, data) => {
+    try {
+        // Add the data to the Firestore database
+        await firestore.collection(collection).doc(documentId).set(data);
+    } catch (error) {
+        console.error('Error creating pet document:', error);
+        throw error;
+    }
+}
