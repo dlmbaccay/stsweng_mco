@@ -5,8 +5,9 @@ import { toast } from "react-hot-toast"
 import { handleImageFilePreview } from "@/lib/helper-functions"
 import { checkDisplayName, checkLocation } from "@/lib/formats"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card } from "@/components/ui/card"
 import { PhoneInput } from "@/components/ui/phone-input"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -39,6 +40,8 @@ export function CreatePetProfile({props}) {
 
     const [ petPhotoPreviewUrl, setPetPhotoPreviewUrl ] = useState('/images/profilePictureHolder.jpg');
 
+    const [ submitDisabled, setSubmitDisabled ] = useState(false);
+
     const handleFileChange = (event) => {
         var temp = handleImageFilePreview(event.target.files[0]);
         if (temp == null) {
@@ -52,8 +55,15 @@ export function CreatePetProfile({props}) {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+
+        if (petName === '' || petSex === '' || petBirthdate === '' || petBirthplace === '') {
+            toast.error('Please fill in all required fields.');
+            return;
+        }
         
         try {
+            setSubmitDisabled(true);
+            toast.loading('Creating pet profile...');
             if (petPhotoURL) {
                 // Create a new document in the 'pets' collection with the given data
                 const petID = firestore.collection("pets").doc().id;
@@ -101,6 +111,8 @@ export function CreatePetProfile({props}) {
                     })
                 }).then(response => response.json()).then(data => {
                     if (data.success) {
+                        setSubmitDisabled(false);
+                        toast.dismiss();
                         toast.success(`${petName}'s profile created successfully!`);
                         router.push(`/pet/${petID}`);
                     }
@@ -114,10 +126,10 @@ export function CreatePetProfile({props}) {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                 <div className="flex items-center justify-center text-wrap gap-4 w-1/2 h-[150px] hover:bg-white dark:hover:bg-dark_gray px-12 py-4 hover:drop-shadow-md cursor-pointer rounded-md">
-                    <i className="fa-solid fa-paw text-4xl flex items-center justify-center bg-muted_blue text-white dark:text-dark_gray dark:bg-light_yellow w-[100px] h-[100px] rounded-full flex-shrink-0"/>
-                    <p className="font-bold mt-2 break-words flex text-lg text-center">Create Pet Profile</p>
-                </div>
+                 <Card className="mb-4 flex flex-col gap-2 items-center justify-center w-1/4 h-[200px] hover:bg-white dark:hover:bg-dark_gray px-6 py-4 hover:drop-shadow-md transition-all hover:scale-105 cursor-pointer">
+                    <i className="fa-solid fa-paw text-5xl flex items-center justify-center bg-muted_blue text-white dark:text-dark_gray dark:bg-light_yellow w-[80px] h-[80px] rounded-full flex-shrink-0"/>
+                    <p className="font-bold mt-2 text-center w-full">Add Pet</p>
+                </Card>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[600px] lg:max-w-[1080px]">
                 {loading ? <Loader show={loading}/> : 
@@ -316,22 +328,28 @@ export function CreatePetProfile({props}) {
                             </div>
                             
                             <DialogFooter className="mt-6">
-                                <Button
-                                    type="reset"
-                                    className="bg-red-500 hover:bg-red-600"
-                                    onClick={() => {
-                                        setPetName('');
-                                        setPetPhotoURL('');
-                                        setPetBreed('');
-                                        setPetSex('');
-                                        setPetAbout('');
-                                        setPetBirthdate('');
-                                        setPetBirthplace('');
-                                        setPetFavoriteFood('');
-                                        setPetHobbies('');
-                                    }}
-                                >Cancel</Button>
-                                <Button type="submit">Submit</Button>
+                                <DialogClose>
+                                    <Button
+                                        variant="secondary"
+                                        type="button"
+                                        onClick={() => {
+                                            // reset all fields
+                                            setPetName('');
+                                            setPetPhotoURL('');
+                                            setPetBreed('');
+                                            setPetSex('');
+                                            setPetAbout('');
+                                            setPetBirthdate('');
+                                            setPetBirthplace(location);
+                                            setPetFavoriteFood('');
+                                            setPetHobbies('');
+                                            setPetPhotoPreviewUrl('/images/profilePictureHolder.jpg');
+                                        }}
+                                    >Cancel</Button>
+                                </DialogClose>
+                                <Button type="submit"
+                                    disabled={submitDisabled}
+                                >Submit</Button>
                             </DialogFooter>
                         </form>
                     </>

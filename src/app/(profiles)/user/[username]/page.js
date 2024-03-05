@@ -170,16 +170,16 @@ function UserProfile() {
                     </div>
                     
                     { userData &&
-                        <div className="w-full h-screen fixed z-10 mt-16 flex flex-col items-center justify-start">
+                        <div className="w-full h-screen fixed z-10 mt-16 flex flex-col items-center justify-start overflow-y-auto">
                             {/* Cover Photo */}
-                            <div className="h-[30%] w-[60%] border-red">
+                            <div className="h-[30%] lg:w-[60%] xl:w-[60%] 2xl:w-[60%] w-full border-red">
                                 <CoverPhoto 
                                     src={userData.coverPhotoURL ? userData.coverPhotoURL : "/images/cover0-image.png"}
                                     alt="cover photo"/>
                             </div>
 
                             {/* Profile Details */}
-                            <div className="flex items-start justify-start w-[60%] h-[110px] px-10">
+                            <div className="flex items-start justify-start lg:w-[60%] xl:w-[60%] 2xl:w-[60%] w-full h-[110px] px-10">
                                 {/* Profile Photo */}
                                 <div className="-translate-y-12 flex items-center justify-center w-[20%]">
                                     <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.png" : userData.userPhotoURL} alt="user photo" width={175} height={175} className="border-2 border-dark_gray rounded-full aspect-square object-cover" />
@@ -236,10 +236,10 @@ function UserProfile() {
                             </div>
                             
                             {/* Main Container */}
-                            <div className="flex w-[60%] px-10 mt-8">
+                            <div className="flex flex-col lg:flex-row lg:w-[60%] xl:w-[60%] 2xl:w-[60%] w-full px-10 mt-8">
 
                                 {/* About and Details Containers */}
-                                <div className="flex flex-col items-start w-[30%] gap-6">
+                                <div className="flex flex-col items-start lg:w-[30%] xl:w-[30%] 2xl:w-[30%] w-full gap-6">
                                     <Card className="drop-shadow-md flex flex-col w-full p-6 text-sm rounded-md">
                                         <div className="flex flex-col justify-start gap-4">
                                             <h1 className="tracking-wide font-bold text-lg text-muted_blue dark:text-light_yellow">About</h1>
@@ -250,7 +250,7 @@ function UserProfile() {
                                     <Card className="drop-shadow-md flex flex-col w-full p-6 text-sm rounded-md">
                                         <h1 className="tracking-wide font-bold text-lg pb-4 text-muted_blue dark:text-light_yellow">Details</h1>
 
-                                        <div className="flex items-start flex-col gap-2">
+                                        <div className="flex items-start flex-col gap-2 break-all">
                                             {/* Location */}
                                             <div className="flex items-center justify-center gap-1">
                                                 <i className="flex items-center justify-center  w-[20px] fa-solid fa-location-dot "/>
@@ -285,7 +285,7 @@ function UserProfile() {
                                 </div>
                                 
                                 {/* Posts and Pets Containers */}
-                                <div className="w-[70%] ml-6">
+                                <div className="lg:w-[70%] xl:w-[70%] 2xl:w-[70%] lg:mt-0 xl:mt-0 2xl:mt-0 mt-8 w-full lg:ml-6 xl:ml-6 2xl:ml-6">
 
                                     {/* Tabs */}
                                     <div className="mb-6 flex flex-row font-bold w-full h-[35px] text-sm bg-off_white dark:bg-gray drop-shadow-md rounded-l-sm rounded-r-sm">
@@ -325,7 +325,7 @@ function UserProfile() {
                                             </Card>
                                         </>
                                     ): (
-                                        <Card className="text-sm p-4 drop-shadow-md rounded-sm">
+                                        <Card className="p-4 rounded-md drop-shadow-md">
                                             
                                             { userData && userPets && <PetsContainer props={{
                                                 uid: userData.uid,

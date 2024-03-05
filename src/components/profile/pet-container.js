@@ -8,8 +8,8 @@ export function PetsContainer({ props }) {
     const { uid, username, displayName, location, coverPhotoURL, pets } = props;
 
     return (
-        <Card className="mb-4 w-full flex items-center justify-center">
-            <div className="grid grid-cols-2 items-start justify-start gap-2 w-full">
+        <Card className="w-full flex items-center justify-center">
+            <div className="flex flex-wrap gap-4 items-center justify-center w-full py-4">
 
                 <CreatePetProfile props={{
                     uid: uid,
@@ -19,7 +19,7 @@ export function PetsContainer({ props }) {
                     coverPhotoURL: coverPhotoURL
                 }}/>
                 
-                {pets.map((pet, index) => {
+                {[...pets].reverse().map((pet, index) => {
                     return (
                         <PetSnippetCard 
                             key={index}
