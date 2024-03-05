@@ -51,7 +51,7 @@ export function CreatePost({props}) {
             <div className="flex flex-row items-center"> 
                 <DialogTrigger asChild>
                     <Button variant="outline" className="h-[35px] w-11/12 bg-light_yellow hover:bg-primary text-primary-foreground hover:text-primary-foreground gap-2 flex items-center justify-center rounded-full">
-                        What's on your mind? 
+                        What&apos;s on your mind? 
                     </Button>
                 </DialogTrigger>
                 <DialogTrigger asChild>
