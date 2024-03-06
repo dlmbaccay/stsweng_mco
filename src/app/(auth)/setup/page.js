@@ -186,7 +186,7 @@ function SetupPage() {
       
 
   return (
-    <div className="flex items-center justify-center md:mt-16 md:mb-16 w-full md:pl-16 md:pr-16">
+    <div className="flex items-center justify-center md:mt-16 md:mb-16 w-full md:pl-16 md:pr-16 setup-page-background">
       <Card className="h-full md:outline justify-center items-center flex w-full md:w-fit">
         <form onSubmit={handleSubmit} className="md:rounded-md p-8 w-full md:w-[800px] h-full md:h-fit flex flex-col overflow-y-scroll md:overflow-hidden">
 

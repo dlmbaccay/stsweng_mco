@@ -275,7 +275,7 @@ export default function Landing() {
   }
 
   return (
-    <div className="w-full h-screen flex flex-row items-center justify-center p-1">
+    <div className="w-full h-screen flex flex-row items-center justify-center p-1 backgroundImage">
 
       <Card className="w-[600px] h-[500px] flex flex-col items-center justify-center border border-slate-400 rounded-3xl drop-shadow-lg m-10">
         
