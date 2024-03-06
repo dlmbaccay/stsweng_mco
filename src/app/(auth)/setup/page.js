@@ -363,7 +363,7 @@ function SetupPage() {
                     name="birthdate"
                     className={`border border-slate-400 mt-2 p-2 rounded-md w-full`} 
                     placeholder="Tell us about yourself!" 
-                    max="9999-12-31"
+                    max={new Date().toISOString().split("T")[0]}
                     required
                     value = {birthdate}
                     onChange={(e) => setBirthdate(e.target.value)} />

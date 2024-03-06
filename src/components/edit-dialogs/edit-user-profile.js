@@ -256,7 +256,7 @@ export function EditUserProfile({props}) {
                                                     </SelectContent>
                                                 </Select>
                                             </div>
-
+                                            
                                             {/* Birthday */}
                                             <div className="flex flex-row mt-2 items-center">
                                                 <p className="text-base tracking-wide font-semibold w-1/3">Birthday</p>
@@ -266,7 +266,8 @@ export function EditUserProfile({props}) {
                                                     name="birthdate"
                                                     className={`border border-slate-400 mt-2 p-2 rounded-md w-full`} 
                                                     placeholder="Tell us about yourself!" 
-                                                    max="9999-12-31"
+                                                    // max="9999-12-31"
+                                                    max={new Date().toISOString().split("T")[0]}
                                                     required
                                                     value = {newBirthdate}
                                                     onChange={(e) => setNewBirthdate(e.target.value)} />
