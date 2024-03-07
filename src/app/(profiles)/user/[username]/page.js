@@ -5,6 +5,7 @@
     import { useRouter, useParams } from "next/navigation";
     import Image from "next/image";
     import { auth, firestore } from "@/lib/firebase";
+    import { handleDateFormat } from "@/lib/helper-functions";
     import  Loader from "@/components/Loader";
     import NavBar from "@/components/nav/navbar";
     import CoverPhoto from "@/components/ui/cover-photo";
@@ -17,6 +18,8 @@
     import { FollowButton } from "@/components/profile/follow-user-button";
     import { CreatePost } from "@/components/post-components/create-post";
     import { PetsContainer } from "@/components/profile/pet-container";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTags } from "@fortawesome/free-solid-svg-icons";
 
 function UserProfile() {
     const router = useRouter();
@@ -24,10 +27,11 @@ function UserProfile() {
     const [userData, setUserData] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const [ activeTab, setActiveTab ] = useState('pets');
+    const [ activeTab, setActiveTab ] = useState('posts');
     const [ currentUser, setCurrentUser ] = useState([{}]);
 
     const [ userPets, setUserPets ] = useState([]);
+    const [ userPosts, setUserPosts ] = useState([]);
 
     useEffect(() => {
         setLoading(true); 
@@ -155,6 +159,34 @@ function UserProfile() {
         }
     }, [userData]);
 
+     /**
+     * This useEffect hook is responsible for fetching and updating the posts of the user whose profile is being viewed.
+     * It fetches the posts of the user from the Firestore database and updates the user's posts on the page accordingly.
+     * 
+     */
+     useEffect(() => {
+        // Fetch user posts
+        if (userData) {
+
+            const fetchUserPosts = async () => {
+                const response = await fetch(`/api/posts/via-authorName?username=${userData.username}`, {
+                    method: 'GET' // Specify GET method
+                });
+    
+                if (response.ok) {
+                    const data = await response.json();
+                    setUserPosts(data.postDocs);
+                } else {
+                    // Assuming the API returns { message: '...' } on error
+                    const errorData = await response.json();
+                    throw new Error(errorData.message);
+                }
+            };
+
+            fetchUserPosts();
+        }
+    }, [userData]);
+
     return (
         <>
             { loading ? <Loader show={true} /> : ( currentUser && 
@@ -268,25 +300,25 @@ function UserProfile() {
 
                                             {/* Gender */}
                                             <div className="flex items-center justify-center gap-1">
-                                                <i class="flex items-center justify-center  w-[20px] fa-solid fa-venus-mars" />
+                                                <i className="flex items-center justify-center  w-[20px] fa-solid fa-venus-mars" />
                                                 <p className="tracking-wide">{userData.gender}</p>
                                             </div>
 
                                             {/* Birthday */}
                                             <div className="flex items-center justify-center gap-1">
-                                                <i class="flex items-center justify-center  w-[20px] fa-solid fa-cake-candles" />
+                                                <i className="flex items-center justify-center  w-[20px] fa-solid fa-cake-candles" />
                                                 <p className="tracking-wide">{userData.birthdate}</p>
                                             </div>
 
                                             {/* Phone Number */}
                                             <div className="flex items-center justify-center gap-1">
-                                                <i class="flex items-center justify-center  w-[20px] fa-solid fa-phone" />
+                                                <i className="flex items-center justify-center  w-[20px] fa-solid fa-phone" />
                                                 <p className="tracking-wide">{userData.phoneNumber}</p>
                                             </div>
 
                                             {/* Email */}
                                             <div className="flex items-center justify-center gap-1">
-                                                <i class="flex items-center justify-center  w-[20px] fa-solid fa-envelope" />
+                                                <i className="flex items-center justify-center  w-[20px] fa-solid fa-envelope" />
                                                 <p className="tracking-wide">{userData.email}</p>
                                             </div>
                                         </div>
@@ -315,23 +347,61 @@ function UserProfile() {
 
                                     {activeTab == 'posts' ? (
                                         <>
-                                            <Card className="drop-shadow-md rounded-sm mb-2">
+                                            { currentUser.uid === userData.uid ? <Card className="drop-shadow-md rounded-sm mb-2">
                                                 <div className="flex flex-row items-center w-full my-2">
                                                     <div className="ml-4">
-                                                        <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.png" : userData.userPhotoURL} alt="user photo" width={44} height={44} className="rounded-full aspect-square object-cover" />
+                                                        <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.jpg" : userData.userPhotoURL} alt="user photo" width={44} height={44} className="rounded-full aspect-square object-cover" />
                                                     </div>
                                                     <div className="w-full mx-4">
                                                         <CreatePost props={{
                                                             uid: userData.uid,
-                                                            username: userData.username
+                                                            username: userData.username,
+                                                            displayname: userData.displayName,
+                                                            userphoto: userData.userPhotoURL,
+                                                            pets: userPets,
                                                         }}/>
                                                     </div>
                                                 </div>
                                                 <hr className="border-b border-light_yellow mx-4 mb-2"/>
-                                            </Card>
-                                            <Card className="text-sm p-4 drop-shadow-md rounded-sm">
-                                                <p>Posts Container</p>
-                                            </Card>
+                                            </Card> : null}
+                                            
+                                            {userPosts.map((post) => {
+                                                return (
+                                                    <Card className="text-sm p-4 drop-shadow-md rounded-[1rem] my-8">
+                                                        <div className="flex flex-col w-full">
+                                                            <div className="flex flex-row w-full my-2 mx-2">
+                                                                <div className="flex flex-row items-center">
+                                                                    <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.jpg" : userData.userPhotoURL} alt="user photo" width={60} height={60} className="rounded-full aspect-square object-cover" />
+                                                                    <div className="flex flex-col mx-4">
+                                                                        <div className="">
+                                                                            <span className="font-bold text-base">{post.authorDisplayName}</span> · @{post.authorName}
+                                                                        </div>
+                                                                        <div className="text-sm">
+                                                                            {handleDateFormat(post.date)}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="items-start ml-auto font-semibold text-base mr-4">
+                                                                    {post.category}
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex flex-row items-left mx-2 text-lg">
+                                                                <FontAwesomeIcon icon={faTags} className="mr-2" />
+                                                            </div> 
+
+
+                                                            <p>Posts Container</p>
+                                                            postAuthor: {post.authorName}
+                                                            postContent: {post.content}
+                                                            postDate: {handleDateFormat(post.date)}
+                                                            postLikes: {post.likes}
+                                                            postComments: {post.comments}
+
+                                                        </div>
+                                                        
+                                                    </Card>
+                                                )
+                                            })}
                                         </>
                                     ): (
                                         <Card className="p-4 rounded-md drop-shadow-md">

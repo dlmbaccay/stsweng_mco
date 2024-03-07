@@ -50,3 +50,17 @@ export async function deletePhotoFromStorage(collection, documentId, type) {
 
     return 'File deleted successfully';
 }
+
+export async function uploadPostMedia(postID, mediaFile) {
+    const storagePath = `postMedia/${postID}`;
+    const storageRef = ref(storage, storagePath);
+    const mediaStorageRef = ref(storageRef, mediaFile.name);
+    const uploadTask = uploadBytesResumable(mediaStorageRef, mediaFile);
+
+    // ... Handle upload progress, error handling if desired
+
+    await uploadTask; // Wait for the upload to complete
+
+    const downloadURL = await getDownloadURL(mediaStorageRef);
+    return downloadURL;
+}
