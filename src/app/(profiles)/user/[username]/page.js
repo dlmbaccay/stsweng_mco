@@ -367,7 +367,7 @@ function UserProfile() {
                                             
                                             {userPosts.map((post) => {
                                                 return (
-                                                    <Card className="text-sm p-4 drop-shadow-md rounded-[1rem] my-8">
+                                                    <Card key={post.postID} className="text-sm p-4 drop-shadow-md rounded-[1rem] my-8">
                                                         <div className="flex flex-col w-full">
                                                             <div className="flex flex-row w-full my-2 mx-2">
                                                                 <div className="flex flex-row items-center">

@@ -137,7 +137,7 @@ export function CreatePost({props}) {
             setDisplayValue(selectedPets.map((pet) => pet.petName).join(", "));
         }
         
-    }, [selectedPetIDs]);
+    }, [selectedPetIDs, pets]);
 
     return (
         <Dialog>
