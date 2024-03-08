@@ -30,6 +30,34 @@ module.exports.createDocument = async (collection, data) => {
     }
 };
 
+// Export the function to create a new User document in a collection with given data
+module.exports.createUserDocument = async (collection, documentId, data) => {
+    try {
+        // Add the data to the Firestore database
+        await firestore.collection(collection).doc(documentId).set(data);
+
+        // Return the ID of the newly created document
+        return documentId;
+    } catch (error) {
+        console.error('Error creating user document:', error);
+        throw error;
+    }
+};
+
+// Export the function to create a new Post document in a collection with given data
+module.exports.createPostDocument = async (collection, documentId, data) => {
+    try {
+        // Add the data to the Firestore database
+        await firestore.collection(collection).doc(documentId).set(data);
+
+        // Return the ID of the newly created document
+        return documentId;
+    } catch (error) {
+        console.error('Error creating post document:', error);
+        throw error;
+    }
+};
+
 // Export the function to update a document in a collection with given data
 module.exports.updateDocument = async (collection, documentId, data) => {
     try {
@@ -128,7 +156,6 @@ module.exports.getDocumentByFieldValue = async (collection, field, value) => {
     }
 };
 
-
 // Export the function to check for documents with a specific username
 module.exports.isUsernameTaken = async (username) => {
     try {
@@ -145,3 +172,12 @@ module.exports.isUsernameTaken = async (username) => {
     }
 };
 
+module.exports.createPetDocument = async (collection, documentId, data) => {
+    try {
+        // Add the data to the Firestore database
+        await firestore.collection(collection).doc(documentId).set(data);
+    } catch (error) {
+        console.error('Error creating pet document:', error);
+        throw error;
+    }
+}

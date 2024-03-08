@@ -6,8 +6,8 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { auth, firestore, storage } from "@/lib/firebase";
 import { checkDisplayName, checkLocation, checkUsername } from "@/lib/formats";
-import { isUsernameTaken} from "@/lib/crud";
-import { handleFilePreview } from "@/lib/helper-functions";
+import { isUsernameTaken} from "@/lib/firestore-crud";
+import { handleImageFilePreview } from "@/lib/helper-functions";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { Textarea } from "@/components/ui/textarea";
 import WithAuth from "@/components/WithAuth";
 import { Card, CardHeader } from "@/components/ui/card";
+import { set } from "date-fns";
 
 
 function SetupPage() {
@@ -34,6 +35,7 @@ function SetupPage() {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [userPhoto, setUserPhoto] = useState('');
     const [previewUrl, setPreviewUrl] = useState('/images/profilePictureHolder.jpg');
+    const [userPhotoURL, setUserPhotoURL] = useState('');
 
     const [submitDisabled, setSubmitDisabled] = useState(false);
 
@@ -63,10 +65,17 @@ function SetupPage() {
             }
         };
         checkUserSetup();
-    }, [router, user]);
+    });
 
+    /**
+     * Handles the change event of the file input element.
+     * This will set the preview image of their selected file 
+     * and assign it to the userPhoto variable.
+     * 
+     * @param {Event} event - The change event object.
+     */
     const handleFileChange = (event) => {
-        var temp = handleFilePreview(event.target.files[0]);
+        var temp = handleImageFilePreview(event.target.files[0]);
         if (temp == null) {
             setUserPhoto('');
             setPreviewUrl('/images/profilePictureHolder.jpg');
@@ -76,101 +85,108 @@ function SetupPage() {
         }
         
     };
-
+    
+    /**
+     * Handles the form submission event.
+     * This function sends requests to the server to check if the username is taken,
+     * upload the user's photo, and save the user's data.
+     * 
+     * @param {Event} event - The form submission event object.
+     */
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        let usernameTaken = await isUsernameTaken(username);
-
-        if (usernameTaken){
-            toast.error('Username is already taken!');
-            return;
-        }
-    
         try {
-            setSubmitDisabled(true);
-            toast.loading('Setting up your account...');
-    
-            const storagePath = `userProfile/${user.uid}/profilePic`;
-            const storageRef = storage.ref().child(storagePath);
-    
-            if (userPhoto) {
-                await uploadUserPhoto(storageRef);
-            }
-    
-            await saveUserData();
-    
-            toast.success(`Welcome to BantayBuddy, ${username}!`);
-            router.push(`/user/${username}`);
-        } catch (error) {
-            toast.error('An error occurred while setting up your account.');
-            console.error(error);
-        } finally {
-            setSubmitDisabled(false);
-            toast.dismiss();
-        }
-    };
-    
-    const uploadUserPhoto = async (storageRef) => {
-        const uploadTask = storageRef.put(userPhoto);
-    
-        await new Promise((resolve, reject) => {
-            uploadTask.on(
-                'state_changed',
-                (snapshot) => {
-                    // Handle progress updates here
-                    const progress = Math.round(
-                        (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-                    );
-                    // Update progress state if needed
-                },
-                (error) => {
-                    // Handle error here
-                    reject(error);
-                },
-                () => {
-                    // Handle successful upload here
-                    toast.success('Photo uploaded successfully!');
-                    resolve();
+            // Check if username is taken
+            /** Send a POST request to the server through the `save-user-data` route to check 
+             *  if the username is taken, and return a value to indicate if the username is taken.
+             *  
+             *  @param {String} action - The name of the action that the server will perform  
+             *  @param {String} username - The username to check. 
+             *  
+             */
+            await fetch('/api/user-setup/save-user-data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'isUsernameTaken', username }) 
+            }).then(res => res.json()).then(data => {
+                if (data.usernameTaken) {
+                    throw new Error("username taken");
+                    return;
                 }
-            );
-        });
-    };
-    
-    const saveUserData = async () => {
-        const userDoc = firestore.doc(`users/${user.uid}`);
-        const batch = firestore.batch();
-    
-        batch.set(userDoc, {
-            username: username,
-            displayName: displayName,
-            userPhotoURL: userPhoto ? await getUserPhotoURL() : "",
-            about: about,
-            email: user.email,
-            followers: [],
-            following: [],
-            hidden: [],
-            coverPhotoURL: "",
-            gender: gender,
-            birthdate: birthdate,
-            location: location,
-            phoneNumber: phoneNumber,
-            uid: user.uid
-        });
-    
-        await batch.commit();
-    };
-    
-    const getUserPhotoURL = async () => {
-        const storagePath = `userProfile/${user.uid}/profilePic`;
-        const storageRef = storage.ref().child(storagePath);
-        return await storageRef.getDownloadURL();
-    };
-    
+            });
 
+            // Photo Upload
+            /** Send a POST request to the server through the `save-user-data` route to upload 
+             *  a file chosen by the user to the firebase storage. The server will return the URL of the uploaded file.
+             *  
+             *  @param {String} action - The name of the action that the server will perform.
+             *  @param {String} user.uid - The id of the user.
+             *  @param {String} userPhoto - The user's profile picture.
+             *  
+             */
+            if (userPhoto) {
+                const formData = new FormData();
+                formData.append('action', "uploadProfile");
+                formData.append('user', user.uid);
+                formData.append('file', userPhoto);
+
+                // Upload user photo
+                await fetch('/api/user-setup/upload-file', {
+                    method: 'POST',
+                    body: formData
+                }).then(response => response.json()).then(async data => {
+                    console.log(data);
+                    setUserPhotoURL(data.url);
+                    // Save User Data
+                    await saveUserData(data.url);
+                });
+            } else {
+                // Save User Data
+                await saveUserData(userPhotoURL);
+            }
+            
+            /** Send a POST request to the server to save the user data
+             *  by attaching the data to the body. 
+             *  
+             *  @param {String} action - The name of the action that the server will perform  
+             *  @param {String} user - The user ID of the signed-in user.
+             *  @param {String} username - The username of the signed-in user.
+             *  @param {String} displayName - The display name of the signed-in user.
+             *  @param {String} userPhotoURL - The URL of the user's profile picture.
+             *  @param {String} about - The about section of the user's profile.
+             *  @param {String} gender - The gender of the user.
+             *  @param {String} birthdate - The birthdate of the user.
+             *  @param {String} location - The location of the user.
+             *  @param {String} phoneNumber - The phone number of the user.
+             *  
+             */
+            async function saveUserData(photoURL) {
+                await fetch('/api/user-setup/save-user-data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'saveUserData', user, username, displayName, userPhotoURL: photoURL, about, gender, birthdate, location, phoneNumber /* ... */ }) 
+                }).then(response => response.json()).then(data => {
+                    if (data.success) {
+                        toast.success(`Welcome to BantayBuddy, ${username}!`);
+                        router.push(`/user/${username}`);
+                    }
+                });
+            }
+
+            
+        } catch (error) {
+            if (error.message === 'username taken'){
+                toast.error('Username is already taken!');
+            } else {
+                toast.error('An error occurred while setting up your account.');
+            }
+        } 
+    }
+      
 
   return (
-    <div className="flex items-center justify-center md:mt-16 md:mb-16 w-full md:pl-16 md:pr-16">
+    <div className="flex items-center justify-center md:mt-16 md:mb-16 w-full md:pl-16 md:pr-16 setup-page-background">
       <Card className="h-full md:outline justify-center items-center flex w-full md:w-fit">
         <form onSubmit={handleSubmit} className="md:rounded-md p-8 w-full md:w-[800px] h-full md:h-fit flex flex-col overflow-y-scroll md:overflow-hidden">
 
@@ -347,8 +363,9 @@ function SetupPage() {
                     name="birthdate"
                     className={`border border-slate-400 mt-2 p-2 rounded-md w-full`} 
                     placeholder="Tell us about yourself!" 
-                    max="9999-12-31"
+                    max={new Date().toISOString().split("T")[0]}
                     required
+                    value = {birthdate}
                     onChange={(e) => setBirthdate(e.target.value)} />
             </div>
 
