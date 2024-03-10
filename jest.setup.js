@@ -18,6 +18,13 @@ jest.mock('../lib/firebase', () => {
   };
 });
 
+if (typeof global.TextEncoder === "undefined") {
+  const { TextEncoder, TextDecoder } = require("util");
+  global.TextEncoder = TextEncoder;
+  global.TextDecoder = TextDecoder;
+}
+
+// Polyfill fetch, Request, Response, Headers globally using whatwg-fetch, node-fetch, or similar
 // Add the global fetch, Request, Response, and Headers setup here
 global.fetch = require('node-fetch');
 global.Request = global.fetch.Request;
