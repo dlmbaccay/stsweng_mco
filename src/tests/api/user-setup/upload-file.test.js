@@ -66,7 +66,7 @@ describe('upload-file API Route', () => {
     expect(result.data).toEqual({ url: 'coverPhotoURL' });
   });
 
-  it('returns an error when file is not received', async () => {
+  it('returns an error when a file is not received', async () => {
     const formData = new FormData();
     formData.append('action', 'uploadProfile');
     // Not appending a file object to simulate the missing file scenario
@@ -117,5 +117,4 @@ describe('upload-file API Route', () => {
 //     expect(result.options).toEqual({ status: 500 });
 //   });
 
-  // Add more test cases here for uploadCover, error handling, etc.
 });
