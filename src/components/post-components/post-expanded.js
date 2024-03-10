@@ -55,7 +55,7 @@ export function ExpandedPost({ post, currentUser }) {
 
                 <div className="flex flex-row justify-start items-start">
                     <div id="author-image">
-                        <Image src={post.authorPhotoURL} alt="author photo" width={50} height={50} className="rounded-full drop-shadow-sm aspect-square object-cover h-[40px] w-[40px] md:h-[45px] md:w-[45px]" />
+                        <Image src={post.authorPhotoURL ? post.authorPhotoURL : "/images/profilePictureHolder.jpg"} alt="author photo" width={50} height={50} className="rounded-full drop-shadow-sm aspect-square object-cover h-[40px] w-[40px] md:h-[45px] md:w-[45px]" />
                     </div>
 
                     <div id="post-meta" className="ml-4 items-center justify-center">
@@ -64,8 +64,8 @@ export function ExpandedPost({ post, currentUser }) {
                                 <p className="font-bold">{post.authorDisplayName}</p>
                             </div>
                             <div className='font-bold'>·</div>
-                            <Link href={`/user/${post.authorName}`} id="username" className="hover:text-muted_blue dark:hover:text-light_yellow hover:font-bold transition-all">
-                                <p>@{post.authorName}</p>
+                            <Link href={`/user/${post.authorUsername}`} id="username" className="hover:text-muted_blue dark:hover:text-light_yellow hover:font-bold transition-all">
+                                <p>@{post.authorUsername}</p>
                             </Link>
                         </div>
                         
@@ -394,7 +394,7 @@ export function ExpandedPost({ post, currentUser }) {
                 onSubmit={handleComment}
                 className='flex flex-row items-start justify-center h-full'>
                 <div className='flex aspect-square w-[40px] h-[40px] mr-2 mt-1'>
-                    {currentUser && <Image src={currentUser.userPhotoURL} alt="user image" width={40} height={40} className='rounded-full drop-shadow-sm '/>}
+                    {currentUser && <Image src={currentUser.userPhotoURL  ? currentUser.userPhotoURL : "/images/profilePictureHolder.jpg"} alt="user image" width={40} height={40} className='rounded-full drop-shadow-sm '/>}
                 </div>
 
                 <textarea 

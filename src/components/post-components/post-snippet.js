@@ -41,15 +41,15 @@ export function PostSnippet({ post, currentUser }) {
 
   return (
     <Dialog>
-        <DialogTrigger asChild>
-            <Card className="drop-shadow-md hover:drop-shadow-md min-h-fit rounded-md p-6 flex flex-col cursor-pointer">
+        {/* <DialogTrigger asChild> */}
+            <Card className="drop-shadow-md hover:drop-shadow-md min-h-fit rounded-md p-6 flex flex-col">
 
                 {/* header */}
                 <div id="post-header" className="flex flex-col md:flex-row justify-between">
 
                     <div className="flex flex-row justify-start items-start">
                         <div id="author-image">
-                            <Image src={post.authorPhotoURL} alt="author photo" width={50} height={50} className="rounded-full drop-shadow-sm aspect-square object-cover h-[40px] w-[40px] md:h-[45px] md:w-[45px]" />
+                            <Image src={post.authorPhotoURL ? post.authorPhotoURL : "/images/profilePictureHolder.jpg"} alt="author photo" width={50} height={50} className="rounded-full drop-shadow-sm aspect-square object-cover h-[40px] w-[40px] md:h-[45px] md:w-[45px]" />
                         </div>
 
                         <div id="post-meta" className="ml-4 items-center justify-center">
@@ -58,8 +58,8 @@ export function PostSnippet({ post, currentUser }) {
                                     <p className="font-bold">{post.authorDisplayName}</p>
                                 </div>
                                 <div className='font-bold'>·</div>
-                                <Link href={`/user/${post.authorName}`} id="username" className="hover:text-muted_blue dark:hover:text-light_yellow hover:font-bold transition-all">
-                                    <p>@{post.authorName}</p>
+                                <Link href={`/user/${post.authorUsername}`} id="username" className="hover:text-muted_blue dark:hover:text-light_yellow hover:font-bold transition-all">
+                                    <p>@{post.authorUsername}</p>
                                 </Link>
                             </div>
                             
@@ -79,7 +79,7 @@ export function PostSnippet({ post, currentUser }) {
                     </div>
 
                 </div>
-
+                
                 {/* body */}
                 <div id="post-body" className='mt-2 md:mt-3 flex flex-col'>
                     {/* pets */}
@@ -118,16 +118,18 @@ export function PostSnippet({ post, currentUser }) {
                     </div>
                     }
 
-                    <div id="post-content">
-                        <p
-                            // onClick={() => {
-                            //   setShowPostExpanded(true)
-                            //   setPostAction('view')
-                            // }} 
-                            className='whitespace-pre-line line-clamp-1 text-sm md:text-base md:line-clamp-4 overflow-hidden text-justify'>
-                            {post.content}
-                        </p>
-                    </div>
+                    <DialogTrigger asChild>
+                        <div id="post-content" className="cursor-pointer">
+                            <p
+                                // onClick={() => {
+                                //   setShowPostExpanded(true)
+                                //   setPostAction('view')
+                                // }} 
+                                className='whitespace-pre-line line-clamp-1 text-sm md:text-base md:line-clamp-4 overflow-hidden text-justify'>
+                                {post.content}
+                            </p>
+                        </div>
+                    </DialogTrigger>
 
                     { post.imageURLs.length >= 1 &&
                         <div id="post-image" className='h-[200px] mt-2 md:mt-4 md:h-[300px] w-auto flex items-center justify-center relative'>
@@ -144,11 +146,13 @@ export function PostSnippet({ post, currentUser }) {
                                     }}></i>
                                 </>
                             )}
-                            <Image src={post.imageURLs[currentImageIndex]} alt="post image" 
-                                layout='fill'
-                                objectFit='contain'
-                                className='rounded-lg cursor-pointer'
-                                />
+                            <DialogTrigger asChild>
+                                <Image src={post.imageURLs[currentImageIndex]} alt="post image" 
+                                    layout='fill'
+                                    objectFit='contain'
+                                    className='rounded-lg cursor-pointer'
+                                    />
+                            </DialogTrigger>
                         </div>
                     }
                 </div>
@@ -275,6 +279,7 @@ export function PostSnippet({ post, currentUser }) {
                         </div>
 
                         <div id="comment-control" className="flex flex-row justify-center items-center gap-2">
+                            <DialogTrigger asChild>
                             <i 
                                 onClick={() => {
                                     // setShowPostExpanded(true)
@@ -282,10 +287,12 @@ export function PostSnippet({ post, currentUser }) {
                                     toast.success("You're commenting on a post!")
                                 }}
                                 className="fa-solid fa-comment hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" />
+                            </DialogTrigger>
                             <p>{commentsLength}</p>
                         </div>
 
                         <div id="share-control">
+                            <DialogTrigger asChild>
                             <i 
                                 onClick={() => {
                                     // setShowPostExpanded(true)
@@ -293,11 +300,13 @@ export function PostSnippet({ post, currentUser }) {
                                     toast.success("You're sharing a post!")
                                 }}
                                 className="fa-solid fa-share hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" />
+                            </DialogTrigger>
                         </div>
                     </div>
 
                     <div id="right" className="flex flex-row gap-4 items-center text-sm md:text-base">
                         {currentUser.uid !== post.authorID && 
+                            <DialogTrigger asChild>
                             <i
                                 id="report-control"
                                 onClick={() => {
@@ -307,6 +316,7 @@ export function PostSnippet({ post, currentUser }) {
                                 }}
                                 className="fa-solid fa-flag hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" 
                             />
+                            </DialogTrigger>
                         }
 
                         {currentUser.uid === post.authorID && 
@@ -335,7 +345,7 @@ export function PostSnippet({ post, currentUser }) {
                     </div>
                 </div>
             </Card>
-        </DialogTrigger>
+        {/* </DialogTrigger> */}
 
         <DialogContent className="sm:min-w-full md:min-w-[750px] h-[95%] flex flex-col items-start justify-center p-2">
             <DialogHeader className="flex items-center justify-center w-full">

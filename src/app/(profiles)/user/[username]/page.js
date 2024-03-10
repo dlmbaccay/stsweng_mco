@@ -170,7 +170,7 @@ function UserProfile() {
         if (userData) {
 
             const fetchUserPosts = async () => {
-                const response = await fetch(`/api/posts/via-authorName?username=${userData.username}`, {
+                const response = await fetch(`/api/posts/via-authorUsername?username=${userData.username}`, {
                     method: 'GET' // Specify GET method
                 });
     

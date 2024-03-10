@@ -9,7 +9,7 @@ export async function GET(request) {
     
     try {
         
-        const postDocs = await getDocumentsWithCondition('posts', 'authorName', "==", username );
+        const postDocs = await getDocumentsWithCondition('posts', 'authorUsername', "==", username );
         if (postDocs) {
             return NextResponse.json({postDocs}, {status: 200});
         } else {

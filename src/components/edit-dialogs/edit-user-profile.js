@@ -144,7 +144,7 @@ export function EditUserProfile({props}) {
         <Dialog>
             <DialogTrigger asChild>
                 <Button className="px-3 h-[35px]  gap-2 flex items-center justify-center">
-                    <i class="fa-solid fa-pencil" />
+                    <i className="fa-solid fa-pencil" />
                     Edit Profile
                 </Button>
             </DialogTrigger>

@@ -22,13 +22,14 @@ export function CreatePost({props}) {
     const { uid, username, displayname, userphoto, pets } = props;
     
     const [ postAuthorID, setPostAuthorID ] = useState(uid);
-    const [ postAuthorName, setPostAuthorName ] = useState(username);
+    const [ postAuthorUsername, setPostAuthorUsername ] = useState(username);
     const [ postAuthorDisplayName, setPostAuthorDisplayName ] = useState(displayname);
     const [ postAuthorPhotoURL, setPostAuthorPhotoURL ] = useState(userphoto);
     const [ postContent, setPostContent] = useState('');
     const [ postCategory, setPostCategory] = useState('');
     const [ postTaggedPets, setPostTaggedPets] = useState([]);
     const [ postImageURLs, setPostImageURLs] = useState([]);
+    const [ postTrackerLocation, setPostTrackerLocation] = useState('');
 
     const [ mediaFiles, setMediaFiles] = useState([]);
     const [ previewMedia, setPreviewMedia] = useState([]);
@@ -81,53 +82,44 @@ export function CreatePost({props}) {
         event.preventDefault();
         setLoading(true);
         try {
-            const postID = await firestore.collection("pets").doc().id;
-            const promises = [];
-            if (mediaFiles.length > 0) {
-                mediaFiles.forEach((file) => {
-                    promises.push(uploadPostMedia(postID, file));
-                });
+            const formData = new FormData();
+            formData.append('postAuthorID', postAuthorID);
+            formData.append('postAuthorUsername', postAuthorUsername);
+            formData.append('postAuthorDisplayName', postAuthorDisplayName);
+            formData.append('postAuthorPhotoURL', postAuthorPhotoURL);
+            formData.append('postContent', postContent);
+            formData.append('postCategory', postCategory);
+            formData.append('postTaggedPets', JSON.stringify(postTaggedPets));
+            formData.append('postTrackerLocation', postTrackerLocation);
+            for (const file of Array.from(mediaFiles)) {
+                formData.append('files', file);
             }
-            Promise.all(promises).then((values) => {
-                setPostImageURLs(values);
+
+            // Call API to create post
+            await fetch('/api/posts/create-post', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json()).then(async data => {
+                console.log(data);
                 setLoading(false);
-                const postDetails = {
-                    postID: postID,
-                    authorID: postAuthorID,
-                    authorName: postAuthorName,
-                    authorDisplayName: postAuthorDisplayName,
-                    authorPhotoURL: postAuthorPhotoURL,
-                    content: postContent,
-                    category: postCategory,
-                    taggedPets: postTaggedPets,
-                    imageURLs: values,
-                    date: new Date().toISOString()
-                };
-                // Call a function to save the post details to the database
-                savePostDetails(postDetails);
+        
+                toast.success("Post created successfully!");
+                
+                setPostContent('');
+                setPostCategory('');
+                setPostTaggedPets([]);
+                setPostImageURLs([]);
+                setMediaFiles([]);
+                setPreviewMedia([]);
+                setSelectedPetIDs([]);
+                setPostTrackerLocation('');
             });
+            
         } catch (error) {
             console.error(error);
             setLoading(false);
-        }
-    }
-
-    const savePostDetails = (postDetails) => {
-        createPostDocument("posts", postDetails.postID, postDetails).then(() => {
-            toast.success("Post created successfully!");
-            setPostContent('');
-            setPostCategory('');
-            setPostTaggedPets([]);
-            setPostImageURLs([]);
-            setMediaFiles([]);
-            setPreviewMedia([]);
-            setSelectedPetIDs([]);
-            setLoading(false);
-        })
-        .catch((error) => {
-            console.error(error);
             toast.error("Error creating post. Please try again later.");
-        });
+        }
     }
 
     useEffect(() => {
@@ -141,6 +133,7 @@ export function CreatePost({props}) {
 
     return (
         <Dialog>
+            {/* Trigger Buttons */}
             <div className="flex flex-row items-center"> 
                 <DialogTrigger asChild>
                     <Button variant="outline" className="h-[35px] w-11/12 bg-light_yellow hover:bg-primary text-primary-foreground hover:text-primary-foreground gap-2 flex items-center justify-center rounded-full">
@@ -149,7 +142,7 @@ export function CreatePost({props}) {
                 </DialogTrigger>
                 <DialogTrigger asChild>
                     <Button variant="outline" className="p-1.5 bg-light_yellow hover:bg-primary text-primary-foreground hover:text-primary-foreground rounded-full aspect-square mx-auto">
-                        <FontAwesomeIcon icon={faImage} class="w-5 h-5 text-white dark:text-dark_gray"></FontAwesomeIcon>
+                        <FontAwesomeIcon icon={faImage} className="w-5 h-5 text-white dark:text-dark_gray"></FontAwesomeIcon>
                     </Button>
                 </DialogTrigger>
             </div>
@@ -162,6 +155,7 @@ export function CreatePost({props}) {
                 <form onSubmit={createPost}>
                     <div className="flex flex-col w-full mb-4">
                         <div className="flex flex-row w-full px-10 gap-12">
+                            {/* Post Category Select */}
                             <div className="flex flex-col items-center w-2/5">
                                 <Label htmlFor="category" className={"my-4 w-full"} > Post Category </Label>
                                 <Select required onValueChange={(value) => setPostCategory(value)} defaultValue={''}>
@@ -179,6 +173,8 @@ export function CreatePost({props}) {
                                     </SelectContent>
                                 </Select>
                             </div>
+                            
+                            {/* Pet Tags Input */}
                             <div className="flex flex-col items-center w-3/5">
                                 <Label htmlFor="pets" className={"my-4 w-full"} >Tag your Pets!</Label>
                                 <MultiSelect 
@@ -188,15 +184,29 @@ export function CreatePost({props}) {
                                     className={"w-full rounded-md"}
                                 />
                             </div>
+                            
+                            
+                            
                         </div>
+
+                        {/* Conditional Location Input for Pet Tracker Categories */}
+                        {(postCategory == "Lost Pets" || postCategory == "Unknown Owner") &&
+                            <div className="flex flex-col w-full px-10">
+                                <Label htmlFor="pet-location" className={"my-4 w-full"} >Last Seen at </Label>
+                                <Input type="text" id="pet-location" required className={`p-2 rounded-md w-full`} placeholder="Location" value={postTrackerLocation} onChange={(e) => setPostTrackerLocation(e.target.value)}
+                                />
+                            </div>
+                        }
+
+                        {/* Post Content Input */}
                         <div className="flex flex-col w-full px-10">
                             <div className="flex flex-col items-left w-full">
                                 <Textarea 
                                     type="text" 
                                     id="post-content" 
                                     value={postContent} 
-                                    className={`mt-2 p-2 rounded-md w-full`} 
-                                    placeholder="What's on your mind?" 
+                                    className={`my-4 p-2 rounded-md w-full`} 
+                                    placeholder={(postCategory == "Lost Pets" || postCategory == "Unknown Owner") ? "Provide more details..." : "What's on your mind?"} 
                                     maxLength={400}
                                     minLength={1}
                                     onChange={(e) => setPostContent(e.target.value)} />
