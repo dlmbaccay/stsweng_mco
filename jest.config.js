@@ -8,6 +8,10 @@ module.exports = {
       // Mock static asset imports (images, stylesheets) which Jest can't process
       '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
       '^@lib/(.*)$': '<rootDir>/src/lib/$1', // Example for aliasing 'src/lib' to '@lib'
+      '^@/lib/(.*)$': '<rootDir>/src/lib/$1',
+      "^@/api/(.*)$": "<rootDir>/src/app/api/$1",
+      '^app/(.*)$': '<rootDir>/src/app/$1',
+      "^@/(.*)$": "<rootDir>/src/$1",
     },
     transform: {
       // Use babel-jest to transpile tests in JS/JSX
