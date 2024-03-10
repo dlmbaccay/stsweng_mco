@@ -1,25 +1,26 @@
-    "use client"
+"use client"
 
-    import { toast } from "react-hot-toast";
-    import { useEffect, useState } from "react";
-    import { useRouter, useParams } from "next/navigation";
-    import Image from "next/image";
-    import { auth, firestore } from "@/lib/firebase";
-    import { handleDateFormat } from "@/lib/helper-functions";
-    import  Loader from "@/components/Loader";
-    import NavBar from "@/components/nav/navbar";
-    import CoverPhoto from "@/components/ui/cover-photo";
-    import { Button } from "@/components/ui/button";
-    import { Input } from "@/components/ui/input";
-    import { EditUserProfile } from "@/components/edit-dialogs/edit-user-profile";
-    import { CreatePetProfile } from "@/components/profile/create-pet-profile";
-    import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
-    import WithAuth from "@/components/WithAuth";
-    import { FollowButton } from "@/components/profile/follow-user-button";
-    import { CreatePost } from "@/components/post-components/create-post";
-    import { PetsContainer } from "@/components/profile/pet-container";
+import { toast } from "react-hot-toast";
+import { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
+import Image from "next/image";
+import { auth, firestore } from "@/lib/firebase";
+import { handleDateFormat } from "@/lib/helper-functions";
+import  Loader from "@/components/Loader";
+import NavBar from "@/components/nav/navbar";
+import CoverPhoto from "@/components/ui/cover-photo";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { EditUserProfile } from "@/components/edit-dialogs/edit-user-profile";
+import { CreatePetProfile } from "@/components/profile/create-pet-profile";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
+import WithAuth from "@/components/WithAuth";
+import { FollowButton } from "@/components/profile/follow-user-button";
+import { CreatePost } from "@/components/post-components/create-post";
+import { PetsContainer } from "@/components/profile/pet-container";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTags } from "@fortawesome/free-solid-svg-icons";
+import { PostSnippet } from "@/components/post-components/post-snippet";
 
 function UserProfile() {
     const router = useRouter();
@@ -202,7 +203,7 @@ function UserProfile() {
                     </div>
                     
                     { userData &&
-                        <div className="w-full h-screen fixed z-10 mt-16 flex flex-col items-center justify-start overflow-y-auto">
+                        <div className="w-full h-screen fixed z-10 mt-16 pb-32 flex flex-col items-center justify-start overflow-y-scroll">
                             {/* Cover Photo */}
                             <div className="h-[30%] xl:w-[60%] 2xl:w-[60%] w-full border-red">
                                 {/* <CoverPhoto 
@@ -347,59 +348,28 @@ function UserProfile() {
 
                                     {activeTab == 'posts' ? (
                                         <>
-                                            { currentUser.uid === userData.uid ? <Card className="drop-shadow-md rounded-sm mb-2">
-                                                <div className="flex flex-row items-center w-full my-2">
-                                                    <div className="ml-4">
-                                                        <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.jpg" : userData.userPhotoURL} alt="user photo" width={44} height={44} className="rounded-full aspect-square object-cover" />
+                                            { currentUser.uid === userData.uid ? 
+                                                <Card className="drop-shadow-md rounded-sm mb-6">
+                                                    <div className="flex flex-row items-center w-full my-2">
+                                                        <div className="ml-4">
+                                                            <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.jpg" : userData.userPhotoURL} alt="user photo" width={44} height={44} className="rounded-full aspect-square object-cover" />
+                                                        </div>
+                                                        <div className="w-full mx-4">
+                                                            <CreatePost props={{
+                                                                uid: userData.uid,
+                                                                username: userData.username,
+                                                                displayname: userData.displayName,
+                                                                userphoto: userData.userPhotoURL,
+                                                                pets: userPets,
+                                                            }}/>
+                                                        </div>
                                                     </div>
-                                                    <div className="w-full mx-4">
-                                                        <CreatePost props={{
-                                                            uid: userData.uid,
-                                                            username: userData.username,
-                                                            displayname: userData.displayName,
-                                                            userphoto: userData.userPhotoURL,
-                                                            pets: userPets,
-                                                        }}/>
-                                                    </div>
-                                                </div>
-                                                <hr className="border-b border-light_yellow mx-4 mb-2"/>
-                                            </Card> : null}
+                                                </Card> : null
+                                            }
                                             
                                             {userPosts.map((post) => {
                                                 return (
-                                                    <Card key={post.postID} className="text-sm p-4 drop-shadow-md rounded-[1rem] my-8">
-                                                        <div className="flex flex-col w-full">
-                                                            <div className="flex flex-row w-full my-2 mx-2">
-                                                                <div className="flex flex-row items-center">
-                                                                    <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.jpg" : userData.userPhotoURL} alt="user photo" width={60} height={60} className="rounded-full aspect-square object-cover" />
-                                                                    <div className="flex flex-col mx-4">
-                                                                        <div className="">
-                                                                            <span className="font-bold text-base">{post.authorDisplayName}</span> · @{post.authorName}
-                                                                        </div>
-                                                                        <div className="text-sm">
-                                                                            {handleDateFormat(post.date)}
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="items-start ml-auto font-semibold text-base mr-4">
-                                                                    {post.category}
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex flex-row items-left mx-2 text-lg">
-                                                                <FontAwesomeIcon icon={faTags} className="mr-2" />
-                                                            </div> 
-
-
-                                                            <p>Posts Container</p>
-                                                            postAuthor: {post.authorName}
-                                                            postContent: {post.content}
-                                                            postDate: {handleDateFormat(post.date)}
-                                                            postLikes: {post.likes}
-                                                            postComments: {post.comments}
-
-                                                        </div>
-                                                        
-                                                    </Card>
+                                                    <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
                                                 )
                                             })}
                                         </>

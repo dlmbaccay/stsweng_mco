@@ -413,4 +413,16 @@
  }
 
  
- 
+ /* for edited posts */
+ .tooltip {
+  background-color: #fff;
+  color: #333;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.edited-post-tooltip {
+  color: '#17171F';
+  font-style: italic;
+}
