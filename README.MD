@@ -1,3 +1,5 @@
-# Dev Branch
+# Release Branch
 
-### Deployed (test) website in: dev-bantaybuddy.vercel.app
+Preview Deployment Link:
+
+https://dev-bantaybuddy.vercel.app/

@@ -44,6 +44,20 @@ module.exports.createUserDocument = async (collection, documentId, data) => {
     }
 };
 
+// Export the function to create a new Post document in a collection with given data
+module.exports.createPostDocument = async (collection, documentId, data) => {
+    try {
+        // Add the data to the Firestore database
+        await firestore.collection(collection).doc(documentId).set(data);
+
+        // Return the ID of the newly created document
+        return documentId;
+    } catch (error) {
+        console.error('Error creating post document:', error);
+        throw error;
+    }
+};
+
 // Export the function to update a document in a collection with given data
 module.exports.updateDocument = async (collection, documentId, data) => {
     try {

@@ -19,3 +19,8 @@ export function handleImageFilePreview(file) {
     }
 }
 
+export function handleDateFormat(date) {
+    const options = { month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
+    const formattedDate = new Date(date).toLocaleString('en-US', options);
+    return formattedDate;
+}

@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRightFromBracket, faBell, faCircleStop, faHandHoldingHeart, faHouse, faPaw, faRightFromBracket, faUser, faUserGear} from "@fortawesome/free-solid-svg-icons";
+import { faArrowRightFromBracket, faBell, faCircleStop, faHandHoldingHeart, faHouse, faPaw, faRightFromBracket, faUser, faBars, faUserGear} from "@fortawesome/free-solid-svg-icons";
 import { auth } from "@/lib/firebase";
 import { ModeToggle } from "../mode-toggle";
 import {
@@ -36,7 +36,7 @@ export default function NavBar({props}) {
 
     return (
         <>
-            <div ref={navRef} className={`h-16 w-full px-4 border-b-2 border-gray grid grid-cols-3 justify-between bg-white dark:bg-dark_gray `}>
+            <div ref={navRef} className={`h-16 w-full px-4 border-b-2 border-slate-400 grid grid-cols-3 justify-between bg-white dark:bg-dark_gray `}>
                 <>
                 {/* user meta */}
                 <div className="flex flex-row items-center">
@@ -48,10 +48,62 @@ export default function NavBar({props}) {
                     <div className="flex flex-row items-center justify-center gap-4">
                         <ModeToggle></ModeToggle>
                     </div>
+                    
+                    {/* Menu Button for Smaller Screens */}
+                    <button 
+                        onClick={() => setIsExpanded(!isExpanded)} className={`lg:hidden xl:hidden 2xl:hidden px-4 transition-all duration-300 flex flex-row items-center gap-3`}>
+                        <div className="p-2 bg-muted_blue rounded-full dark:bg-light_yellow">
+                            <FontAwesomeIcon icon={faBars} className="w-5 h-5 text-white dark:text-dark_gray"></FontAwesomeIcon>
+                        </div>
+                    </button>
+                    
+
+                    {/* Dropdown Menu for Smaller Screens */}
+                    {isExpanded && (
+                        <div className="lg:hidden xl:hidden 2xl:hidden">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger>
+                                    <FontAwesomeIcon icon={faBars} className="w-5 h-5 text-white dark:text-dark_gray" />
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                    <DropdownMenuItem>
+                                        <button onClick={() => router.push('/home')} className="transition-all duration-300 flex flex-row items-center gap-3">
+                                            <FontAwesomeIcon icon={faHouse} className="w-5 h-5 text-white dark:text-dark_gray" />
+                                            <span>Home</span>
+                                        </button>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem>
+                                        <button onClick={() => router.push('/pet-tracker')} className="transition-all duration-300 flex flex-row items-center gap-3">
+                                            <FontAwesomeIcon icon={faPaw} className="w-5 h-5 text-white dark:text-dark_gray" />
+                                            <span>Pet Tracker</span>
+                                        </button>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem>
+                                        <button onClick={() => router.push(`/user/${username}`)} className="transition-all duration-300 flex flex-row items-center gap-3">
+                                            <FontAwesomeIcon icon={faUser} className="w-5 h-5 text-white dark:text-dark_gray" />
+                                            <span>Profile</span>
+                                        </button>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem>
+                                        <button onClick={() => router.push('/adopt')} className="transition-all duration-300 flex flex-row items-center gap-3">
+                                            <FontAwesomeIcon icon={faHandHoldingHeart} className="w-5 h-5 text-white dark:text-dark_gray" />
+                                            <span>Adoption</span>
+                                        </button>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    )}
+                    
                 </div>
                 
                 <div className="flex flex-row items-center mx-auto">
-                    <div className={`flex flex-row h-full gap-14`}>
+                    
+                    
+
+                    {/* Desktop View */}
+                    <div className={`hidden lg:flex xl:flex 2xl:flex flex-row h-full gap-14`}>
+                
                         
                         {/* Home Button */}
                         <button 
@@ -77,7 +129,7 @@ export default function NavBar({props}) {
                             <div className="p-2 bg-muted_blue rounded-full dark:bg-light_yellow">
                                 <FontAwesomeIcon icon={faUser} class="w-5 h-5 text-white dark:text-dark_gray"></FontAwesomeIcon>
                             </div>
-                            {isExpanded && <span className="text-muted_blue dark:text-light_yellow font-semibold tracking-wider">Profile</span>}
+                            {/* {isExpanded && <span className="text-muted_blue dark:text-light_yellow font-semibold tracking-wider">Profile</span>} */}
                         </button>
 
                         {/* Adoption Button */}
@@ -86,8 +138,10 @@ export default function NavBar({props}) {
                             <div className="p-2 bg-muted_blue rounded-full dark:bg-light_yellow">
                                 <FontAwesomeIcon icon={faHandHoldingHeart} class="w-5 h-5 text-white dark:text-dark_gray"></FontAwesomeIcon>
                             </div>
-                            {isExpanded && <span className="text-muted_blue dark:text-light_yellow font-semibold tracking-wider">Settings</span>}
+                            {/* {isExpanded && <span className="text-muted_blue dark:text-light_yellow font-semibold tracking-wider">Settings</span>} */}
                         </button>
+
+                        {/* <FontAwesomeIcon icon="fa-solid fa-bars" class="w-5 h-5 text-white dark:text-dark_gray" /> */}
 
                         {/* Settings Button */}
                         {/* <button 
