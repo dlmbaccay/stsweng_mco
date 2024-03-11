@@ -32,7 +32,7 @@ export function PostSnippet({ post, currentUser }) {
   return (
     <Dialog>
         {/* <DialogTrigger asChild> */}
-            <Card className="drop-shadow-md hover:drop-shadow-md min-h-fit rounded-md p-6 flex flex-col">
+            <Card className="w-full drop-shadow-md hover:drop-shadow-md min-h-fit rounded-md p-6 flex flex-col">
 
                 {/* header */}
                 <div id="post-header" className="flex flex-col md:flex-row justify-between">
@@ -66,6 +66,15 @@ export function PostSnippet({ post, currentUser }) {
                                 }
                             </div>
                         </div>
+                    </div>
+
+                    <div className='flex flex-col w-fit items-end mt-3 md:mt-0 text-sm md:text-base'>
+                        {   post.category !== 'General' && (
+                            <div className='flex flex-row items-center justify-center gap-2'>
+                                <div className='w-3 h-3 rounded-full bg-muted_blue dark:bg-light_yellow'></div>
+                                <p>{post.category}</p>
+                            </div>
+                        )}
                     </div>
 
                 </div>

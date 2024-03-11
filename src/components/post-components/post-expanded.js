@@ -84,6 +84,15 @@ export function ExpandedPost({ post, currentUser }) {
                     </div>
                 </div>
 
+                <div className='flex flex-col w-fit items-end mt-3 md:mt-0 text-sm md:text-base'>
+                    {   post.category !== 'General' && (
+                        <div className='flex flex-row items-center justify-center gap-2'>
+                            <div className='w-3 h-3 rounded-full bg-muted_blue dark:bg-light_yellow'></div>
+                            <p>{post.category}</p>
+                        </div>
+                    )}
+                </div>
+
             </div>
 
             {/* body */}

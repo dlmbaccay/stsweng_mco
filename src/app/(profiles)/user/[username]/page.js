@@ -366,12 +366,14 @@ function UserProfile() {
                                                     </div>
                                                 </Card> : null
                                             }
+                                            <div className="flex flex-col min-w-full items-center justify-center gap-6">
+                                                {[...userPosts].reverse().map((post) => {
+                                                    return (
+                                                        <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                                    )
+                                                })}
+                                            </div>
                                             
-                                            {userPosts.map((post) => {
-                                                return (
-                                                    <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
-                                                )
-                                            })}
                                         </>
                                     ): (
                                         <Card className="p-4 rounded-md drop-shadow-md">
