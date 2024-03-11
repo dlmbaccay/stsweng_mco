@@ -333,8 +333,8 @@ export function PostSnippet({ post, currentUser }) {
 
                         {currentUser.uid === post.authorID && 
                             <>
-                                <DialogTrigger asChild>
-                                <i
+                            
+                                {/* <i
                                     id="edit-control"
                                     onClick={() => {
                                         setShowPostExpanded(true)
@@ -342,8 +342,8 @@ export function PostSnippet({ post, currentUser }) {
                                         toast.success("You're editing a post!")
                                     }}
                                     className="fa-solid fa-pencil hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" 
-                                />
-                                </DialogTrigger>
+                                /> */}
+                                <EditPost postID={post.postID}/>
 
                                 {/* <i
                                     id="delete-control"
