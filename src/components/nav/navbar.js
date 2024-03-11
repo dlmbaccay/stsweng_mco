@@ -36,7 +36,7 @@ export default function NavBar({props}) {
 
     return (
         <>
-            <div ref={navRef} className={`h-16 w-full px-4 border-b-2 border-slate-400 grid grid-cols-3 justify-between bg-white dark:bg-dark_gray `}>
+            <div ref={navRef} className={`h-16 w-full px-4 grid grid-cols-3 justify-between bg-white dark:bg-dark_gray drop-shadow-lg`}>
                 <>
                 {/* user meta */}
                 <div className="flex flex-row items-center">
@@ -102,22 +102,22 @@ export default function NavBar({props}) {
                     
 
                     {/* Desktop View */}
-                    <div className={`hidden lg:flex xl:flex 2xl:flex flex-row h-full gap-14`}>
+                    <div className={`hidden lg:flex xl:flex 2xl:flex flex-row h-full gap-12`}>
                 
                         
                         {/* Home Button */}
                         <button 
-                            onClick={() => router.push('/home')} className={`px-4 transition-all duration-300 flex flex-row items-center gap-3 ${activeTab === '/home' ? 'border-b-2 border-muted_blue dark:border-light_yellow' : ''}`}>
-                            <div className="p-2 bg-muted_blue rounded-full dark:bg-light_yellow">
-                                <FontAwesomeIcon icon={faHouse} className="w-5 h-5 text-white dark:text-dark_gray"></FontAwesomeIcon>
+                            onClick={() => router.push('/home')} className={`px-6 transition-all duration-300 flex flex-row items-center gap-3 ${activeTab === '/home' ? 'border-b-[3.5px] border-muted_blue dark:border-light_yellow' : ''}`}>
+                            <div className="rounded-full">
+                                <FontAwesomeIcon icon={faHouse} className={`w-6 h-6 ${activeTab === '/home' ? 'text-muted_blue dark:text-light_yellow' : 'text-white dark:text-dark_gray stroke-[50px] stroke-primary'}`}></FontAwesomeIcon>
                             </div>
                         </button>
 
                         {/* Pet Tracker Button */}
                         <button 
-                            onClick={() => router.push('/pet-tracker')} className={`px-4 transition-all duration-300 flex flex-row items-center gap-3 ${activeTab === '/pet-tracker' ? 'border-b-2 border-muted_blue dark:border-light_yellow' : ''}`}>
-                            <div className="p-2 bg-muted_blue rounded-full dark:bg-light_yellow">
-                                <FontAwesomeIcon icon={faPaw} className="w-5 h-5 text-white dark:text-dark_gray"></FontAwesomeIcon>
+                            onClick={() => router.push('/pet-tracker')} className={`px-6 transition-all duration-300 flex flex-row items-center gap-3 ${activeTab === '/pet-tracker' ? 'border-b-[3.5px] border-muted_blue dark:border-light_yellow' : ''}`}>
+                            <div className="rounded-full">
+                                <FontAwesomeIcon icon={faPaw} className={`w-6 h-6 ${activeTab === '/pet-tracker' ? 'text-muted_blue dark:text-light_yellow' : 'text-white dark:text-dark_gray stroke-[50px] stroke-primary'}`}></FontAwesomeIcon>
                             </div>
                         </button>
 
@@ -125,52 +125,31 @@ export default function NavBar({props}) {
 
                         {/* Profile Button */}
                         <button 
-                            onClick={() => router.push('/user/'+username)} className={`px-4 transition-all duration-300 flex flex-row items-center gap-3 ${activeTab === '/user/'+username ? 'border-b-2 border-muted_blue dark:border-light_yellow' : ''}`}>
-                            <div className="p-2 bg-muted_blue rounded-full dark:bg-light_yellow">
-                                <FontAwesomeIcon icon={faUser} className="w-5 h-5 text-white dark:text-dark_gray"></FontAwesomeIcon>
+                            onClick={() => router.push('/user/'+username)} className={`px-8 transition-all duration-300 flex flex-row items-center gap-3 ${activeTab === '/user/'+username ? 'border-b-[3.5px] border-muted_blue dark:border-light_yellow' : ''}`}>
+                            <div className="rounded-full">
+                                <FontAwesomeIcon icon={faUser} className={`w-6 h-6 ${activeTab === '/user/'+username ? 'text-muted_blue dark:text-light_yellow' : 'text-white dark:text-dark_gray stroke-[50px] stroke-primary'}`}></FontAwesomeIcon>
                             </div>
                             {/* {isExpanded && <span className="text-muted_blue dark:text-light_yellow font-semibold tracking-wider">Profile</span>} */}
                         </button>
 
                         {/* Adoption Button */}
                         <button 
-                            onClick={() => router.push('/adopt')} className={`px-4 transition-all duration-300 flex flex-row items-center gap-3 ${activeTab === '/adopt' ? 'border-b-2 border-muted_blue dark:border-light_yellow' : ''}`}>
-                            <div className="p-2 bg-muted_blue rounded-full dark:bg-light_yellow">
-                                <FontAwesomeIcon icon={faHandHoldingHeart} className="w-5 h-5 text-white dark:text-dark_gray"></FontAwesomeIcon>
+                            onClick={() => router.push('/adopt')} className={`px-6 transition-all duration-300 flex flex-row items-center gap-3 ${activeTab === '/adopt' ? 'border-b-[3.5px] border-muted_blue dark:border-light_yellow' : ''}`}>
+                            <div className="rounded-full">
+                                <FontAwesomeIcon icon={faHandHoldingHeart} className={`w-6 h-6 ${activeTab === '/adopt' ? 'text-muted_blue dark:text-light_yellow' : 'text-white dark:text-dark_gray stroke-[50px] stroke-primary'}`}></FontAwesomeIcon>
                             </div>
                             {/* {isExpanded && <span className="text-muted_blue dark:text-light_yellow font-semibold tracking-wider">Settings</span>} */}
                         </button>
-
-                        {/* <FontAwesomeIcon icon="fa-solid fa-bars" className="w-5 h-5 text-white dark:text-dark_gray" /> */}
-
-                        {/* Settings Button */}
-                        {/* <button 
-                            onClick={() => router.push('/settings')} className={`px-4 transition-all duration-300 flex flex-row items-center gap-3`}>
-                            <div className="p-2 bg-muted_blue rounded-full dark:bg-light_yellow">
-                                <FontAwesomeIcon icon={faUserGear} className="w-5 h-5 text-white dark:text-dark_gray"></FontAwesomeIcon>
-                            </div>
-                            {isExpanded && <span className="text-muted_blue dark:text-light_yellow font-semibold tracking-wider">Settings</span>}
-                        </button> */}
-
                     </div>
-
-                    {/* Log Out Button */}
-                    {/* <button onClick={() => handleSignOut()} className={` transition-all duration-300 flex flex-row items-center gap-3`}>
-                        <div className="p-1 bg-muted_blue rounded-full dark:bg-light_yellow">
-                            <svg className="w-6 h-6 text-white dark:text-dark_gray" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H4m12 0-4 4m4-4-4-4m3-4h2a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3h-2"/>
-                            </svg>
-                        </div>
-                        {isExpanded && <span className="text-muted_blue dark:text-light_yellow font-semibold whitespace-nowrap">Log Out</span>}
-                    </button> */}
-                    
                 </div>
+
+                {/* Right End of Navbar */}
                 <div className="flex flex-row items-center justify-end">
                     {/* Notifications Button */}
                     <button 
-                        onClick={() => router.push('/pet-tracker')} className={`px-4 transition-all duration-300 flex flex-row items-center gap-3`}>
-                        <div className="p-2 bg-muted_blue rounded-full dark:bg-light_yellow">
-                            <FontAwesomeIcon icon={faBell} className="w-5 h-5 text-white dark:text-dark_gray"></FontAwesomeIcon>
+                        onClick={() => router.push('/pet-tracker')} className={`px-6 transition-all duration-300 flex flex-row items-center gap-3`}>
+                        <div className="rounded-full">
+                            <FontAwesomeIcon icon={faBell} className="w-6 h-6 text-muted_blue dark:text-light_yellow"></FontAwesomeIcon>
                         </div>
                     </button>
                     <DropdownMenu>
@@ -187,9 +166,9 @@ export default function NavBar({props}) {
                             <DropdownMenuItem>
                                 {/* Profile Button */}
                                 <button 
-                                    onClick={() => router.push('/user/'+username)} className={`transition-all duration-300 flex flex-row items-center gap-3`}>
-                                    <div className="p-1.5 bg-muted_blue rounded-full dark:bg-light_yellow">
-                                        <FontAwesomeIcon icon={faUser} className="w-4 h-4 text-white dark:text-dark_gray"></FontAwesomeIcon>
+                                    onClick={() => router.push('/user/'+username)} className={`transition-all duration-150 flex flex-row items-center gap-3`}>
+                                    <div className="p-1.5 rounded-full">
+                                        <FontAwesomeIcon icon={faUser} className="w-6 h-6 text-muted_blue dark:text-light_yellow"></FontAwesomeIcon>
                                     </div>
                                     <span className="text-muted_blue dark:text-light_yellow font-semibold tracking-wider">View Profile</span>
                                 </button>
@@ -197,18 +176,18 @@ export default function NavBar({props}) {
                             <DropdownMenuItem>
                                 {/* Settings Button */}
                                 <button 
-                                    onClick={() => router.push('/settings')} className={`transition-all duration-300 flex flex-row items-center gap-3`}>
-                                    <div className="p-1.5 bg-muted_blue rounded-full dark:bg-light_yellow">
-                                        <FontAwesomeIcon icon={faUserGear} className="w-4 h-4 text-white dark:text-dark_gray"></FontAwesomeIcon>
+                                    onClick={() => router.push('/settings')} className={`transition-all duration-150 flex flex-row items-center gap-3`}>
+                                    <div className="p-1.5 rounded-full">
+                                        <FontAwesomeIcon icon={faUserGear} className="w-6 h-6 text-muted_blue dark:text-light_yellow"></FontAwesomeIcon>
                                     </div>
                                     <span className="text-muted_blue dark:text-light_yellow font-semibold tracking-wider">Settings</span>
                                 </button>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem>
-                                <button onClick={() => handleSignOut()} className={` transition-all duration-300 flex flex-row items-center gap-3`}>
-                                    <div className="p-1.5 bg-muted_blue rounded-full dark:bg-light_yellow">
-                                        <FontAwesomeIcon icon={faArrowRightFromBracket} className="w-4 h-4 text-white dark:text-dark_gray"></FontAwesomeIcon>
+                                <button onClick={() => handleSignOut()} className={` transition-all duration-150 flex flex-row items-center gap-3`}>
+                                    <div className="p-1.5 rounded-full">
+                                        <FontAwesomeIcon icon={faArrowRightFromBracket} className="w-6 h-6 text-muted_blue dark:text-light_yellow"></FontAwesomeIcon>
                                     </div>
                                     <span className="text-muted_blue dark:text-light_yellow font-semibold whitespace-nowrap">Log Out</span>
                                 </button>

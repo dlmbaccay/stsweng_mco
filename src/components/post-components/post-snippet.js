@@ -9,6 +9,7 @@ import { handleDateFormat } from "@/lib/helper-functions"
 
 import { Card, CardContent } from "@/components/ui/card"
 import { DeletePost } from "@/components/post-components/delete-post"
+import { EditPost } from "@/components/post-components/edit-post";
 
 import likeReaction from '/public/images/post-reactions/like.png'
 import heartReaction from '/public/images/post-reactions/heart.png'
@@ -29,6 +30,18 @@ export function PostSnippet({ post, currentUser }) {
     const [currentUserReaction, setCurrentUserReaction] = useState('');
     const [reactionOverlayVisible, setReactionOverlayVisible] = useState(false);
 
+    const [showPostExpanded, setShowPostExpanded] = useState(false);
+    const [postAction, setPostAction] = useState('');
+
+    const [showEditPopup, setShowEditPopup] = useState(false);
+
+    const handleEditClick = () => {
+        setShowEditPopup(true);
+    };
+
+    const handleCloseEditPopup = () => {
+        setShowEditPopup(false);
+    };
   return (
     <Dialog>
         {/* <DialogTrigger asChild> */}
@@ -320,15 +333,17 @@ export function PostSnippet({ post, currentUser }) {
 
                         {currentUser.uid === post.authorID && 
                             <>
-                                <i
+                            
+                                {/* <i
                                     id="edit-control"
                                     onClick={() => {
-                                        // setShowPostExpanded(true)
-                                        // setPostAction('edit')
+                                        setShowPostExpanded(true)
+                                        setPostAction('edit')
                                         toast.success("You're editing a post!")
                                     }}
                                     className="fa-solid fa-pencil hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" 
-                                />
+                                /> */}
+                                <EditPost postID={post.postID}/>
 
                                 {/* <i
                                     id="delete-control"

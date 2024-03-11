@@ -390,11 +390,11 @@
  /* setup page background image*/
 .setup-page-background::before {
   content: "";
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
-  width: 200%;
-  height: 200%;
+  width: 100%;
+  height: 100%;
   background-image: url('/images/login-and-signup-cover.png');
   background-size: cover;
   background-position: center;

@@ -163,7 +163,7 @@ export function EditUserProfile({props}) {
                                         <Label htmlFor="user-photo" className="text-center text-md">
                                             <span className="">Change Profile Picture</span>
                                             <div className="mt-4">
-                                                <RoundImage src={previewUrl ? previewUrl : '/images/profilePhotoHolder.jpg'} alt="Profile Picture" className="rounded-full object-cover cursor-pointer" />
+                                                <RoundImage src={previewUrl ? previewUrl : '/images/profilePictureHolder.jpg'} alt="Profile Picture" className="rounded-full object-cover cursor-pointer" />
                                             </div>
                                         </Label>
                                         <Input type="file" className="hidden" onChange={handleUserPhotoChange} id="user-photo" />
