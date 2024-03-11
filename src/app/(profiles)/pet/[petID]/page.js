@@ -256,16 +256,16 @@ function PetProfile() {
                     <div className="xl:w-[70%] 2xl:w-[70%] xl:mt-0 2xl:mt-0 mt-8 w-full xl:ml-6 2xl:ml-6">
 
                         {/* Tabs */}
-                        <div className="mb-6 flex flex-row font-bold w-full h-[35px] text-sm bg-off_white dark:bg-gray drop-shadow-md rounded-l-sm rounded-r-sm">
+                        <div className="mb-6 flex flex-row font-bold w-full h-[35px] text-sm bg-off_white dark:bg-gray drop-shadow-md rounded-l-sm rounded-r-sm gap-1">
                             <div
-                                className={`transition-all w-1/2 flex items-center justify-center rounded-l-sm ${activeTab == 'tagged posts' ? "bg-muted_blue dark:bg-light_yellow text-white dark:text-black" : "hover:bg-muted_blue dark:hover:bg-light_yellow hover:text-white  dark:hover:text-black cursor-pointer transition-all"}`} 
+                                className={`transition-all w-1/2 flex items-center justify-center rounded-l-sm ${activeTab == 'tagged posts' ? "bg-muted_blue dark:bg-light_yellow text-white dark:text-black" : "hover:bg-inherit hover:border-2 hover:border-primary hover:text-primary cursor-pointer transition-all"}`} 
                                 onClick={() => setActiveTab('tagged posts')}
                             >
                                 Tagged Posts
                             </div>
 
                             <div
-                                className={`transition-all w-1/2 flex items-center justify-center rounded-r-sm ${activeTab == 'milestones' ? "bg-muted_blue dark:bg-light_yellow text-white dark:text-black" : "hover:bg-muted_blue dark:hover:bg-light_yellow hover:text-white  dark:hover:text-black cursor-pointer transition-all"}`} 
+                                className={`transition-all w-1/2 flex items-center justify-center rounded-r-sm ${activeTab == 'milestones' ? "bg-muted_blue dark:bg-light_yellow text-white dark:text-black" : "hover:bg-inherit hover:border-2 hover:border-primary hover:text-primary cursor-pointer transition-all"}`} 
                                 onClick={() => setActiveTab('milestones')}
                             >
                                 Milestones
