@@ -125,14 +125,19 @@ function PetProfile() {
                   <div className="h-[30%] xl:w-[60%] 2xl:w-[60%] w-full border-red">
                       <CoverPhoto 
                           src={petData.petOwnerCoverPhotoURL ? petData.petOwnerCoverPhotoURL : "/images/cover0-image.png"}
-                          alt="cover photo"/>
+                          alt="cover photo"
+                          width={0}
+                          height={0}
+                          sizes="100vw"
+                          className='w-full h-full rounded-b-lg aspect-square object-cover drop-shadow-xl outline-none border-none'
+                          />
                   </div>
 
                   {/* Profile Details */}
                   <div className="flex items-start justify-start xl:w-[60%] 2xl:w-[60%] w-full h-[110px] lg:px-10 px-5">
                       {/* Profile Photo */}
                       <div className="-translate-y-12 flex items-center justify-center w-[20%]">
-                          <Image src={petData.petPhotoURL == "" ? "/images/petPictureHolder.jpg" : petData.petPhotoURL} alt="pet photo" width={175} height={175} className="border-2 border-dark_gray rounded-full aspect-square object-cover" />
+                          <Image src={petData.petPhotoURL == "" ? "/images/petPictureHolder.jpg" : petData.petPhotoURL} alt="pet photo" width={175} height={175} className="border-2 border-white dark:border-dark_gray rounded-full aspect-square object-cover drop-shadow-md" />
                       </div>
 
                       {/* Display Name, Username, Followers, Following */}
@@ -253,14 +258,14 @@ function PetProfile() {
                         {/* Tabs */}
                         <div className="mb-6 flex flex-row font-bold w-full h-[35px] text-sm bg-off_white dark:bg-gray drop-shadow-md rounded-l-sm rounded-r-sm">
                             <div
-                                className={`transition-all w-1/2 flex items-center justify-center rounded-l-sm ${activeTab == 'tagged posts' ? "bg-muted_blue dark:bg-light_yellow text-white dark:text-black" : "hover:bg-light_yellow dark:hover:bg-muted_blue cursor-pointer"}`} 
+                                className={`transition-all w-1/2 flex items-center justify-center rounded-l-sm ${activeTab == 'tagged posts' ? "bg-muted_blue dark:bg-light_yellow text-white dark:text-black" : "hover:bg-muted_blue dark:hover:bg-light_yellow hover:text-white  dark:hover:text-black cursor-pointer transition-all"}`} 
                                 onClick={() => setActiveTab('tagged posts')}
                             >
                                 Tagged Posts
                             </div>
 
                             <div
-                                className={`transition-all w-1/2 flex items-center justify-center rounded-r-sm ${activeTab == 'milestones' ? "bg-muted_blue dark:bg-light_yellow text-white dark:text-black" : "hover:bg-light_yellow dark:hover:bg-muted_blue cursor-pointer"}`} 
+                                className={`transition-all w-1/2 flex items-center justify-center rounded-r-sm ${activeTab == 'milestones' ? "bg-muted_blue dark:bg-light_yellow text-white dark:text-black" : "hover:bg-muted_blue dark:hover:bg-light_yellow hover:text-white  dark:hover:text-black cursor-pointer transition-all"}`} 
                                 onClick={() => setActiveTab('milestones')}
                             >
                                 Milestones
