@@ -144,7 +144,7 @@ export function EditUserProfile({props}) {
         <Dialog>
             <DialogTrigger asChild>
                 <Button className="px-3 h-[35px]  gap-2 flex items-center justify-center">
-                    <i class="fa-solid fa-pencil" />
+                    <i className="fa-solid fa-pencil" />
                     Edit Profile
                 </Button>
             </DialogTrigger>
@@ -160,21 +160,23 @@ export function EditUserProfile({props}) {
                             <div className="flex flex-row w-full mb-4">
                                 <div className="flex flex-col items-center w-1/3 p-4">
                                     <div className="flex flex-col items-center">
+                                        
                                         <Label htmlFor="user-photo" className="text-center text-md">
                                             <span className="">Change Profile Picture</span>
                                             <div className="mt-4">
-                                                <RoundImage src={previewUrl ? previewUrl : '/images/profilePhotoHolder.jpg'} alt="Profile Picture" className="rounded-full object-cover cursor-pointer" />
+                                                <RoundImage src={previewUrl ? previewUrl : '/images/profilePictureHolder.jpg'} alt="Profile Picture" className="rounded-full object-cover cursor-pointer" />
                                             </div>
                                         </Label>
-                                        <Input type="file" className="hidden" onChange={handleUserPhotoChange} id="user-photo" />
-
+                                        <Input type="file" onChange={handleUserPhotoChange} id="user-photo" className="mt-4 w-full border-muted-foreground"/>
+                                        
                                         <Label htmlFor="cover-photo" className="text-center text-md mt-4">
                                             <span className="">Change Cover Photo</span>
                                             <div className="mt-4 w-64 h-36 relative">
                                                 <Image src={coverPreviewUrl ? coverPreviewUrl : '/images/cover0-image.png'} alt="Cover Photo" layout="fill" className="rounded-lg object-cover hover:object-scale-down transition-all delay-300 cursor-pointer" />
                                             </div>
                                         </Label>
-                                        <Input type="file" className="hidden" onChange={handleCoverPhotoChange} id="cover-photo" />
+                                        <Input type="file" onChange={handleCoverPhotoChange} id="cover-photo" className="mt-4 w-full border-muted-foreground" />
+                                        
                                     </div>
                                 </div>
                                 <div className="flex flex-col w-2/3 px-20">

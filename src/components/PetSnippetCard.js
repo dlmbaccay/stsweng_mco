@@ -18,7 +18,7 @@ export function PetSnippetCard({ props }) {
     } = props;
 
     return (
-        <Card className="mb-4 flex flex-col gap-2 items-center justify-center w-1/4 h-[200px] hover:bg-white dark:hover:bg-dark_gray px-6 py-4 hover:drop-shadow-md transition-all hover:scale-105 cursor-pointer"
+        <Card className="mb-4 flex flex-col gap-2 items-center justify-center w-1/3 h-[200px] hover:bg-white dark:hover:bg-dark_gray px-6 py-4 hover:drop-shadow-md transition-all hover:scale-105 cursor-pointer"
             onClick={() => { router.push(`/pet/${petID}`) }}
         >
             <Image 
@@ -28,7 +28,7 @@ export function PetSnippetCard({ props }) {
                 
             />
             <div className="flex flex-col items-center justify-center">
-                <p className="text-lg font-bold">{petName}</p>
+                <p className="xl:text-sm text-lg font-bold">{petName}</p>
                 <p className="text-sm italic text-center">{petBreed}</p>
             </div>
         </Card>

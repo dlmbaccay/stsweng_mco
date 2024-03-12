@@ -1,25 +1,26 @@
-    "use client"
+"use client"
 
-    import { toast } from "react-hot-toast";
-    import { useEffect, useState } from "react";
-    import { useRouter, useParams } from "next/navigation";
-    import Image from "next/image";
-    import { auth, firestore } from "@/lib/firebase";
-    import { handleDateFormat } from "@/lib/helper-functions";
-    import  Loader from "@/components/Loader";
-    import NavBar from "@/components/nav/navbar";
-    import CoverPhoto from "@/components/ui/cover-photo";
-    import { Button } from "@/components/ui/button";
-    import { Input } from "@/components/ui/input";
-    import { EditUserProfile } from "@/components/edit-dialogs/edit-user-profile";
-    import { CreatePetProfile } from "@/components/profile/create-pet-profile";
-    import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
-    import WithAuth from "@/components/WithAuth";
-    import { FollowButton } from "@/components/profile/follow-user-button";
-    import { CreatePost } from "@/components/post-components/create-post";
-    import { PetsContainer } from "@/components/profile/pet-container";
+import { toast } from "react-hot-toast";
+import { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
+import Image from "next/image";
+import { auth, firestore } from "@/lib/firebase";
+import { handleDateFormat } from "@/lib/helper-functions";
+import  Loader from "@/components/Loader";
+import NavBar from "@/components/nav/navbar";
+import CoverPhoto from "@/components/ui/cover-photo";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { EditUserProfile } from "@/components/edit-dialogs/edit-user-profile";
+import { CreatePetProfile } from "@/components/profile/create-pet-profile";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
+import WithAuth from "@/components/WithAuth";
+import { FollowButton } from "@/components/profile/follow-user-button";
+import { CreatePost } from "@/components/post-components/create-post";
+import { PetsContainer } from "@/components/profile/pet-container";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTags } from "@fortawesome/free-solid-svg-icons";
+import { PostSnippet } from "@/components/post-components/post-snippet";
 
 function UserProfile() {
     const router = useRouter();
@@ -169,7 +170,7 @@ function UserProfile() {
         if (userData) {
 
             const fetchUserPosts = async () => {
-                const response = await fetch(`/api/posts/via-authorName?username=${userData.username}`, {
+                const response = await fetch(`/api/posts/via-authorUsername?username=${userData.username}`, {
                     method: 'GET' // Specify GET method
                 });
     
@@ -202,9 +203,9 @@ function UserProfile() {
                     </div>
                     
                     { userData &&
-                        <div className="w-full h-screen fixed z-10 mt-16 flex flex-col items-center justify-start overflow-y-auto">
+                        <div className="w-full h-screen fixed z-10 mt-16 pb-32 flex flex-col items-center justify-start overflow-y-scroll page-background">
                             {/* Cover Photo */}
-                            <div className="h-[30%] lg:w-[60%] xl:w-[60%] 2xl:w-[60%] w-full border-red">
+                            <div className="h-[30%] xl:w-[60%] 2xl:w-[60%] w-full border-red">
                                 {/* <CoverPhoto 
                                     src={userData.coverPhotoURL ? userData.coverPhotoURL : "/images/cover0-image.png"}
                                     alt="cover photo"/> */}
@@ -214,15 +215,15 @@ function UserProfile() {
                                     width={0}
                                     height={0}
                                     sizes="100vw"
-                                    className='w-full h-full rounded-b-lg aspect-square object-cover'
+                                    className='w-full h-full rounded-b-lg aspect-square object-cover drop-shadow-xl outline-none border-none'
                                 />
                             </div>
 
                             {/* Profile Details */}
-                            <div className="flex items-start justify-start lg:w-[60%] xl:w-[60%] 2xl:w-[60%] w-full h-[110px] lg:px-10 px-5">
+                            <div className="flex items-start justify-start xl:w-[60%] 2xl:w-[60%] w-full h-[110px] lg:px-10 px-5">
                                 {/* Profile Photo */}
                                 <div className="-translate-y-12 flex items-center justify-center w-[20%]">
-                                    <Image src={userData.userPhotoURL ? userData.userPhotoURL : "/images/profilePictureHolder.jpg"} alt="user photo" width={175} height={175} className="border-2 border-dark_gray rounded-full aspect-square object-cover" />
+                                    <Image src={userData.userPhotoURL ? userData.userPhotoURL : "/images/profilePictureHolder.jpg"} alt="user photo" width={175} height={175} className="border-2 border-white dark:border-dark_gray rounded-full aspect-square object-cover drop-shadow-md" />
                                 </div>
 
                                 {/* Display Name, Username, Followers, Following */}
@@ -276,10 +277,10 @@ function UserProfile() {
                             </div>
                             
                             {/* Main Container */}
-                            <div className="flex flex-col lg:flex-row lg:w-[60%] xl:w-[60%] 2xl:w-[60%] w-full px-10 mt-8">
+                            <div className="flex flex-col xl:flex-row xl:w-[60%] 2xl:w-[60%] w-full px-10 mt-8">
 
                                 {/* About and Details Containers */}
-                                <div className="flex flex-col items-start lg:w-[30%] xl:w-[30%] 2xl:w-[30%] w-full gap-6">
+                                <div className="flex flex-col items-start xl:w-[30%] 2xl:w-[30%] w-full gap-6">
 
                                     <Card className="drop-shadow-md flex flex-col w-full p-6 text-sm rounded-md">
                                         <div className="flex flex-col justify-start gap-4">
@@ -326,19 +327,19 @@ function UserProfile() {
                                 </div>
                                 
                                 {/* Posts and Pets Containers */}
-                                <div className="lg:w-[70%] xl:w-[70%] 2xl:w-[70%] lg:mt-0 xl:mt-0 2xl:mt-0 mt-8 w-full lg:ml-6 xl:ml-6 2xl:ml-6">
+                                <div className="xl:w-[70%] 2xl:w-[70%] xl:mt-0 2xl:mt-0 mt-8 w-full xl:ml-6 2xl:ml-6">
 
                                     {/* Tabs */}
-                                    <div className="mb-6 flex flex-row font-bold w-full h-[35px] text-sm bg-off_white dark:bg-gray drop-shadow-md rounded-l-sm rounded-r-sm">
+                                    <div className="mb-6 flex flex-row font-bold w-full h-[35px] text-sm bg-off_white dark:bg-gray drop-shadow-md rounded-l-sm rounded-r-sm gap-1">
                                         <div
-                                            className={`transition-all w-1/2 flex items-center justify-center rounded-l-sm ${activeTab == 'posts' ? "bg-muted_blue dark:bg-light_yellow text-white dark:text-black" : "hover:bg-light_yellow dark:hover:bg-muted_blue cursor-pointer"}`} 
+                                            className={`transition-all w-1/2 flex items-center justify-center rounded-l-sm ${activeTab == 'posts' ? "bg-muted_blue dark:bg-light_yellow text-white dark:text-black" : "hover:bg-inherit hover:border-2 hover:border-primary hover:text-primary cursor-pointer transition-all"}`} 
                                             onClick={() => setActiveTab('posts')}
                                         >
                                             Posts
                                         </div>
 
                                         <div
-                                            className={`transition-all w-1/2 flex items-center justify-center rounded-r-sm ${activeTab == 'pets' ? "bg-muted_blue dark:bg-light_yellow text-white dark:text-black" : "hover:bg-light_yellow dark:hover:bg-muted_blue cursor-pointer"}`} 
+                                            className={`transition-all w-1/2 flex items-center justify-center rounded-r-sm ${activeTab == 'pets' ? "bg-muted_blue dark:bg-light_yellow text-white dark:text-black" : "hover:bg-inherit hover:border-2 hover:border-primary hover:text-primary cursor-pointer transition-all"}`} 
                                             onClick={() => setActiveTab('pets')}
                                         >
                                             Pets
@@ -347,61 +348,32 @@ function UserProfile() {
 
                                     {activeTab == 'posts' ? (
                                         <>
-                                            { currentUser.uid === userData.uid ? <Card className="drop-shadow-md rounded-sm mb-2">
-                                                <div className="flex flex-row items-center w-full my-2">
-                                                    <div className="ml-4">
-                                                        <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.jpg" : userData.userPhotoURL} alt="user photo" width={44} height={44} className="rounded-full aspect-square object-cover" />
-                                                    </div>
-                                                    <div className="w-full mx-4">
-                                                        <CreatePost props={{
-                                                            uid: userData.uid,
-                                                            username: userData.username,
-                                                            displayname: userData.displayName,
-                                                            userphoto: userData.userPhotoURL,
-                                                            pets: userPets,
-                                                        }}/>
-                                                    </div>
-                                                </div>
-                                                <hr className="border-b border-light_yellow mx-4 mb-2"/>
-                                            </Card> : null}
-                                            
-                                            {userPosts.map((post) => {
-                                                return (
-                                                    <Card key={post.postID} className="text-sm p-4 drop-shadow-md rounded-[1rem] my-8">
-                                                        <div className="flex flex-col w-full">
-                                                            <div className="flex flex-row w-full my-2 mx-2">
-                                                                <div className="flex flex-row items-center">
-                                                                    <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.jpg" : userData.userPhotoURL} alt="user photo" width={60} height={60} className="rounded-full aspect-square object-cover" />
-                                                                    <div className="flex flex-col mx-4">
-                                                                        <div className="">
-                                                                            <span className="font-bold text-base">{post.authorDisplayName}</span> · @{post.authorName}
-                                                                        </div>
-                                                                        <div className="text-sm">
-                                                                            {handleDateFormat(post.date)}
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="items-start ml-auto font-semibold text-base mr-4">
-                                                                    {post.category}
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex flex-row items-left mx-2 text-lg">
-                                                                <FontAwesomeIcon icon={faTags} className="mr-2" />
-                                                            </div> 
-
-
-                                                            <p>Posts Container</p>
-                                                            postAuthor: {post.authorName}
-                                                            postContent: {post.content}
-                                                            postDate: {handleDateFormat(post.date)}
-                                                            postLikes: {post.likes}
-                                                            postComments: {post.comments}
-
+                                            { currentUser.uid === userData.uid ? 
+                                                <Card className="drop-shadow-md rounded-sm mb-6">
+                                                    <div className="flex flex-row items-center w-full my-2">
+                                                        <div className="ml-4">
+                                                            <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.jpg" : userData.userPhotoURL} alt="user photo" width={44} height={44} className="rounded-full aspect-square object-cover" />
                                                         </div>
-                                                        
-                                                    </Card>
-                                                )
-                                            })}
+                                                        <div className="w-full mx-4">
+                                                            <CreatePost props={{
+                                                                uid: userData.uid,
+                                                                username: userData.username,
+                                                                displayname: userData.displayName,
+                                                                userphoto: userData.userPhotoURL,
+                                                                pets: userPets,
+                                                            }}/>
+                                                        </div>
+                                                    </div>
+                                                </Card> : null
+                                            }
+                                            <div className="flex flex-col min-w-full items-center justify-center gap-6">
+                                                {[...userPosts].reverse().map((post) => {
+                                                    return (
+                                                        <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                                    )
+                                                })}
+                                            </div>
+                                            
                                         </>
                                     ): (
                                         <Card className="p-4 rounded-md drop-shadow-md">

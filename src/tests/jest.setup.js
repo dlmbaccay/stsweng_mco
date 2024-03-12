@@ -26,4 +26,3 @@ jest.mock('../lib/firebase', () => {
         },
   }
 });
-  
