@@ -174,14 +174,16 @@ export function CreatePetProfile({props}) {
 
                                  {/* pet breed */}
                                 <div className="w-1/2 mt-4">
-                                    <label htmlFor="breed" className="block text-sm font-medium text-raisin_black">
+                                    <label htmlFor="breed" className={`block text-sm font-medium text-raisin_black`}>
                                         <span>Breed</span>
+                                        <span className="text-red-500"> *</span>
                                     </label>
                                     <Input 
                                         type="text" 
                                         id="breed" 
                                         className={`border border-slate-400 mt-2 p-2 rounded-md w-full`} 
                                         placeholder="What breed is your pet?"
+                                        required
                                         maxLength={30}
                                         minLength={1}
                                         onChange={(e) => setPetBreed(e.target.value)} />

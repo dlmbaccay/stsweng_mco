@@ -45,9 +45,6 @@ export default function NavBar({props}) {
                         className='group flex flex-row justify-center items-center gap-4'>
                             {<Image src={'/images/logo.png'} alt={'profile picture'} width={44} height={44} className='rounded-full aspect-square object-cover'/>}
                     </button>
-                    <div className="flex flex-row items-center justify-center gap-4">
-                        <ModeToggle></ModeToggle>
-                    </div>
                 </div>
                 
                 
@@ -152,10 +149,13 @@ export default function NavBar({props}) {
                     <DropdownMenu>
                         <DropdownMenuTrigger><Image src={userPhotoURL ? userPhotoURL : "/images/profilePictureHolder.jpg"} alt={'profile picture'} width={44} height={44} className='rounded-full aspect-square object-cover'/></DropdownMenuTrigger>
                         <DropdownMenuContent className="mr-2 p-4 pt-2">
-                            <DropdownMenuLabel>
-                                <div className="flex flex-col">
+                            <DropdownMenuLabel className="flex flex-row items-center justify-between">
+                                <div className="flex flex-col justify-start">
                                     My Account
                                     <span className="text-xs">@{username}</span>
+                                </div>
+                                <div className="flex flex-row items-center">
+                                    <ModeToggle></ModeToggle>
                                 </div>
                             </DropdownMenuLabel>
 

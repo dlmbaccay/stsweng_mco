@@ -35,7 +35,8 @@ export function DeletePost({postID}) {
           console.error('Error deleting post:', error);
           toast.error('An error occurred while deleting the post.');
         } finally {
-          // Optional: Close the dialog
+          window.location.reload();
+
         }
     };
 

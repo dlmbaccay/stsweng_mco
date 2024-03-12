@@ -145,13 +145,15 @@ function PetProfile() {
                           {/* Display Name and Username Section */}
                           <div className="flex flex-col">
                               <p className="font-semibold text-3xl tracking-wide">{petData.petName}</p>
-                              <p className="text-base font-semibold tracking-wide text-muted_blue dark:text-light_yellow italic">
+                              <p className="font-semibold tracking-wide italic">
+                                <span className="text-secondary">@</span>
                                 <span 
                                   onClick={() => router.push(`/user/${petData.petOwnerUsername}`)}
-                                  className="text-black  dark:text-white mr-1 hover:text-muted_blue dark:hover:text-light_yellow transition-all cursor-pointer">
-                                  @{petData.petOwnerUsername}&apos;s
+                                  className="text-secondary mr-1 hover:text-primary transition-all cursor-pointer">
+                                  {petData.petOwnerUsername}<span className="text-secondary">&apos;s</span>
                                 </span>
-                                <span className="">
+                                
+                                <span className="text-secondary">
                                   {petData.petBreed}
                                 </span>
                               </p>
