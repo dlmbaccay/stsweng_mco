@@ -22,7 +22,7 @@ export default function Home() {
       setTimeout(() => {
         if (user) {
           toast.success("Welcome back! 👋");
-          router.push(`/user/${user.uid}`)
+          router.push(`/home`)
         } else {
           router.push("/landing")
         }

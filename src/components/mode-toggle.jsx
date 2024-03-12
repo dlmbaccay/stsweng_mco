@@ -1,40 +1,30 @@
-"use client"
+"use client"; // Assuming this is still required
 
-import * as React from "react"
-import { Moon, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
-
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import * as React from "react";
+import { useTheme } from "next-themes";
+import { DarkModeSwitch } from "@/components/ui/theme-switch"; // Assuming you have a Shadcn Switch component
 
 export function ModeToggle() {
-  const { setTheme } = useTheme()
+  const { theme, setTheme } = useTheme();
+  const isDarkMode = theme === "dark";
+
+  const handleThemeChange = (checked) => {
+    if (isDarkMode) {
+      setTheme("light");
+    } else {
+      setTheme("dark");
+    }
+    // setTheme(checked ? "dark" : "light"); // Adapt if system theme is needed
+  };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
+    <div className="items-center flex"> {/* Container for label and switch */}
+      <DarkModeSwitch
+        id="mode-switch"
+        checked={isDarkMode}
+        onClick={handleThemeChange}
+      />
+      <label htmlFor="mode-switch"></label> 
+    </div>
+  );
 }

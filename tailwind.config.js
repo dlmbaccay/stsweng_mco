@@ -19,11 +19,13 @@ module.exports = {
     extend: {
       colors: {
         white: "#F5F0F0",
+        off_white: "#F9F9F9",
         black: "#222222",
         gray: "#484747",
         dark_gray: "#323031",
         light_blue: "#00C4DD",
         muted_blue: "#028090",
+        light_yellow: "#fdd068",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -77,6 +79,9 @@ module.exports = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      spacing: {
+        '1/5': "20%",
+      }
     },
   },
   plugins: [require("tailwindcss-animate")],
