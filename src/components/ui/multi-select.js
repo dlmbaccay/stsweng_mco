@@ -39,12 +39,12 @@ function MultiSelect({ options, selected, onChange, className, ...props}) {
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className={`w-full justify-between ${selected.length > 1 ? "h-full" : "h-10"}`}
+                    className={`w-full justify-between ${selected.length > 1 ? "h-full" : "h-10"} text-muted-foreground hover:bg-inherit`}
                     onClick={() => setOpen(!open)}
                 >
                     <div className="flex gap-1 flex-wrap">
                         {selected.length === 0 ? (
-                            <span className="text-off_white">Select Pet(s)</span>
+                            <span>Select Pet(s)</span>
                         ) : selected.map((item) => (
                             <Badge
                                 variant="secondary"

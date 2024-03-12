@@ -113,6 +113,8 @@ export function CreatePost({props}) {
                 setPreviewMedia([]);
                 setSelectedPetIDs([]);
                 setPostTrackerLocation('');
+
+                window.location.reload();
             });
             
         } catch (error) {
@@ -151,7 +153,7 @@ export function CreatePost({props}) {
                 <DialogHeader>
                     <DialogTitle className="text-center">Write a Post</DialogTitle>
                 </DialogHeader>
-                <hr className="border-b border-light_yellow my-2 mx-4"/>
+                <hr className="border-b border-primary my-2 mx-4"/>
                 <form onSubmit={createPost}>
                     <div className="flex flex-col w-full mb-4">
                         <div className="flex flex-row w-full px-10 gap-12">
@@ -160,7 +162,7 @@ export function CreatePost({props}) {
                                 <Label htmlFor="category" className={"my-4 w-full"} > Post Category </Label>
                                 <Select required onValueChange={(value) => setPostCategory(value)} defaultValue={''}>
                                     <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Select Category" />
+                                        <SelectValue placeholder="Select Category" className="text-muted-foreground"/>
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="General">General</SelectItem>
@@ -176,12 +178,12 @@ export function CreatePost({props}) {
                             
                             {/* Pet Tags Input */}
                             <div className="flex flex-col items-center w-3/5">
-                                <Label htmlFor="pets" className={"my-4 w-full"} >Tag your Pets!</Label>
+                                <Label htmlFor="pets" className={"my-4 w-full text-secondary"} >Tag your Pets!</Label>
                                 <MultiSelect 
                                     options={pets.map(pet=>({value: pet.petID, label: pet.petName}))}
                                     selected={selectedPetIDs}
                                     onChange={setSelectedPetIDs}
-                                    className={"w-full rounded-md"}
+                                    className={"w-full rounded-md text-secondary"}
                                 />
                             </div>
                             
