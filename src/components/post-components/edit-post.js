@@ -25,14 +25,12 @@ export function EditPost({ postID }) {
     const [loading, setLoading] = useState(false);
     const [postContent, setPostContent] = useState('');
     const [postCategory, setPostCategory] = useState('');
-    // const [postLocation, setPostLocation] = useState('');
 
     useEffect(() => {
         if (postID) {
             fetchPostData(postID).then(data => {
                 setPostContent(data.content);
                 setPostCategory(data.category);
-                // setPostLocation(data.location);
             }).catch(error => {
                 console.error('Error fetching post data:', error);
             });
@@ -48,12 +46,14 @@ export function EditPost({ postID }) {
             formData.append('postID', postID);
             formData.append('postContent', postContent);
             formData.append('postCategory', postCategory);
-            // formData.append('postLocation', postLocation); 
+            formData.append('isEdited', true);
+            // console.log('FormData before fetch:', formData);
 
             const response = await fetch('/api/posts/edit-post', {
                 method: 'POST',
                 body: formData,
             });
+            // console.log('Response:', response);
 
             if (response.ok) {
                 toast.success("Post updated successfully!");
@@ -67,6 +67,7 @@ export function EditPost({ postID }) {
             setLoading(false);
         }
     };
+
 
 
     return (
@@ -101,7 +102,7 @@ export function EditPost({ postID }) {
                                     </SelectContent>
                                 </Select>
                             </div>
-                            <div className="flex flex-col w-full">
+                            {/* <div className="flex flex-col w-full">
                                 <label htmlFor="location" className="my-2">Location</label>
                                 <input
                                     type="text"
@@ -111,7 +112,7 @@ export function EditPost({ postID }) {
                                     // value={postLocation}
                                     onChange={(e) => setPostLocation(e.target.value)}
                                 />
-                            </div>
+                            </div> */}
                             <Textarea
                                 type="text"
                                 id="post-content"
