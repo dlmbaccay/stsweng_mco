@@ -1,4 +1,3 @@
-// app/users/route.js
 import { NextResponse } from 'next/server';
 import { getDocumentByFieldValue } from '@/lib/firestore-crud';
 

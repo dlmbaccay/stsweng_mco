@@ -56,17 +56,17 @@ export default function NavBar({props}) {
                         
                         {/* Home Button */}
                         <button 
-                            onClick={() => router.push('/home')} className={`px-8 transition-all duration-300 flex flex-row items-center gap-3 ${activeTab === '/home' ? 'border-b-[3px] border-primary' : ''}`}>
+                            onClick={() => router.push('/home')} className={`px-8 transition-all duration-150 flex flex-row items-center gap-3 ${activeTab === '/home' ? 'border-b-[3px] border-primary text-primary' : 'text-background hover:text-primary stroke-[50px] stroke-primary'}`}>
                             <div className="rounded-full">
-                                <FontAwesomeIcon icon={faHouse} className={`w-6 h-6 ${activeTab === '/home' ? 'text-primary' : 'text-white dark:text-dark_gray stroke-[50px] stroke-primary'}`}></FontAwesomeIcon>
+                                <FontAwesomeIcon icon={faHouse} className={`w-6 h-6`}></FontAwesomeIcon>
                             </div>
                         </button>
 
                         {/* Pet Tracker Button */}
                         <button 
-                            onClick={() => router.push('/pet-tracker')} className={`px-8 transition-all duration-300 flex flex-row items-center gap-3 ${activeTab === '/pet-tracker' ? 'border-b-[3px] border-primary' : ''}`}>
+                            onClick={() => router.push('/pet-tracker')} className={`px-8 transition-all duration-150 flex flex-row items-center gap-3 ${activeTab === '/pet-tracker' ? 'border-b-[3px] border-primary text-primary' : 'text-background hover:text-primary stroke-[50px] stroke-primary'}`}>
                             <div className="rounded-full">
-                                <FontAwesomeIcon icon={faPaw} className={`w-6 h-6 ${activeTab === '/pet-tracker' ? 'text-primary' : 'text-white dark:text-dark_gray stroke-[50px] stroke-primary'}`}></FontAwesomeIcon>
+                                <FontAwesomeIcon icon={faPaw} className={`w-6 h-6`}></FontAwesomeIcon>
                             </div>
                         </button>
 
@@ -74,18 +74,18 @@ export default function NavBar({props}) {
 
                         {/* Profile Button */}
                         <button 
-                            onClick={() => router.push('/user/'+username)} className={`px-8 transition-all duration-300 flex flex-row items-center gap-3 ${activeTab === '/user/'+username ? 'border-b-[3px] border-primary' : ''}`}>
+                            onClick={() => router.push('/user/'+username)} className={`px-8 transition-all duration-150 flex flex-row items-center gap-3 ${activeTab === '/user/'+username ? 'border-b-[3px] border-primary text-primary' : 'text-background hover:text-primary stroke-[50px] stroke-primary'}`}>
                             <div className="rounded-full">
-                                <FontAwesomeIcon icon={faUser} className={`w-6 h-6 ${activeTab === '/user/'+username ? 'text-primary' : 'text-white dark:text-dark_gray stroke-[50px] stroke-primary'}`}></FontAwesomeIcon>
+                                <FontAwesomeIcon icon={faUser} className={`w-6 h-6`}></FontAwesomeIcon>
                             </div>
                             {/* {isExpanded && <span className="text-muted_blue dark:text-light_yellow font-semibold tracking-wider">Profile</span>} */}
                         </button>
 
                         {/* Adoption Button */}
                         <button 
-                            onClick={() => router.push('/adopt')} className={`px-8 transition-all duration-300 flex flex-row items-center gap-3 ${activeTab === '/adopt' ? 'border-b-[3px] border-primary' : ''}`}>
+                            onClick={() => router.push('/adopt')} className={`px-8 transition-all duration-150 flex flex-row items-center gap-3 ${activeTab === '/adopt' ? 'border-b-[3px] border-primary text-primary' : 'text-background hover:text-primary stroke-[50px] stroke-primary'}`}>
                             <div className="rounded-full">
-                                <FontAwesomeIcon icon={faHandHoldingHeart} className={`w-6 h-6 ${activeTab === '/adopt' ? 'text-primary' : 'text-white dark:text-dark_gray stroke-[50px] stroke-primary'}`}></FontAwesomeIcon>
+                                <FontAwesomeIcon icon={faHandHoldingHeart} className={`w-6 h-6`}></FontAwesomeIcon>
                             </div>
                             {/* {isExpanded && <span className="text-muted_blue dark:text-light_yellow font-semibold tracking-wider">Settings</span>} */}
                         </button>
@@ -113,25 +113,25 @@ export default function NavBar({props}) {
                                     <DropdownMenuSeparator className="bg-secondary"/>
                                     <DropdownMenuItem className="mt-2 focus:bg-inherit focus:border-b-2 focus:border-primary focus:rounded-none mx-2">
                                         <button onClick={() => router.push('/home')} className="transition-all duration-300 flex flex-row items-center gap-3">
-                                            <FontAwesomeIcon icon={faHouse} className={`w-6 h-6 ${activeTab === '/home' ? 'text-primary' : 'text-white dark:text-dark_gray stroke-[50px] stroke-primary'}`}/>
+                                            <FontAwesomeIcon icon={faHouse} className={`w-6 h-6 ${activeTab === '/home' ? 'text-primary' : 'text-background stroke-[50px] stroke-primary'}`}/>
                                             <span className="text-primary font-semibold tracking-wider">Home</span>
                                         </button>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem className="mt-2 focus:bg-inherit focus:border-b-2 focus:border-primary focus:rounded-none mx-2">
                                         <button onClick={() => router.push('/pet-tracker')} className="transition-all duration-300 flex flex-row items-center gap-3">
-                                            <FontAwesomeIcon icon={faPaw} className={`w-6 h-6 ${activeTab === '/pet-tracker' ? 'text-primary' : 'text-white dark:text-dark_gray stroke-[50px] stroke-primary'}`}/>
+                                            <FontAwesomeIcon icon={faPaw} className={`w-6 h-6 ${activeTab === '/pet-tracker' ? 'text-primary' : 'text-background stroke-[50px] stroke-primary'}`}/>
                                             <span className="text-primary font-semibold tracking-wider">Pet Tracker</span>
                                         </button>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem className="mt-2 focus:bg-inherit focus:border-b-2 focus:border-primary focus:rounded-none mx-2">
                                         <button onClick={() => router.push(`/user/${username}`)} className="transition-all duration-300 flex flex-row items-center gap-3">
-                                            <FontAwesomeIcon icon={faUser} className={`w-6 h-6 ${activeTab === '/user/'+username ? 'text-primary' : 'text-white dark:text-dark_gray stroke-[50px] stroke-primary'}`}/>
+                                            <FontAwesomeIcon icon={faUser} className={`w-6 h-6 ${activeTab === '/user/'+username ? 'text-primary' : 'text-background stroke-[50px] stroke-primary'}`}/>
                                             <span className="text-primary font-semibold tracking-wider">Profile</span>
                                         </button>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem className="mt-2 focus:bg-inherit focus:border-b-2 focus:border-primary focus:rounded-none mx-2">
                                         <button onClick={() => router.push('/adopt')} className="transition-all duration-300 flex flex-row items-center gap-3">
-                                            <FontAwesomeIcon icon={faHandHoldingHeart} className={`w-6 h-6 ${activeTab === '/adopt' ? 'text-primary' : 'text-white dark:text-dark_gray stroke-[50px] stroke-primary'}`}/>
+                                            <FontAwesomeIcon icon={faHandHoldingHeart} className={`w-6 h-6 ${activeTab === '/adopt' ? 'text-primary' : 'text-background stroke-[50px] stroke-primary'}`}/>
                                             <span className="text-primary font-semibold tracking-wider">Adoption</span>
                                         </button>
                                     </DropdownMenuItem>
