@@ -13,6 +13,8 @@ module.exports = {
       '^app/(.*)$': '<rootDir>/src/app/$1',
       "^@/(.*)$": "<rootDir>/src/$1",
       "^@route/(.*)$": "<rootDir>/src/app/$1",
+      '^@/app/users/via-id/route$': '<rootDir>/src/app/users/route.js',
+      "^@/app(.*)$": "<rootDir>/src/app$1"
     },
     transform: {
       // Use babel-jest to transpile tests in JS/JSX
@@ -25,6 +27,6 @@ module.exports = {
     coveragePathIgnorePatterns: ['src/pages', 'src/styles', 'src/tests', 'src/lib'],
     // Configure the coverage report
     coverageReporters: ['text', 'lcov', 'clover'],
-
-
   };
+
+  
