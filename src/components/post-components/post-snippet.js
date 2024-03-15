@@ -348,7 +348,12 @@ export function PostSnippet({ post, currentUser }) {
                                     }}
                                     className="fa-solid fa-pencil hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" 
                                 /> */}
-                                <EditPost postID={post.postID}/>
+                                {/* <EditPost postID={post.postID}/> */}
+                                <EditPost props={{
+                                            postID: post.postID,
+                                            content: post.content,
+                                            category: post.category
+                                        }}/>
 
                                 {/* <i
                                     id="delete-control"
