@@ -28,7 +28,7 @@ export function CreatePost({props}) {
     const [ postAuthorDisplayName, setPostAuthorDisplayName ] = useState(displayname);
     const [ postAuthorPhotoURL, setPostAuthorPhotoURL ] = useState(userphoto);
     const [ postContent, setPostContent] = useState('');
-    const [ postCategory, setPostCategory] = useState('');
+    const [ postCategory, setPostCategory] = useState('General');
     const [ postTaggedPets, setPostTaggedPets] = useState([]);
     const [ postImageURLs, setPostImageURLs] = useState([]);
     const [ postTrackerLocation, setPostTrackerLocation] = useState('');
