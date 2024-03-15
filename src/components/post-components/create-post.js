@@ -1,4 +1,5 @@
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
 import { Loader2 } from "lucide-react"
@@ -17,6 +18,7 @@ import { faImage } from "@fortawesome/free-solid-svg-icons"
 
 
 export function CreatePost({props}) {
+    const router = useRouter();
     const [loading, setLoading] = useState(false);
 
     const { uid, username, displayname, userphoto, pets } = props;
@@ -114,7 +116,7 @@ export function CreatePost({props}) {
                 setSelectedPetIDs([]);
                 setPostTrackerLocation('');
 
-                window.location.reload();
+                router.refresh();
             });
             
         } catch (error) {
