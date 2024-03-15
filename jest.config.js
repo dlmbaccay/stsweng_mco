@@ -12,6 +12,7 @@ module.exports = {
       "^@/api/(.*)$": "<rootDir>/src/app/api/$1",
       '^app/(.*)$': '<rootDir>/src/app/$1',
       "^@/(.*)$": "<rootDir>/src/$1",
+      "^@route/(.*)$": "<rootDir>/src/app/$1",
     },
     transform: {
       // Use babel-jest to transpile tests in JS/JSX

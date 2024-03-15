@@ -1,4 +1,5 @@
 // jest.setup.js (Used for Back-end Testing for CRUD Operations)
+import '@testing-library/jest-dom';
 jest.mock('../lib/firebase', () => {
   const mockFirestore = {
     collection: jest.fn().mockReturnThis(),
