@@ -162,7 +162,7 @@ export function CreatePost({props}) {
                             {/* Post Category Select */}
                             <div className="flex flex-col items-center w-2/5">
                                 <Label htmlFor="category" className={"my-4 w-full"} > Post Category </Label>
-                                <Select required onValueChange={(value) => setPostCategory(value)} defaultValue={''}>
+                                <Select required onValueChange={(value) => setPostCategory(value)} defaultValue="General">
                                     <SelectTrigger className="w-full">
                                         <SelectValue placeholder="Select Category" className="text-muted-foreground"/>
                                     </SelectTrigger>
