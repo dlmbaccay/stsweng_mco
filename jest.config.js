@@ -14,7 +14,8 @@ module.exports = {
       "^@/(.*)$": "<rootDir>/src/$1",
       "^@route/(.*)$": "<rootDir>/src/app/$1",
       '^@/app/users/via-id/route$': '<rootDir>/src/app/users/route.js',
-      "^@/app(.*)$": "<rootDir>/src/app$1"
+      "^@/app(.*)$": "<rootDir>/src/app$1",
+      "\\.(css|less|scss|sass)$": "<rootDir>/src/tests/__mocks__/styleMock.js", // Mock CSS files
     },
     transform: {
       // Use babel-jest to transpile tests in JS/JSX
@@ -24,7 +25,14 @@ module.exports = {
     // Collect coverage from all files except those in the node_modules directory
     collectCoverageFrom: ['src/**/*.{js,jsx}', '!**/node_modules/**'],
     // Ignore the following directories when collecting coverage
-    coveragePathIgnorePatterns: ['src/pages', 'src/styles', 'src/tests', 'src/lib'],
+    coveragePathIgnorePatterns: [
+      'src/pages', 
+      'src/styles', 
+      'src/tests', 
+      'src/lib',
+      '/src/app/layout.js',
+      '/src/app/page.js',
+      ],
     // Configure the coverage report
     coverageReporters: ['text', 'lcov', 'clover'],
   };
