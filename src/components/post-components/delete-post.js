@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -13,7 +14,7 @@ import { Button } from "@/components/ui/button"
 import toast from "react-hot-toast"
   
 export function DeletePost({postID}) {
-
+    const router = useRouter();
     const handleDeletePost = async () => {
         try {
           // Logic to delete the post from your database (Firestore, etc.)
@@ -35,7 +36,7 @@ export function DeletePost({postID}) {
           console.error('Error deleting post:', error);
           toast.error('An error occurred while deleting the post.');
         } finally {
-          window.location.reload();
+          router.refresh();
 
         }
     };

@@ -42,6 +42,11 @@ export function PostSnippet({ post, currentUser }) {
     const handleCloseEditPopup = () => {
         setShowEditPopup(false);
     };
+
+    const handleEditSuccess = () => {
+        setIsEdited(true);
+    };
+
   return (
     <Dialog>
         {/* <DialogTrigger asChild> */}

@@ -203,7 +203,7 @@ function UserProfile() {
                     </div>
                     
                     { userData &&
-                        <div className="w-full h-screen fixed z-10 mt-16 pb-32 flex flex-col items-center justify-start overflow-y-scroll page-background">
+                        <div className="w-full h-screen fixed z-10 mt-16 pb-32 flex flex-col items-center justify-start ">
                             {/* Cover Photo */}
                             <div className="h-[30%] xl:w-[60%] 2xl:w-[60%] w-full border-red">
                                 {/* <CoverPhoto 
@@ -354,7 +354,7 @@ function UserProfile() {
                                                         <div className="ml-4">
                                                             <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.jpg" : userData.userPhotoURL} alt="user photo" width={44} height={44} className="rounded-full aspect-square object-cover" />
                                                         </div>
-                                                        <div className="w-full mx-4">
+                                                        <div className="w-full mr-4">
                                                             <CreatePost props={{
                                                                 uid: userData.uid,
                                                                 username: userData.username,
