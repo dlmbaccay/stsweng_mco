@@ -140,12 +140,12 @@ export function CreatePost({props}) {
             {/* Trigger Buttons */}
             <div className="flex flex-row items-center"> 
                 <DialogTrigger asChild>
-                    <Button variant="outline" className="h-[35px] w-11/12 bg-primary hover:bg-inherit hover:border-2 hover:border-primary hover:text-muted_blue hover:dark:text-light_yellow text-primary-foreground gap-2 flex items-center justify-center rounded-full">
+                    <Button variant="outline" className="h-[35px] w-11/12 bg-primary hover:bg-inherit hover:border-2 hover:border-primary hover:text-primary text-primary-foreground flex items-center justify-center rounded-full mx-4">
                         What&apos;s on your mind? 
                     </Button>
                 </DialogTrigger>
                 <DialogTrigger asChild>
-                    <Button variant="outline" className="p-1.5 bg-primary hover:bg-inherit hover:border-2 hover:border-primary hover:text-muted_blue hover:dark:text-light_yellow text-primary-foreground rounded-full aspect-square mx-auto">
+                    <Button variant="outline" className="p-1.5 bg-primary hover:bg-inherit hover:border-2 hover:border-primary hover:text-primary text-primary-foreground rounded-full aspect-square mx-auto">
                         <FontAwesomeIcon icon={faImage} className="w-5 h-5"></FontAwesomeIcon>
                     </Button>
                 </DialogTrigger>

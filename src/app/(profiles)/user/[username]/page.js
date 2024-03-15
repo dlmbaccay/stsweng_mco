@@ -354,7 +354,7 @@ function UserProfile() {
                                                         <div className="ml-4">
                                                             <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.jpg" : userData.userPhotoURL} alt="user photo" width={44} height={44} className="rounded-full aspect-square object-cover" />
                                                         </div>
-                                                        <div className="w-full mx-4">
+                                                        <div className="w-full mr-4">
                                                             <CreatePost props={{
                                                                 uid: userData.uid,
                                                                 username: userData.username,
