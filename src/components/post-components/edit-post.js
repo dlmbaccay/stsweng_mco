@@ -21,11 +21,11 @@ export function EditPost({ props }) {
         event.preventDefault();
         setLoading(true)
         try {
-    
             // Save User Data
             await savePostData();
             setLoading(false);
-            toast.success('post changes saved!')
+            toast.success('Post successfully updated!')
+            window.location.reload();
             handleEditSuccess();
     
         } catch (error) {
