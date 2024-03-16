@@ -72,11 +72,11 @@ export function ExpandedPost({ post, currentUser }) {
                         <div id="publish-date" className="flex flex-row gap-2 items-center">
                             <p className="text-xs md:text-sm">{handleDateFormat(post.date)}</p>
                             
-                            { isEdited ? 
+                            { post.isEdited ? 
                                 (
-                                    <div className="relative flex flex-row items-center gap-2">
+                                    <div className="relative flex flex-row items-center gap-2 group">
                                         <i className="hover-tooltip fa-solid fa-clock-rotate-left text-[10px] md:text-xs"/>
-                                        <p className="edited-post-tooltip hidden text-xs">Edited Post</p>
+                                        <p className="edited-post-tooltip hidden group-hover:block text-xs">Edited Post</p>
                                     </div>
                                 ) : null
                             }

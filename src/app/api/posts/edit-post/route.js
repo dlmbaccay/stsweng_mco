@@ -3,7 +3,7 @@ import { updateDocument } from '@/lib/firestore-crud';
 
 export async function POST(request) {
     const body = await request.json();
-    const { action, postID, content, category } = body;
+    const { action, postID, isEdited, content, category } = body;
     try {
         switch (action) {
             case 'updatePostData':
@@ -13,6 +13,7 @@ export async function POST(request) {
                 //     category: postCategory
                 // });
                 const postData = {
+                    isEdited: true,
                     content: content,
                     category: category
                 };

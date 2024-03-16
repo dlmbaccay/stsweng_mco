@@ -12,7 +12,7 @@ export function EditPost({ props }) {
     const [loading, setLoading] = useState(false);
     const [isEdited, setIsEdited] = useState(false);
 
-    const { postID, content, category  } = props;
+    const { postID, postIsEdited, content, category  } = props;
 
     const [newContent, setNewContent] = useState(content);
     const [newCategory, setNewCategory] = useState(category);
@@ -42,6 +42,7 @@ export function EditPost({ props }) {
             body: JSON.stringify({ 
                 action: 'updatePostData', 
                 postID, 
+                isEdited,
                 content: newContent, 
                 category: newCategory
             }) 
