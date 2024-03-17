@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { uploadPostMedia } from '@/lib/storage-funcs';
 import { firestore } from '@/lib/firebase';
 import { createCommentDocument } from '@/lib/firestore-crud';
 
@@ -37,7 +36,6 @@ export async function POST(request) {
             isEdited: false,
         };
         // Call a function to save the post details to the database
-        // await createPostDocument("posts", postDetails.postID, postDetails);
         await createCommentDocument(postID, commentID, commentDetails);
         return NextResponse.json({ message: "Comment created successfully." }, {status: 200});
 

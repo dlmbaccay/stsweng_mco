@@ -18,6 +18,7 @@ import { faImage } from "@fortawesome/free-solid-svg-icons"
 import { faTags } from "@fortawesome/free-solid-svg-icons"
 import { handleDateFormat } from "@/lib/helper-functions"
 import Link from "next/link"
+import { Comment } from "@/components/post-components/comment"
 
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -64,7 +65,7 @@ export function ExpandedPost({ post, currentUser }) {
             formData.append('authorID', currentUser.uid);
             formData.append('authorDisplayName', currentUser.displayName);
             formData.append('authorUsername', currentUser.username);
-            formData.append('authorPhotoURL', currentUser.photoURL);
+            formData.append('authorPhotoURL', currentUser.userPhotoURL);
 
             // Call API to create comment
             await fetch('/api/posts/comment-post', {
@@ -83,6 +84,21 @@ export function ExpandedPost({ post, currentUser }) {
         }
     }
 
+    // read comments from firestore
+    useEffect(() => {
+        const unsubscribe = firestore.collection("posts").doc(post.postID).collection("comments").onSnapshot((snapshot) => {
+            const comments = snapshot.docs.map((doc) => ({
+                commentID: doc.id,
+                ...doc.data()
+            }));
+            setComments(comments);
+            setCommentsLength(comments.length);
+        });
+
+        return () => {
+            unsubscribe();
+        }
+    }, [post.postID]);
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -411,15 +427,14 @@ export function ExpandedPost({ post, currentUser }) {
                     <div className='flex flex-col w-full h-fit gap-3 justify-start items-start'>
                         {comments.map((comment, index) => (
                             <div key={comment.commentID} className='w-full h-fit'>
-                                {/* <Comment 
+                                <Comment 
                                     props = {{
-                                        currentUserID: currentUserID,
-                                        currentUserPhotoURL: currentUser.photoURL,
-                                        currentUserUsername: currentUser.username,
-                                        currentUserDisplayName: currentUser.displayName,
-                                        reportCount: currentUser.reportCount,
-                                        postID: postID,
-                                        isEdited: comment.isEdited,
+                                        currentUser: currentUser,
+                                        postID: post.postID,
+                                        postAuthorID: post.authorID,
+                                        postAuthorDisplayName: post.authorDisplayName,
+                                        postAuthorUsername: post.authorUsername,
+                                        postAuthorPhotoURL: post.authorPhotoURL,
                                         commentID: comment.commentID,
                                         commentBody: comment.commentBody,
                                         commentDate: comment.commentDate,
@@ -427,8 +442,10 @@ export function ExpandedPost({ post, currentUser }) {
                                         authorDisplayName: comment.authorDisplayName,
                                         authorUsername: comment.authorUsername,
                                         authorPhotoURL: comment.authorPhotoURL,
+                                        isEdited: comment.isEdited,
+                                        // replies: comment.replies
                                     }}
-                                /> */}
+                                />
                             </div>
                         ))}
                     </div>
