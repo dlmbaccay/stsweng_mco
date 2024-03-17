@@ -55,8 +55,42 @@ export function Comment({ props }) {
         }
     }
 
-    const handleEditComment = (event) => {
-        
+    const [isEditingComment, setIsEditingComment] = useState(false)
+    const [newCommentBody, setNewCommentBody] = useState(commentBody)
+
+    const handleEditComment = async (event) => {
+
+        if (newCommentBody === '') {
+            toast.error('Comment cannot be empty.');
+            return;
+        }
+
+        event.preventDefault();
+
+        // call edit api
+        // if success, update comment in state
+
+        try {
+            const response = await fetch('/api/posts/comment-post/edit-comment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ postID, commentID, newCommentBody }),
+            });
+
+            if (response.ok) { 
+                toast.success('Comment updated successfully!');
+            } else {
+                toast.error('Error updating comment. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error updating comment:', error);
+            toast.error('An error occurred while updating the comment.');
+        } finally {
+            setIsEditingComment(false);
+            router.refresh();
+        }
     }
 
     const handleDeleteComment = async () => {
@@ -126,9 +160,62 @@ export function Comment({ props }) {
                         <Link href={`/user/${authorUsername}`} className='hover:font-bold transition-all'> @{authorUsername}</Link>
                     </div> 
 
-                    <div>
-                        <p>{commentBody}</p>
-                    </div>
+                    { !isEditingComment && (
+                        <div>
+                            <p>{commentBody}</p>
+
+                            {/* if each reaction's userIDs are not 0 */}
+                            {allReactions.filter((reaction) => reaction.userIDs.length > 0).length > 0 && (
+                                <div className='flex flex-row gap-2 items-center mt-2'>
+                                    {allReactions.filter((reaction) => reaction.userIDs.length > 0).map((reaction, index) => (
+                                        <div key={index} className='flex flex-row gap-1 items-center'>
+                                            <Image 
+                                                src={reactionImages[reaction.reaction].src} 
+                                                alt={reactionImages[reaction.reaction].alt} 
+                                                className='w-[15px] h-[15px] rounded-full' 
+                                            />
+                                            <p className='text=xs'>{reaction.userIDs.length}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    { isEditingComment && (
+                        <form 
+                            className="flex flex-row w-full"
+                            onSubmit={(event) => { handleEditComment(event) }}>
+                            <textarea
+                                value={newCommentBody}
+                                onChange={(event) => setNewCommentBody(event.target.value)}
+                                maxLength={100}
+                                // onKeyDown={(event => {
+                                //     if (event.key === 'Enter') {
+                                //         handleEditComment(event);
+                                //     }
+                                // })}
+                                placeholder='Write a comment...'
+                                className={`outline-none resize-none border-t border-l border-b border-[#d1d1d1] text-sm rounded-l-md text-raisin_black w-full p-3 transition-all h-[80px]`}
+                            />
+
+                            <div className='flex flex-col h-[80px] w-[40px] bg-black text-white dark:bg-white dark:text-black border-white items-center justify-center text-xs rounded-r-md'>
+                                <button type='submit' 
+                                    className='flex items-center h-1/2 w-full justify-center rounded-rt-md rounded-tr-md hover:bg-light_yellow hover:text-black dark:hover:text-white dark:hover:bg-muted_blue transition-all'>
+                                    <i className='fa-solid fa-check h-1/2 flex items-center' />
+                                </button>
+                                <button type='button' 
+                                    onClick={() => {
+                                        setIsEditingComment(false);
+                                        setNewCommentBody(commentBody);
+                                    }} 
+                                    className='flex items-center h-1/2 w-full justify-center rounded-br-md rounded-rb-md hover:bg-light_yellow hover:text-black dark:hover:text-white dark:hover:bg-muted_blue transition-all'>
+                                    <i className='fa-solid fa-xmark h-1/2 flex items-center' />
+                                </button>
+                            </div>
+                        </form>
+                    )}
+                    
 
                     <div className="flex flex-row w-full text-xs gap-2 pl-1 mt-1">
                         <div id='like-control'
@@ -213,7 +300,11 @@ export function Comment({ props }) {
 
                         { currentUser.uid === authorID && (
                             <div className="flex gap-2">
-                                <div id="edit-control" className="hover:underline cursor-pointer">
+                                <div 
+                                    id="edit-control"
+                                    className="hover:underline cursor-pointer"
+                                    onClick={() => setIsEditingComment(true)}
+                                >
                                     Edit
                                 </div>
 
