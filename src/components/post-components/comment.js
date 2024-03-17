@@ -137,13 +137,98 @@ export function Comment({ props }) {
     const [isOverlayVisible, setIsOverlayVisible ] = useState(false)
 
     const handleCommentReaction = async (newReaction) => {
-        toast.success("To be implemented")
+        const reactionsRef = firestore.collection('posts').doc(postID).collection('comments').doc(commentID).collection('reactions');
+        const reactionTypes = ['like', 'heart', 'haha', 'wow', 'sad', 'angry']; // Replace with your actual reaction types
+
+        for (let reaction of reactionTypes) {
+            const reactionRef = reactionsRef.doc(reaction);
+            const reactionDoc = await reactionRef.get();
+
+            if (reactionDoc.exists) {
+                const reactionData = reactionDoc.data();
+                const userIDs = reactionData.userIDs;
+
+                if (userIDs.includes(currentUser.uid)) {
+                    if (reaction === newReaction) {
+                        // User has reacted with the same type again, remove user from userIDs array
+                        const updatedUserIDs = userIDs.filter((userID) => userID !== currentUser.uid);
+                        await reactionRef.update({ userIDs: updatedUserIDs });
+                        setCurrentUserReaction('');
+                    } else {
+                        // User has reacted with a different type, remove user from current userIDs array
+                        const updatedUserIDs = userIDs.filter((userID) => userID !== currentUser.uid);
+                        await reactionRef.update({ userIDs: updatedUserIDs });
+                    }
+                } else if (reaction === newReaction) {
+                    // User has not reacted with this type, add user to userIDs array
+                    await reactionRef.update({ userIDs: [...userIDs, currentUser.uid] });
+
+                    const notificationsRef = firestore.collection('users').doc(authorID).collection('notifications');
+                    if (currentUser.uid !== authorID) {
+                        // Create a new document in the notificationsRef collection
+                        const notificationRef = notificationsRef.doc();
+                        await notificationRef.set({
+                            userID: currentUser.uid,
+                            action: "reacted to your comment!",
+                            date: new Date().toISOString(), // Get the server timestamp
+                            postID: postID,
+                            userPhotoURL: currentUser.userPhotoURL,
+                            displayname: currentUser.displayName,
+                            username: currentUser.username,
+                        });
+                        }
+                }
+            } else if (reaction === newReaction) {
+                // Reaction does not exist, create reaction and add user to userIDs array
+                await reactionRef.set({ userIDs: [currentUser.uid] });
+
+                const notificationsRef = firestore.collection('users').doc(authorID).collection('notifications');
+                if (currentUser.uid !== authorID) {
+                    // Create a new document in the notificationsRef collection
+                    const notificationRef = notificationsRef.doc();
+                    await notificationRef.set({
+                        userID: currentUser.uid,
+                        action: "reacted to your comment!",
+                        date: new Date().toISOString(), // Get the server timestamp
+                        postID: postID,
+                        userPhotoURL: currentUser.userPhotoURL,
+                        displayname: currentUser.displayName,
+                        username: currentUser.username,
+                    });
+                }
+            }
+        }
     }
 
     const reactionTypes = ['like', 'heart', 'haha', 'wow', 'sad', 'angry']
 
     const [currentUserReaction, setCurrentUserReaction] = useState('')
     const [allReactions, setAllReactions] = useState([])
+
+    useEffect(() => {
+        const reactionsRef = firestore.collection('posts').doc(postID).collection('comments').doc(commentID).collection('reactions');
+        const unsubscribe = reactionsRef.onSnapshot((snapshot) => {
+            let currentUserReaction = '';
+            let allReactions = [];
+
+            snapshot.docs.forEach(doc => {
+                const reaction = doc.id;
+                const userIDs = doc.data().userIDs;
+
+                if (reactionTypes.includes(reaction)) {
+                    if (userIDs.includes(currentUser.uid)) {
+                        currentUserReaction = reaction;
+                    }
+                    allReactions.push({ reaction: reaction, userIDs: userIDs });
+                }
+            });
+
+            setCurrentUserReaction(currentUserReaction);
+            setAllReactions(allReactions);
+        })
+
+        return unsubscribe;
+    }, [])
 
     return (
         <div className="flex flex-row w-full items-start mih-h-[60px] max-h-fit gap-2">
