@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast"
 import { Loader2 } from "lucide-react"
 import { uploadPostMedia } from "@/lib/storage-funcs"
 import { firestore } from "@/lib/firebase"
+import { getDocs, collection } from "firebase/firestore"
 import { createPostDocument } from "@/lib/firestore-crud"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog"
@@ -20,6 +21,7 @@ import { handleDateFormat } from "@/lib/helper-functions"
 import Link from "next/link"
 import { Comment } from "@/components/post-components/comment"
 import { onSnapshot } from "firebase/firestore"
+
 
 
 import { Card, CardContent } from "@/components/ui/card"
@@ -46,20 +48,28 @@ export function ExpandedPost({ post, currentUser }) {
     const [comments, setComments] = useState([]);
     const [commentBody, setCommentBody] = useState('');
 
-    // read comments from firestore
     useEffect(() => {
-        const unsubscribe = firestore.collection("posts").doc(post.postID).collection("comments").onSnapshot((snapshot) => {
+        const commentsRef = firestore.collection('posts').doc(post.postID).collection('comments');
+
+        const unsubscribe = onSnapshot(commentsRef, async (snapshot) => {
+            let totalComments = snapshot.size;
             const comments = snapshot.docs.map((doc) => ({
                 commentID: doc.id,
                 ...doc.data()
             }));
+
+            for (let doc of snapshot.docs) {
+                const repliesSnapshot = await getDocs(collection(doc.ref, 'replies'));
+                totalComments += repliesSnapshot.size;
+            }
+
+            setCommentsLength(totalComments);
             setComments(comments);
-            setCommentsLength(comments.length);
         });
 
         return () => {
             unsubscribe();
-        }
+        };
     }, [post.postID]);
 
     useEffect(() => {
@@ -193,8 +203,6 @@ export function ExpandedPost({ post, currentUser }) {
 
         setReactionOverlayVisible(false);
     }
-
-    
 
   return (
     <div className="w-full h-full flex flex-col">

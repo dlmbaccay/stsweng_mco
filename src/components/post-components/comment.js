@@ -18,6 +18,7 @@ import { faImage } from "@fortawesome/free-solid-svg-icons"
 import { faTags } from "@fortawesome/free-solid-svg-icons"
 import { handleDateFormat } from "@/lib/helper-functions"
 import Link from "next/link"
+import { Reply } from "./reply"
 
 import likeReaction from '/public/images/post-reactions/like.png'
 import heartReaction from '/public/images/post-reactions/heart.png'
@@ -59,14 +60,12 @@ export function Comment({ props }) {
     const [newCommentBody, setNewCommentBody] = useState(commentBody)
 
     const handleEditComment = async (event) => {
+        event.preventDefault();
 
         if (newCommentBody === '') {
             toast.error('Comment cannot be empty.');
             return;
         }
-
-        event.preventDefault();
-
         // call edit api
         // if success, update comment in state
 
@@ -122,6 +121,51 @@ export function Comment({ props }) {
 
     const [isReplying, setIsReplying] = useState(false)
     const [replyBody, setReplyBody] = useState('')
+
+    const handleReply = async (event) => {
+        event.preventDefault();
+
+        if (replyBody === '') {
+            toast.error('Reply cannot be empty.');
+            return;
+        }
+
+        // call reply api
+        // if success, add reply to state
+        try {
+            const formData = new FormData();
+            formData.append('postID', postID);
+            formData.append('commentID', commentID);
+            formData.append('postAuthorID', postAuthorID);
+            formData.append('postAuthorDisplayName', postAuthorDisplayName);
+            formData.append('postAuthorUsername', postAuthorUsername);
+            formData.append('postAuthorPhotoURL', postAuthorPhotoURL);
+            formData.append('replyBody', replyBody);
+            formData.append('replyDate', new Date().toISOString());
+            formData.append('authorID', currentUser.uid);
+            formData.append('authorDisplayName', currentUser.displayName);
+            formData.append('authorUsername', currentUser.username);
+            formData.append('authorPhotoURL', currentUser.userPhotoURL);
+
+            const response = await fetch('/api/posts/comment-post/reply', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                toast.success('Reply added successfully!');
+            } else {
+                toast.error('Error adding reply. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error adding reply:', error);
+            toast.error('An error occurred while adding the reply.');
+        } finally {
+            setIsReplying(false);
+            setReplyBody('');
+            router.refresh();
+        }
+    }
 
     const [replies, setReplies] = useState([]);
     
@@ -230,13 +274,29 @@ export function Comment({ props }) {
         return unsubscribe;
     }, [])
 
+    useEffect(() => {
+        // Fetch replies from firestore
+        const repliesRef = firestore.collection('posts').doc(postID).collection('comments').doc(commentID).collection('replies');
+        const unsubscribe = repliesRef.onSnapshot((snapshot) => {
+            let replies = [];
+
+            snapshot.docs.forEach(doc => {
+                const reply = doc.data();
+                replies.push(reply);
+            });
+
+            setReplies(replies);
+        });
+
+        return unsubscribe;
+    }, []);
+
     return (
         <div className="flex flex-row w-full items-start mih-h-[60px] max-h-fit gap-2">
             <Image src={authorPhotoURL} alt={authorUsername} 
                 width={40} height={40} className="rounded-full aspect-square object-cover" />
 
             <div className="flex flex-col w-full">
-                {/* add bg and border later */}
                 <div className="flex flex-col gap-1 w-full items-start break-all py-2 px-3 text-sm rounded-xl drop-shadow-sm bg-off_white dark:bg-gray"> 
 
                     <div>
@@ -259,7 +319,7 @@ export function Comment({ props }) {
                                                 alt={reactionImages[reaction.reaction].alt} 
                                                 className='w-[15px] h-[15px] rounded-full' 
                                             />
-                                            <p className='text=xs'>{reaction.userIDs.length}</p>
+                                            <p className='text-xs'>{reaction.userIDs.length}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -299,10 +359,9 @@ export function Comment({ props }) {
                                 </button>
                             </div>
                         </form>
-                    )}
-                    
+                    )}      
 
-                    <div className="flex flex-row w-full text-xs gap-2 pl-1 mt-1">
+                    <div className="flex flex-row w-full text-xs gap-2 mt-1">
                         <div id='like-control'
                             className='flex items-center justify-center'
                             onMouseEnter={() => setIsOverlayVisible(true)}
@@ -379,8 +438,17 @@ export function Comment({ props }) {
                             )}
                         </div>
 
-                        <div id="reply-control">
-
+                        <div id='reply-control' 
+                            className='hover:underline cursor-pointer flex items-center justify-center' 
+                            onClick={() => {
+                                setIsReplying(true);
+                                setTimeout(() => {
+                                    const replyBody = document.getElementById(`reply-${commentID}`);
+                                    if (replyBody) replyBody.focus();
+                                }, 0);
+                            }}
+                        >
+                            Reply
                         </div>
 
                         { currentUser.uid === authorID && (
@@ -432,7 +500,68 @@ export function Comment({ props }) {
                             : null}
                         </div>
                     </div>
+                    
+                    {replies.length > 0 && (
+                        <div className='mt-3 flex flex-col w-full h-fit gap-2 justify-start items-start'>
+                            {replies.map((reply, index) => (
+                                <div key={reply.replyID} className='w-full h-fit'>
+                                    <Reply 
+                                        props = {{
+                                            currentUser: currentUser,
+                                            postID: postID,
+                                            postAuthorID: postAuthorID,
+                                            postAuthorDisplayName: postAuthorDisplayName,
+                                            postAuthorUsername: postAuthorUsername,
+                                            postAuthorPhotoURL: postAuthorPhotoURL,
+                                            commentID: commentID,
+                                            replyID: reply.replyID,
+                                            replyBody: reply.replyBody,
+                                            replyDate: reply.replyDate,
+                                            authorID: reply.authorID,
+                                            authorDisplayName: reply.authorDisplayName,
+                                            authorUsername: reply.authorUsername,
+                                            authorPhotoURL: reply.authorPhotoURL,
+                                            isEdited: reply.isEdited,
+                                        }}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
+                    {isReplying && 
+                        <div className='flex flex-row w-full mt-2 mb-2'>
+                            <form 
+                                onSubmit={(event) => {
+                                    handleReply(event);
+                                }}
+                                className='flex flex-row w-full items-start justify-center h-full'>
+                                <div className='flex aspect-square w-[40px] h-[40px] mr-2 mt-1'>
+                                    <Image src={currentUser.userPhotoURL} alt="user image" width={40} height={40} className='rounded-full drop-shadow-sm '/>
+                                </div>
+
+                                <textarea 
+                                    id={`reply-${commentID}`}
+                                    value={replyBody}
+                                    onChange={(event) => setReplyBody(event.target.value)}
+                                    maxLength={100}
+                                    // onKeyDown={(event => {
+                                    //     if (event.key === 'Enter') {
+                                    //         handleReply(event);
+                                    //     }
+                                    // })}
+                                    placeholder='Write a reply...' 
+                                    className={`outline-none resize-none border border-[#d1d1d1] bg-white dark:bg-black text-sm rounded-xl text-raisin_black w-full p-3 transition-all h-[60px]`}
+                                />
+
+                                <button
+                                    type='submit'
+                                    className='flex rounded-full aspect-square w-[40px] h-[40px] mt-1 bg-muted_blue text-white hover:opacity-80 dark:bg-light_yellow dark:text-black items-center justify-center ml-2 hover:bg-grass hover:text-snow '>
+                                    <i className='fa-solid fa-paper-plane text-sm'></i>
+                                </button>
+                            </form>
+                        </div>
+                    }
 
                 </div>
             </div>
