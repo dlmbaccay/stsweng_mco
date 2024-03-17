@@ -6,6 +6,8 @@ import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog"
 import { handleDateFormat } from "@/lib/helper-functions"
+import { firestore } from "@/lib/firebase"
+import { onSnapshot, getDocs, collection } from "firebase/firestore"
 
 import { Card, CardContent } from "@/components/ui/card"
 import { DeletePost } from "@/components/post-components/delete-post"
@@ -30,22 +32,111 @@ export function PostSnippet({ post, currentUser }) {
     const [currentUserReaction, setCurrentUserReaction] = useState('');
     const [reactionOverlayVisible, setReactionOverlayVisible] = useState(false);
 
-    const [showPostExpanded, setShowPostExpanded] = useState(false);
-    const [postAction, setPostAction] = useState('');
+    useEffect(() => {
+        const commentsRef = firestore.collection('posts').doc(post.postID).collection('comments');
+        const reactionsRef = firestore.collection('posts').doc(post.postID).collection('reactions');
 
-    const [showEditPopup, setShowEditPopup] = useState(false);
+        const unsubscribeComments = onSnapshot(commentsRef, async (snapshot) => {
+            let totalComments = snapshot.size;
 
-    const handleEditClick = () => {
-        setShowEditPopup(true);
-    };
+            for (let doc of snapshot.docs) {
+                const repliesSnapshot = await getDocs(collection(doc.ref, 'replies'));
+                totalComments += repliesSnapshot.size;
+            }
 
-    const handleCloseEditPopup = () => {
-        setShowEditPopup(false);
-    };
+            setCommentsLength(totalComments);
+        });
 
-    const handleEditSuccess = () => {
-        setIsEdited(true);
-    };
+        const unsubscribeReactions = onSnapshot(reactionsRef, async (snapshot) => {
+            let totalReactions = 0;
+            let currentUserReaction = null;
+
+            const reactionTypes = ['like', 'heart', 'haha', 'wow', 'sad', 'angry']; // Replace with your actual reaction types
+
+            for (let doc of snapshot.docs) {
+                const reactionData = doc.data();
+                totalReactions += reactionData.userIDs.length;
+
+                if (reactionData.userIDs.includes(currentUser.uid)) {
+                    currentUserReaction = reactionTypes.find(type => type === doc.id);
+                }
+            }
+
+            setReactionsLength(totalReactions);
+            setCurrentUserReaction(currentUserReaction);
+        });
+
+        // Clean up the subscriptions on unmount
+        return () => {
+            unsubscribeComments();
+            unsubscribeReactions();
+        };
+    }, [post.postID, currentUser.uid]);
+
+    const handleReaction = async (newReaction) => {
+      const reactionsRef = firestore.collection('posts').doc(post.postID).collection('reactions');
+      const reactionTypes = ['like', 'heart', 'haha', 'wow', 'sad', 'angry']; // Replace with your actual reaction types
+      const notificationsRef = firestore.collection('users').doc(post.authorID).collection('notifications');
+
+      for (let reaction of reactionTypes) {
+        const reactionRef = reactionsRef.doc(reaction);
+        const reactionDoc = await reactionRef.get();
+
+        if (reactionDoc.exists) {
+          const reactionData = reactionDoc.data();
+          const userIDs = reactionData.userIDs;
+
+          if (userIDs.includes(currentUser.uid)) {
+            if (reaction === newReaction) {
+              // User has reacted with the same type again, remove user from userIDs array
+              const updatedUserIDs = userIDs.filter((userID) => userID !== currentUser.uid);
+              await reactionRef.update({ userIDs: updatedUserIDs });
+              setCurrentUserReaction('');
+            } else {
+              // User has reacted with a different type, remove user from current userIDs array
+              const updatedUserIDs = userIDs.filter((userID) => userID !== currentUser.uid);
+              await reactionRef.update({ userIDs: updatedUserIDs });
+            }
+          } else if (reaction === newReaction) {
+            // User has not reacted with this type, add user to userIDs array
+            await reactionRef.update({ userIDs: [...userIDs, currentUser.uid] });
+            
+            if (currentUser.uid !== post.authorID) {
+              // Create a new document in the notificationsRef collection
+              const notificationRef = notificationsRef.doc();
+              await notificationRef.set({
+                userID: currentUser.uid,
+                action: "reacted to your post!",
+                date: new Date().toISOString(), // Get the server timestamp
+                postID: post.postID,
+                userPhotoURL: currentUser.userPhotoURL,
+                displayname: currentUser.displayName,
+                username: currentUser.username,
+              });
+            }
+            }
+        } else if (reaction === newReaction) {
+          // Reaction does not exist, create reaction and add user to userIDs array
+          await reactionRef.set({ userIDs: [currentUser.uid] });
+
+          if (currentUser.uid !== post.authorID) {
+            // Create a new document in the notificationsRef collection
+            const notificationRef = notificationsRef.doc();
+            await notificationRef.set({
+              userID: currentUser.uid,
+              action: "reacted to your post!",
+              date: new Date().toISOString(),  // Get the server timestamp
+              postID: post.postID,
+                userPhotoURL: currentUser.userPhotoURL,
+                displayname: currentUser.displayName,
+                username: currentUser.username,
+            });
+          }
+        }
+      }
+
+      setReactionOverlayVisible(false);
+    }
 
   return (
     <Dialog>
@@ -253,43 +344,37 @@ export function PostSnippet({ post, currentUser }) {
                                         src={likeReaction} 
                                         alt="like reaction" 
                                         className='w-fit h-[40px] hover:scale-125 hover:transform transition-all'
-                                        // onClick={() => handleReaction('like')}
-                                        onClick={() => toast.success("You reacted with a like!")}
+                                        onClick={() => handleReaction('like')}
                                     />
                                     <Image 
                                         src={heartReaction} 
                                         alt="like reaction" 
                                         className='w-fit h-[40px] hover:scale-125 hover:transform transition-all'
-                                        // onClick={() => handleReaction('heart')}
-                                        onClick={() => toast.success("You reacted with a heart!")}
+                                        onClick={() => handleReaction('heart')}
                                     />
                                     <Image 
                                         src={laughReaction} 
                                         alt="like reaction" 
                                         className='w-fit h-[40px] hover:scale-125 hover:transform transition-all'
-                                        // onClick={() => handleReaction('haha')}
-                                        onClick={() => toast.success("You reacted with a haha!")}
+                                        onClick={() => handleReaction('haha')}
                                     />
                                     <Image 
                                         src={wowReaction} 
                                         alt="like reaction" 
                                         className='w-fit h-[40px] hover:scale-125 hover:transform transition-all'
-                                        // onClick={() => handleReaction('wow')}
-                                        onClick={() => toast.success("You reacted with a wow!")}
+                                        onClick={() => handleReaction('wow')}
                                     />
                                     <Image 
                                         src={sadReaction} 
                                         alt="like reaction" 
                                         className='w-fit h-[40px] hover:scale-125 hover:transform transition-all'
-                                        // onClick={() => handleReaction('sad')}
-                                        onClick={() => toast.success("You reacted with a sad!")}
+                                        onClick={() => handleReaction('sad')}
                                     />
                                     <Image 
                                         src={angryReaction} 
                                         alt="like reaction" 
                                         className='w-fit h-[40px] hover:scale-125 hover:transform transition-all'
-                                        // onClick={() => handleReaction('angry')}
-                                        onClick={() => toast.success("You reacted with a angry!")}
+                                        onClick={() => handleReaction('angry')}
                                     />
                                 </div>
                             )}
