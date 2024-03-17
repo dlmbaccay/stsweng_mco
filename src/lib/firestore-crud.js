@@ -181,3 +181,13 @@ module.exports.createPetDocument = async (collection, documentId, data) => {
         throw error;
     }
 }
+
+module.exports.createCommentDocument = async(postID, commentID, data) => {
+    try {
+        // Add the data to the Firestore database
+        await firestore.collection("posts").doc(postID).collection("comments").doc(commentID).set(data);
+    } catch (error) {
+        console.error('Error creating comment document:', error);
+        throw error;
+    }
+}

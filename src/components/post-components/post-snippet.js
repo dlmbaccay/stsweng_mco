@@ -301,7 +301,6 @@ export function PostSnippet({ post, currentUser }) {
                                 onClick={() => {
                                     // setShowPostExpanded(true)
                                     // setPostAction('comment')
-                                    toast.success("You're commenting on a post!")
                                 }}
                                 className="fa-solid fa-comment hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" />
                             </DialogTrigger>

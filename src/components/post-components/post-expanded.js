@@ -1,4 +1,5 @@
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
 import { Loader2 } from "lucide-react"
@@ -30,6 +31,7 @@ import angryReaction from '/public/images/post-reactions/angry.png'
 export function ExpandedPost({ post, currentUser }) {
 
     const [isEdited, setIsEdited] = useState(false);
+    const router = useRouter();
     const [ currentImageIndex, setCurrentImageIndex ] = useState(0)
 
     const [commentsLength, setCommentsLength] = useState(0);
@@ -42,6 +44,43 @@ export function ExpandedPost({ post, currentUser }) {
     const [commentBody, setCommentBody] = useState('');
 
     const handleComment = async (event) => {
+
+        if (commentBody === '') {
+            toast.error("You can't post an empty comment!");
+            return;
+        }
+
+        toast.success("You've commented!")
+        event.preventDefault();
+        try {
+            const formData = new FormData();
+            formData.append('postID', post.postID);
+            formData.append('postAuthorID', post.authorID);
+            formData.append('postAuthorDisplayName', post.authorDisplayName);
+            formData.append('postAuthorUsername', post.authorUsername);
+            formData.append('postAuthorPhotoURL', post.authorPhotoURL);
+            formData.append('commentBody', commentBody);
+            formData.append('commentDate', new Date().toISOString());
+            formData.append('authorID', currentUser.uid);
+            formData.append('authorDisplayName', currentUser.displayName);
+            formData.append('authorUsername', currentUser.username);
+            formData.append('authorPhotoURL', currentUser.photoURL);
+
+            // Call API to create comment
+            await fetch('/api/posts/comment-post', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json()).then(async data => {
+                console.log(data);
+                toast.success("Successfully commented on post!");
+                setCommentBody('');
+                router.refresh();
+            });
+            
+        } catch (error) {
+            console.error(error);
+            toast.error("Error commenting on post. Please try again later.");
+        }
     }
 
 
@@ -413,17 +452,18 @@ export function ExpandedPost({ post, currentUser }) {
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     maxLength={100}
-                    onKeyDown={(event => {
-                        if (event.key === 'Enter') {
-                            handleComment(event);
-                        }
-                    })}
+                    // onKeyDown={(event => {
+                    //     if (event.key === 'Enter') {
+                    //         handleComment(event);
+                    //     }
+                    // })}
                     placeholder='Write a comment...' 
                     className={`outline-none resize-none border bg-[#fafafa] dark:bg-black text-md rounded-xl text-raisin_black w-full p-3 transition-all ${isFocused ? 'max-h-[80px]' : 'max-h-[50px]'}`}
                 />
 
                 <Button
-                    type='submit'
+                    type='button'
+                    onClick={handleComment}
                     className='w-[40px] h-[40px] rounded-full ml-2 mt-1'>
                     <i className='fa-solid fa-paper-plane text-sm'></i>
                 </Button>
