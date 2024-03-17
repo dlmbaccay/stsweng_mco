@@ -7,7 +7,7 @@ import { uploadPostMedia } from "@/lib/storage-funcs"
 import { firestore } from "@/lib/firebase"
 import { createPostDocument } from "@/lib/firestore-crud"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogClose, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { MultiSelect } from "@/components/ui/multi-select"
 import { Input } from "@/components/ui/input"
@@ -27,6 +27,8 @@ import sadReaction from '/public/images/post-reactions/sad.png'
 import angryReaction from '/public/images/post-reactions/angry.png'
 
 export function Comment({ props }) {
+
+    const router = useRouter();
 
     const { currentUser, postID, postAuthorID, postAuthorDisplayName, postAuthorUsername, postAuthorPhotoURL, commentID, commentBody, commentDate, authorID, authorDisplayName, authorUsername, authorPhotoURL, isEdited } = props;
 
@@ -57,8 +59,31 @@ export function Comment({ props }) {
         
     }
 
-    const handleDeleteComment = (event) => {
+    const handleDeleteComment = async () => {
 
+        // call delete api
+        // if success, remove comment from state
+
+        try {
+            const response = await fetch('/api/posts/comment-post/delete-comment', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ postID, commentID }),
+            });
+
+            if (response.ok) { 
+                toast.success('Comment deleted successfully!');
+            } else {
+                toast.error('Error deleting comment. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+            toast.error('An error occurred while deleting the comment.');
+        } finally {
+            router.refresh();
+        }
     }
 
     const [isReplying, setIsReplying] = useState(false)
@@ -192,9 +217,32 @@ export function Comment({ props }) {
                                     Edit
                                 </div>
 
-                                <div id="delete-control" className="hover:underline cursor-pointer">
-                                    Delete
-                                </div>
+                                <Dialog>
+                                    <DialogTrigger className="hover:underline cursor-pointer">
+                                        Delete
+                                    </DialogTrigger>
+                                    <DialogContent className="w-full h-fit">
+                                        <DialogHeader>
+                                            <DialogTitle>
+                                                Delete Comment
+                                            </DialogTitle>
+                                        </DialogHeader>
+                                        Are you sure you want to delete this comment?
+
+                                         <DialogFooter className="flex flex-row gap-2 w-full">
+                                            <DialogClose>
+                                                <Button className="bg-white  text-black dark:text-white dark:bg-dark_gray hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black">
+                                                    Cancel
+                                                </Button>
+                                            </DialogClose>
+                                            <Button
+                                                onClick={() => handleDeleteComment()}
+                                            >
+                                                Delete
+                                            </Button>
+                                         </DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
                             </div>
                         )}
 
