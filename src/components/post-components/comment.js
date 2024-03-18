@@ -88,7 +88,6 @@ export function Comment({ props }) {
             toast.error('An error occurred while updating the comment.');
         } finally {
             setIsEditingComment(false);
-            router.refresh();
         }
     }
 
@@ -114,8 +113,6 @@ export function Comment({ props }) {
         } catch (error) {
             console.error('Error deleting comment:', error);
             toast.error('An error occurred while deleting the comment.');
-        } finally {
-            router.refresh();
         }
     }
 
@@ -163,7 +160,6 @@ export function Comment({ props }) {
         } finally {
             setIsReplying(false);
             setReplyBody('');
-            router.refresh();
         }
     }
 

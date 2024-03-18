@@ -28,6 +28,7 @@ export async function POST(request) {
             postAuthorDisplayName: postAuthorDisplayName,
             postAuthorUsername: postAuthorUsername,
             postAuthorPhotoURL: postAuthorPhotoURL,
+            replyID: replyID,
             replyBody: replyBody,
             replyDate: replyDate,
             authorID: authorID,

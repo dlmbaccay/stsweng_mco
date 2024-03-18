@@ -25,6 +25,7 @@ import laughReaction from '/public/images/post-reactions/haha.png'
 import wowReaction from '/public/images/post-reactions/wow.png'
 import sadReaction from '/public/images/post-reactions/sad.png'
 import angryReaction from '/public/images/post-reactions/angry.png'
+import { set } from "date-fns"
 
 export function Reply( { props } ) {
 
@@ -85,7 +86,6 @@ export function Reply( { props } ) {
             toast.error('Error editing reply');
         } finally {
             setIsEditingReply(false);
-            router.refresh();
         }
     }
 
@@ -107,9 +107,7 @@ export function Reply( { props } ) {
         } catch (error) {
             console.error('Error deleting reply:', error);
             toast.error('Error deleting reply');
-        } finally {
-            router.refresh();
-        }            
+        }       
     }
 
     const [isOverlayVisible, setIsOverlayVisible] = useState(false);
@@ -192,7 +190,7 @@ export function Reply( { props } ) {
                             <button type='button' 
                                 onClick={() => {
                                     setIsEditingReply(false);
-                                    setEditedReplyBody(editedReplyBody);
+                                    setEditedReplyBody(replyBody);
                                 }} 
                                 className='flex items-center h-1/2 w-full justify-center rounded-br-md rounded-rb-md hover:bg-light_yellow hover:text-black dark:hover:text-white dark:hover:bg-muted_blue transition-all'>
                                 <i className='fa-solid fa-xmark h-1/2 flex items-center' />
@@ -299,7 +297,8 @@ export function Reply( { props } ) {
 
                                     <DialogFooter className="flex flex-row gap-2 w-full">
                                     <DialogClose>
-                                        <Button className="bg-white  text-black dark:text-white dark:bg-dark_gray hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black">
+                                        <Button 
+                                            className="bg-white  text-black dark:text-white dark:bg-dark_gray hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black">
                                             Cancel
                                         </Button>
                                     </DialogClose>

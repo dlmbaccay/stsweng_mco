@@ -130,7 +130,6 @@ export function ExpandedPost({ post, currentUser }) {
                 console.log(data);
                 toast.success("Successfully commented on post!");
                 setCommentBody('');
-                router.refresh();
             });
             
         } catch (error) {
