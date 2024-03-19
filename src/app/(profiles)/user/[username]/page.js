@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
+import { isEqual } from "lodash";
 import { auth, firestore } from "@/lib/firebase";
 import { handleDateFormat } from "@/lib/helper-functions";
 import  Loader from "@/components/Loader";
@@ -34,6 +35,8 @@ function UserProfile() {
     const [ userPets, setUserPets ] = useState([]);
     const [ userPosts, setUserPosts ] = useState([]);
 
+    const [ userFetchFlag, setUserFetchFlag ] = useState(false);
+
     useEffect(() => {
         setLoading(true); 
     
@@ -46,6 +49,7 @@ function UserProfile() {
             if (response.ok) {
                 const data = await response.json();
                 setUserData(data);
+                setUserFetchFlag(true);
             } else {
                 // Assuming the API returns { message: '...' } on error
                 const errorData = await response.json();
@@ -131,6 +135,31 @@ function UserProfile() {
     
         return () => unsubscribe; // Cleanup function
     }, [currentUser]);
+
+    /*
+    * This useEffect hook is responsible for fetching and updating the posts of the user whose profile is being viewed.
+    * It fetches the posts of the user from the Firestore database and updates the user's posts on the page accordingly.
+     */ 
+    useEffect(() => {
+        let unsubscribe
+
+        if (userPosts && userFetchFlag) {
+            console.log(userData)
+            const postsRef = firestore.collection('posts').where('authorID', "==", userData.uid); // Matches if 'reports' is not empty
+
+            unsubscribe = postsRef.onSnapshot((querySnapshot) => {
+                
+                const postDocs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                if (!isEqual(postDocs, userPosts)){
+                    setUserPosts(postDocs);
+                    
+                }
+            });
+        }
+    
+        return () => unsubscribe;
+    }, [userPosts, userData, userFetchFlag]);
     
     /**
      * This useEffect hook is responsible for fetching and updating the pets of the user whose profile is being viewed.
@@ -385,7 +414,8 @@ function UserProfile() {
                                                 location: userData.location,
                                                 userPhotoURL: userData.userPhotoURL,
                                                 coverPhotoURL: userData.coverPhotoURL,
-                                                pets: userPets
+                                                pets: userPets,
+                                                currentUserID: currentUser.uid,
                                             }}/>}
                                             
                                         </Card>

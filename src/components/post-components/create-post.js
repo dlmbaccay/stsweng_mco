@@ -116,7 +116,6 @@ export function CreatePost({props}) {
                 setSelectedPetIDs([]);
                 setPostTrackerLocation('');
 
-                router.refresh();
             });
             
         } catch (error) {

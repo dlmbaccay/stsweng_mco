@@ -180,7 +180,8 @@ module.exports.createPetDocument = async (collection, documentId, data) => {
         console.error('Error creating pet document:', error);
         throw error;
     }
-}
+
+};
 
 module.exports.createCommentDocument = async(postID, commentID, data) => {
     try {
@@ -190,7 +191,7 @@ module.exports.createCommentDocument = async(postID, commentID, data) => {
         console.error('Error creating comment document:', error);
         throw error;
     }
-}
+};
 
 module.exports.updateCommentDocument = async(postID, commentID, data) => {
     try {
@@ -200,7 +201,7 @@ module.exports.updateCommentDocument = async(postID, commentID, data) => {
         console.error('Error updating comment document:', error);
         throw error;
     }
-}
+};
 
 module.exports.deleteCommentDocument = async(postID, commentID) => {
     try {
@@ -210,7 +211,7 @@ module.exports.deleteCommentDocument = async(postID, commentID) => {
         console.error('Error deleting comment document:', error);
         throw error;
     }
-}
+};
 
 module.exports.createReplyDocument= async(postID, commentID, replyID, data) => {
     try {
@@ -220,7 +221,7 @@ module.exports.createReplyDocument= async(postID, commentID, replyID, data) => {
         console.error('Error creating reply document:', error);
         throw error;
     }
-}
+};
 
 module.exports.updateReplyDocument = async(postID, commentID, replyID, data) => {
     try {
@@ -230,7 +231,7 @@ module.exports.updateReplyDocument = async(postID, commentID, replyID, data) => 
         console.error('Error updating reply document:', error);
         throw error;
     }
-}
+};
 
 module.exports.deleteReplyDocument = async(postID, commentID, replyID) => {
     try {
@@ -241,3 +242,4 @@ module.exports.deleteReplyDocument = async(postID, commentID, replyID) => {
         throw error;
     }
 }
+

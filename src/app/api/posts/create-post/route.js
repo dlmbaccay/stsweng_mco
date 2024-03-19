@@ -38,6 +38,8 @@ export async function POST(request) {
                 location: (postCategory == "Lost Pets" || postCategory == "Unknown Owner") ? postTrackerLocation : "",
                 imageURLs: values,
                 isEdited: false,
+                reports: [],
+                reportStatus: "pending",
                 date: new Date().toISOString()
             };
             // Call a function to save the post details to the database
