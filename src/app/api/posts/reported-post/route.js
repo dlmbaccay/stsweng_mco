@@ -5,17 +5,15 @@ import { create } from 'lodash';
 
 export async function POST(request) {
     const body = await request.json();
-    const { reportData} = body;
+    const { reportData, post} = body;
 
     try {
-        const check = await hasReported(reportData.post.postID, reportData.reportedBy.uid);
-        if (check) {
+        // Check if the user has already reported the post
+        if (post.reports.some((report) => report.reportedBy.uid === reportData.reportedBy.uid)) {
             return NextResponse.json({ message: "You have already reported this post." }, { status: 400 });
         }
 
-        const reportID = await firestore.collection("reports").doc().id;
-        const data = {...reportData, reportID: reportID};
-        await createReportDocument(reportID, data);
+        await updateDocument("posts", post.postID, {reports: [...post.reports, reportData], reportStatus: "pending"})
 
         return NextResponse.json({ message: "Report success." }, { status: 200 });
 
@@ -44,8 +42,8 @@ export async function PATCH(request) {
     const { id, status} = body;
     try {
         // Use the updateDocument function from firestore-crud.js
-        await updateDocument("reports", id, {
-            status: status
+        await updateDocument("posts", id, {
+            reportStatus: status
         });
         return NextResponse.json({message: 'update success'}, {status: 200});
     } catch (error) {

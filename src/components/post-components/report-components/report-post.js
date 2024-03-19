@@ -46,8 +46,6 @@ export function ReportPost({props}) {
                 description: reportDescription,
                 createdAt: new Date(),
                 updatedAt: new Date(),
-                status: "pending",
-                post: post
             };
 
             const response = await fetch("/api/posts/reported-post", {
@@ -55,7 +53,7 @@ export function ReportPost({props}) {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({reportData})
+                body: JSON.stringify({reportData, post})
             });
 
             if (response.ok) {
@@ -180,8 +178,8 @@ export function ReportPost({props}) {
                         </div>
                     </div>
                     <DialogFooter className={`flex flex-row items-center`}>
-                        <DialogClose>
-                        Cancel
+                        <DialogClose className="items-center border border-secondary mt-6 p-2 rounded-lg hover:bg-muted hover:scale-110 transition-all duration-300">
+                            Cancel
                             {/* <Button type="button" variant={"secondary"} className="mt-6">Cancel</Button> */}
                         </DialogClose>
                         {loading ? 
@@ -189,7 +187,7 @@ export function ReportPost({props}) {
                                 <Loader2 className=" mr-2 h-4 w-4 animate-spin" />
                                 Please wait
                             </Button>
-                        :   <Button type="submit" className="mt-6">Report</Button>}
+                        :   <Button type="submit" className="mt-6 hover:scale-110 transition-all duration-300">Report</Button>}
                     </DialogFooter>
                 </form>
             </DialogContent>

@@ -29,16 +29,20 @@ function AdminPage() {
         
         async function fetchReportedPosts() {
             try {
-                // const response = await fetch("/api/posts/reported-post");
-                // const data = await response.json();
-                // // Process the data here
-                // console.log(data);
-                const data = await getReportedPosts();
-                
-                setReportedPosts(data);
-                setFilteredReports(data);
-                setLoading(false);
-                
+                const response = await fetch("/api/posts/reported-post", {
+                    method: 'GET' // Specify GET method
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setReportedPosts(data.postDocs);
+                    setFilteredReports(data.postDocs);
+                    setLoading(false);
+                } else {
+                    // Assuming the API returns { message: '...' } on error
+                    const errorData = await response.json();
+                    throw new Error(errorData.message);
+                }
 
             } catch (error) {
                 console.error("Error fetching reported posts:", error);
@@ -53,7 +57,7 @@ function AdminPage() {
         let unsubscribe
 
         if (reportedPosts) {
-            const reportsRef = firestore.collection('reports'); // Matches if 'reports' is not empty
+            const reportsRef = firestore.collection('posts').where('reports', ">", []); // Matches if 'reports' is not empty
 
             unsubscribe = reportsRef.onSnapshot((querySnapshot) => {
                 
@@ -72,18 +76,19 @@ function AdminPage() {
 
     useEffect(() => {
         if (filter === "pending") {
-            const uncheckedPosts = reportedPosts.filter((post) => post.status === "pending");
+            const uncheckedPosts = reportedPosts.filter((post) => post.reportStatus === "pending");
             setFilteredReports(uncheckedPosts);
         } else if (filter === "verified") {
-            const verifiedPosts = reportedPosts.filter((post) => post.status === "verified");
+            const verifiedPosts = reportedPosts.filter((post) => post.reportStatus=== "verified");
             setFilteredReports(verifiedPosts);
         } else if (filter === "dismissed") {
-            const dismissedPosts = reportedPosts.filter((post) => post.status === "dismissed");
+            const dismissedPosts = reportedPosts.filter((post) => post.reportStatus === "dismissed");
             setFilteredReports(dismissedPosts);
         } else {
             setFilteredReports(reportedPosts);
         }
-    },[filter])
+    },[filter, reportedPosts])
+
 
   return (
     <>
@@ -111,9 +116,9 @@ function AdminPage() {
                         </div>
                     </div>
                     <div className="items-center flex flex-col mt-8">
-                        {!postsLoading && filteredReports.map((report, index) => (
+                        {!postsLoading && filteredReports.map((post, index) => (
                             <div key={index} className="w-3/5 mb-4"> {/* Add a key for the outer container */}
-                                <ReportSnippet post={report.post} report={report} />
+                                <ReportSnippet post={post} />
                             </div>
                         ))}
                     </div>

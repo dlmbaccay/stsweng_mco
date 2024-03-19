@@ -180,47 +180,4 @@ module.exports.createPetDocument = async (collection, documentId, data) => {
         console.error('Error creating pet document:', error);
         throw error;
     }
-}
-
-// Export the function to create a report document in the reports collection of a post document
-module.exports.createReportDocument = async (documentID, data) => {
-    try {
-        // Add the data to the Firestore database
-        await firestore.collection("reports").doc(documentID).set(data);
-
-        // Return success message
-        return 'Report created successfully';
-    } catch (error) {
-        console.error('Error creating report:', error);
-        throw error;
-    }
-};
-
-// Export the function to check for existing report from a user for a post document
-module.exports.hasReported = async (postID, userID) => {
-    try {
-        // Fetch data from the Firestore database
-        console.log(postID, userID);
-        const snapshot = await firestore.collection("reports").where('post.postID', '==', postID).where('reportedBy.uid', '==', userID).limit(1).get();
-        // Check if any documents match the postID and reportedBy
-        const hasReported = !snapshot.empty;
-
-        return hasReported;
-    } catch (error) {
-        console.error('Error checking report:', error);
-        throw error;
-    }
-};
-
-// Export the function to get all documents in the reports collection
-module.exports.getReportedPosts = async () => {
-    try {
-        // Fetch data from the Firestore database
-        const snapshot = await firestore.collection("reports").get();
-        const data = snapshot.docs.map((doc) => doc.data());
-        return data;
-    } catch (error) {
-        console.error('Error getting reported posts:', error);
-        throw error;
-    }
 };

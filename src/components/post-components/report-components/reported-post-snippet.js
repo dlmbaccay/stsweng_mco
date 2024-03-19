@@ -5,18 +5,23 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
 import { Loader2 } from "lucide-react"
+import { handleDateFormat } from "@/lib/helper-functions"
+
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog"
-import { handleDateFormat } from "@/lib/helper-functions"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faCircleInfo, faAngleRight, faAnglesRight, faAngleDown } from "@fortawesome/free-solid-svg-icons"
 
 import { Card } from "@/components/ui/card"
 
 import { ReportDetails } from "./report-details"
 
-export function ReportSnippet({ post, report }) {
+export function ReportSnippet({ post }) {
 
     const [isEdited, setIsEdited] = useState(false);
     const [ currentImageIndex, setCurrentImageIndex ] = useState(0);
+
+    const [ showDetails, setShowDetails ] = useState(false);
 
     async function handleAction(status) {
         try {
@@ -25,7 +30,7 @@ export function ReportSnippet({ post, report }) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ id: report.reportID, status: status })
+                body: JSON.stringify({ id: post.postID, status: status })
             });
             const data = await response.json();
             console.log(data);
@@ -36,6 +41,8 @@ export function ReportSnippet({ post, report }) {
         }
     }
 
+
+
     return (
         <Dialog>
             {/* <DialogTrigger asChild> */}
@@ -44,8 +51,8 @@ export function ReportSnippet({ post, report }) {
                 {/* header */}
                 <div id="post-header" className="flex flex-col justify-between">
                     <div className="flex flex-row w-full justify-between border-b border-secondary pb-3 mb-4">
-                        <span className="font-semibold">@{report.reportedBy.username} on {handleDateFormat(report.createdAt)} reported: </span>
-                        <span className={`font-semibold ${report.status === "pending" ? "text-secondary" : (report.status === "verified" ? "text-green-600" : "text-primary")}`}>{report.status === "pending" ? "UNCHECKED" : (report.status === "verified" ? "VERIFIED" : "DISMISSED")}</span>
+                        <span className="font-semibold">{post.reports.length == 1 ? "1 user has reported:" : post.reports.length+" users have reported:"}</span>
+                        <span className={`font-semibold ${post.reportStatus === "pending" ? "text-secondary" : (post.reportStatus === "verified" ? "text-green-600" : "text-primary")}`}>{post.reportStatus === "pending" ? "UNCHECKED" : (post.reportStatus === "verified" ? "VERIFIED" : "DISMISSED")}</span>
                     </div>
                     
 
@@ -174,9 +181,20 @@ export function ReportSnippet({ post, report }) {
                 <div id="post-footer" className="mt-4 flex flex-col w-full">
                     <div className="w-full border-y border-secondary justify-between">
                         {/* See Report Details */}
-                        <ReportDetails details={report}/>
+                        <div className='flex flex-row justify-between items-center w-full my-3 px-4'>
+                            <div onClick={() => setShowDetails(!showDetails)} className='flex flex-row items-center w-full hover:text-primary hover:cursor-pointer'>
+                                <FontAwesomeIcon icon={faCircleInfo} className='text-4xl text-primary'></FontAwesomeIcon>
+                                <span id="report-control" className='ml-4 text-md'>See Report Details</span>
+                            </div>
+                            <FontAwesomeIcon icon={(showDetails ? faAngleDown : faAngleRight)} className='text-3xl text-primary hover:cursor-pointer'/>
+                        </div>
                     </div>
-                    {report.status === 'pending' && 
+                    <div className={`${showDetails ? "flex":"hidden"}`}>
+                        {post.reports.map((report, index) => 
+                            <ReportDetails key={index} details={report} />
+                        )}
+                    </div>
+                    {post.reportStatus === 'pending' && 
                         <div className="flex w-full justify-center gap-8 mt-4">
                             {/* Buttons */}
                             <Button type="button" onClick={(e) => handleAction("verified")} className={`w-36 text-lg font-semibold tracking-wide shadow-lg hover:w-40 hover:text-xl transition-all duration-150`}>

@@ -2,23 +2,14 @@ import Image from "next/image"
 import { useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
 import { Loader2 } from "lucide-react"
-import { uploadPostMedia } from "@/lib/storage-funcs"
-import { firestore } from "@/lib/firebase"
-import { createPostDocument } from "@/lib/firestore-crud"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MultiSelect } from "@/components/ui/multi-select"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faImage } from "@fortawesome/free-solid-svg-icons"
-import { faTags } from "@fortawesome/free-solid-svg-icons"
 import { handleDateFormat } from "@/lib/helper-functions"
 import Link from "next/link"
 
 import { Card, CardContent } from "@/components/ui/card"
+import { EditPost } from "./edit-post"
+import { DeletePost } from "./delete-post"
 
 import likeReaction from '/public/images/post-reactions/like.png'
 import heartReaction from '/public/images/post-reactions/heart.png'
@@ -325,25 +316,9 @@ export function ExpandedPost({ post, currentUser }) {
 
                     {currentUser.uid === post.authorID && 
                         <>
-                            <i
-                                id="edit-control"
-                                onClick={() => {
-                                    // setShowPostExpanded(true)
-                                    // setPostAction('edit')
-                                    toast.success("You're editing a post!")
-                                }}
-                                className="fa-solid fa-pencil hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" 
-                            />
+                            <EditPost post={post}/>
 
-                            <i
-                                id="delete-control"
-                                onClick={() => {
-                                    // setShowPostExpanded(true)
-                                    // setPostAction('delete')
-                                    toast.success("You're deleting a post!")
-                                }}
-                                className="fa-solid fa-trash hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all"
-                            />
+                            <DeletePost postID={post.postID}/>
                         </>
                     }
                 </div>

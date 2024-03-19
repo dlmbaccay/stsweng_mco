@@ -6,36 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from 'lucide-react';
 
-// Function to fetch existing post data
-const fetchPostData = async (postID) => {
-    try {
-        // Fetch post data using an API route
-        const response = await fetch(`/api/posts/get-post?id=${postID}`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch post data');
-        }
-        return await response.json();
-    } catch (error) {
-        console.error('Error fetching post data:', error);
-        throw error;
-    }
-};
-
-export function EditPost({ postID }) {
+export function EditPost({ post }) {
     const [loading, setLoading] = useState(false);
-    const [postContent, setPostContent] = useState('');
-    const [postCategory, setPostCategory] = useState('');
-
-    useEffect(() => {
-        if (postID) {
-            fetchPostData(postID).then(data => {
-                setPostContent(data.content);
-                setPostCategory(data.category);
-            }).catch(error => {
-                console.error('Error fetching post data:', error);
-            });
-        }
-    }, [postID]);
+    const [postContent, setPostContent] = useState(post.content);
+    const [postCategory, setPostCategory] = useState(post.category);
 
     const updatePost = async (event) => {
         event.preventDefault();
@@ -43,9 +17,9 @@ export function EditPost({ postID }) {
 
         try {
             const formData = new FormData();
-            formData.append('postID', postID);
+            formData.append('postID', post.postID);
             formData.append('postContent', postContent);
-            formData.append('postCategory', postCategory);
+            formData.append('postCategory', postCategory == '' ? 'General' : postCategory);
             formData.append('isEdited', true);
             // console.log('FormData before fetch:', formData);
 

@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import { auth } from "@/lib/firebase";
@@ -10,7 +10,7 @@ import { ModeToggle } from "../mode-toggle";
 
 export default function AdminNav() {
     const router = useRouter();
-    const activeTab = router.pathname;
+    const activeTab = usePathname();
     
     const navRef = useRef(null);
 
@@ -61,31 +61,35 @@ export default function AdminNav() {
                     </div>
                 </div>
                 <div className="pb-8 text-sm">
-                    <div className={`flex flex-col gap-6 justify-items-start"`}>
+                    <div className={`flex flex-col gap-2 justify-items-start`}>
                         
                         <hr className={`border border-xanthous opacity-30 ml-6 mr-6 mt-6`}/>
                         {/* Reported Posts Button */}
-                        <button 
-                            onClick={() => router.push('/reported-posts')} className={`ml-14 transition-all duration-300 flex flex-row items-center gap-3 ${activeTab === '/reported-posts' ? 'bg-gray-200 dark:bg-gray-800' : ''}`}>
-                            <div className="p-2 bg-muted_blue rounded-full dark:bg-light_yellow">
-                                <svg className="w-4 h-4 text-white dark:text-dark_gray" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                                    <path d="M64 32C64 14.3 49.7 0 32 0S0 14.3 0 32V64 368 480c0 17.7 14.3 32 32 32s32-14.3 32-32V352l64.3-16.1c41.1-10.3 84.6-5.5 122.5 13.4c44.2 22.1 95.5 24.8 141.7 7.4l34.7-13c12.5-4.7 20.8-16.6 20.8-30V66.1c0-23-24.2-38-44.8-27.7l-9.6 4.8c-46.3 23.2-100.8 23.2-147.1 0c-35.1-17.6-75.4-22-113.5-12.5L64 48V32z"/>
-                                </svg>
-                            </div>
-                            <span className="text-muted_blue dark:text-light_yellow font-semibold tracking-wider">Reported Posts</span>
-                        </button>
+                        <div className={`w-full h-14 items-center flex ${activeTab === '/admin/reported-posts' ? 'dark:bg-gray bg-light_yellow' : ''}`}>
+                            <button 
+                                onClick={() => router.push('/admin/reported-posts')} className={`ml-14 transition-all duration-300 flex flex-row items-center gap-3`}>
+                                <div className="p-2 bg-primary rounded-full">
+                                    <svg className="w-4 h-4 text-background" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                                        <path d="M64 32C64 14.3 49.7 0 32 0S0 14.3 0 32V64 368 480c0 17.7 14.3 32 32 32s32-14.3 32-32V352l64.3-16.1c41.1-10.3 84.6-5.5 122.5 13.4c44.2 22.1 95.5 24.8 141.7 7.4l34.7-13c12.5-4.7 20.8-16.6 20.8-30V66.1c0-23-24.2-38-44.8-27.7l-9.6 4.8c-46.3 23.2-100.8 23.2-147.1 0c-35.1-17.6-75.4-22-113.5-12.5L64 48V32z"/>
+                                    </svg>
+                                </div>
+                                <span className="text-primary font-semibold tracking-wider">Reported Posts</span>
+                            </button>
+                        </div>
+                        
 
                         {/* Banned Users Button */}
-                        <button 
-                            onClick={() => router.push('/banned-users')} className={`ml-14 transition-all duration-300 flex flex-row items-center gap-3 ${activeTab === '/banned-users' ? 'bg-gray-200 dark:bg-gray-800' : ''}`}>
-                            <div className="p-1 bg-muted_blue rounded-full dark:bg-light_yellow">
-                                <svg className="w-6 h-6 text-white dark:text-dark_gray" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                                    <path fillRule="evenodd" d="M8 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4H6Zm7.3-2a6 6 0 0 0 0-6A4 4 0 0 1 20 8a4 4 0 0 1-6.7 3Zm2.2 9a4 4 0 0 0 .5-2v-1a6 6 0 0 0-1.5-4H18a4 4 0 0 1 4 4v1a2 2 0 0 1-2 2h-4.5Z" clipRule="evenodd"/>
-                                </svg>
-                            </div>
-                            <span className="text-muted_blue dark:text-light_yellow font-semibold tracking-wider whitespace-nowrap">Banned Users</span>
-                        </button>
-
+                        <div className={`w-full h-14 items-center flex ${activeTab === '/admin/banned-users' ? 'bg-gray' : ''}`}>
+                            <button 
+                                onClick={() => router.push('/admin/banned-users')} className={`ml-14 transition-all duration-300 flex flex-row items-center gap-3`}>
+                                <div className="p-1 bg-primary rounded-full">
+                                    <svg className="w-6 h-6 text-background" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                        <path fillRule="evenodd" d="M8 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4H6Zm7.3-2a6 6 0 0 0 0-6A4 4 0 0 1 20 8a4 4 0 0 1-6.7 3Zm2.2 9a4 4 0 0 0 .5-2v-1a6 6 0 0 0-1.5-4H18a4 4 0 0 1 4 4v1a2 2 0 0 1-2 2h-4.5Z" clipRule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <span className="text-primary font-semibold tracking-wider whitespace-nowrap">Banned Users</span>
+                            </button>
+                        </div>
                         {/* Notifications Button */}
                         {/* <button 
                             onClick={() => router.push('/pet-tracker')} className={`${isExpanded ? "ml-14" : "mx-auto"} transition-all duration-300 flex flex-row items-center gap-3`}>
@@ -121,7 +125,7 @@ export default function AdminNav() {
 
                     </div>
 
-                    <hr className='border border-xanthous opacity-30 ml-6 mr-6 mt-6 mb-6'/>
+                    <hr className='border border-xanthous opacity-30 ml-6 mr-6 mt-2 mb-6'/>
                     {/* Log Out Button */}
                     <button onClick={() => handleSignOut()} className={`ml-14 transition-all duration-300 flex flex-row items-center gap-3`}>
                         <div className="p-1 bg-muted_blue rounded-full dark:bg-light_yellow">

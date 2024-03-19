@@ -29,7 +29,8 @@ const Layout = ({ children }) => {
         };
 
         checkAuth();
-    }, []);
+    });
+    
     return (
         <div>
             {/* Add your main content here */}
