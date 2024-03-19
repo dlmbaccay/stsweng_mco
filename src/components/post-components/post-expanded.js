@@ -26,6 +26,7 @@ import laughReaction from '/public/images/post-reactions/haha.png'
 import wowReaction from '/public/images/post-reactions/wow.png'
 import sadReaction from '/public/images/post-reactions/sad.png'
 import angryReaction from '/public/images/post-reactions/angry.png'
+import { ReportPost } from "./report-components/report-post"
 
 export function ExpandedPost({ post, currentUser }) {
 
@@ -313,15 +314,13 @@ export function ExpandedPost({ post, currentUser }) {
 
                 <div id="right" className="flex flex-row gap-4 items-center text-sm md:text-base">
                     {currentUser.uid !== post.authorID && 
-                        <i
-                            id="report-control"
-                            onClick={() => {
-                                // setShowPostExpanded(true)
-                                // setPostAction('report')
-                                toast.success("You're reporting a post!")
-                            }}
-                            className="fa-solid fa-flag hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" 
-                        />
+                        <div>
+                        <ReportPost props={{
+                                currentUser: currentUser,
+                                post: post,
+                                postReports: post.reports,
+                            }}/>
+                    </div>
                     }
 
                     {currentUser.uid === post.authorID && 

@@ -10,6 +10,7 @@ import { handleDateFormat } from "@/lib/helper-functions"
 import { Card, CardContent } from "@/components/ui/card"
 import { DeletePost } from "@/components/post-components/delete-post"
 import { EditPost } from "@/components/post-components/edit-post";
+import { ReportPost } from "@/components/post-components/report-components/report-post"
 
 import likeReaction from '/public/images/post-reactions/like.png'
 import heartReaction from '/public/images/post-reactions/heart.png'
@@ -323,17 +324,14 @@ export function PostSnippet({ post, currentUser }) {
 
                     <div id="right" className="flex flex-row gap-4 items-center text-sm md:text-base">
                         {currentUser.uid !== post.authorID && 
-                            <DialogTrigger asChild>
-                            <i
-                                id="report-control"
-                                onClick={() => {
-                                    // setShowPostExpanded(true)
-                                    // setPostAction('report')
-                                    toast.success("You're reporting a post!")
-                                }}
-                                className="fa-solid fa-flag hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" 
-                            />
-                            </DialogTrigger>
+                            <div>
+                                <ReportPost props={{
+                                    currentUser: currentUser,
+                                    post: post,
+                                    postReports: post.reports,
+                                }}/>
+                            </div>
+                            
                         }
 
                         {currentUser.uid === post.authorID && 
