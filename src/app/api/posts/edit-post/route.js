@@ -1,29 +1,27 @@
 import { NextResponse } from 'next/server';
-import { firestore } from '@/lib/firebase';
-import { updateDocument } from '@/lib/firestore-crud'; // Ensure this import is correct
+import { updateDocument } from '@/lib/firestore-crud';
 
 export async function POST(request) {
-    const formData = await request.formData();
-
-    const postID = formData.get('postID');
-    const postContent = formData.get('postContent');
-    const postCategory = formData.get('postCategory');
-    const isEdited = formData.get('isEdited');
-    // console.log(isEdited)
-    // console.log('Response:', formData);
-    // const postTrackerLocation = formData.get('postTrackerLocation');
-
+    const body = await request.json();
+    const { action, postID, isEdited, content, category } = body;
     try {
-        // Use the updateDocument function from firestore-crud.js
-        await updateDocument("posts", postID, {
-            content: postContent,
-            category: postCategory,
-            isEdited: isEdited === "true"
-            // location: (postCategory === "Lost Pets" || postCategory === "Unknown Owner") ? postTrackerLocation : ""
-        });
-
-        return NextResponse.json({ message: "Post updated successfully." }, { status: 200 });
-
+        switch (action) {
+            case 'updatePostData':
+                // Use the updateDocument function from firestore-crud.js
+                // await updateDocument("posts", postID, {
+                //     content: postContent,
+                //     category: postCategory
+                // });
+                const postData = {
+                    isEdited: true,
+                    content: content,
+                    category: category
+                };
+                await updateDocument('posts', postID, postData);
+                return NextResponse.json({ success: true }, { status: 200 });
+            default:
+                return NextResponse.json({ message: 'Invalid action' }, { status: 400 });
+        }
     } catch (error) {
         console.log('Error in API Route:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });

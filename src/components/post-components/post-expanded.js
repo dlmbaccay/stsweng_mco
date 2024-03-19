@@ -1,11 +1,22 @@
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
 import { Loader2 } from "lucide-react"
+
+import { uploadPostMedia } from "@/lib/storage-funcs"
+import { firestore } from "@/lib/firebase"
+import { getDocs, collection } from "firebase/firestore"
+import { createPostDocument } from "@/lib/firestore-crud"
+
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog"
 import { handleDateFormat } from "@/lib/helper-functions"
 import Link from "next/link"
+import { Comment } from "@/components/post-components/comment"
+import { onSnapshot } from "firebase/firestore"
+
+
 
 import { Card, CardContent } from "@/components/ui/card"
 import { EditPost } from "./edit-post"
@@ -22,6 +33,7 @@ import { ReportPost } from "./report-components/report-post"
 export function ExpandedPost({ post, currentUser }) {
 
     const [isEdited, setIsEdited] = useState(false);
+    const router = useRouter();
     const [ currentImageIndex, setCurrentImageIndex ] = useState(0)
 
     const [commentsLength, setCommentsLength] = useState(0);
@@ -33,9 +45,160 @@ export function ExpandedPost({ post, currentUser }) {
     const [comments, setComments] = useState([]);
     const [commentBody, setCommentBody] = useState('');
 
+    useEffect(() => {
+        const commentsRef = firestore.collection('posts').doc(post.postID).collection('comments');
+
+        const unsubscribe = onSnapshot(commentsRef, async (snapshot) => {
+            let totalComments = snapshot.size;
+            const comments = snapshot.docs.map((doc) => ({
+                commentID: doc.id,
+                ...doc.data()
+            }));
+
+            for (let doc of snapshot.docs) {
+                const repliesSnapshot = await getDocs(collection(doc.ref, 'replies'));
+                totalComments += repliesSnapshot.size;
+            }
+
+            setCommentsLength(totalComments);
+            setComments(comments);
+        });
+
+        return () => {
+            unsubscribe();
+        };
+    }, [post.postID]);
+
+    useEffect(() => {
+        const reactionsRef = firestore.collection('posts').doc(post.postID).collection('reactions');
+
+        const unsubscribeReactions = onSnapshot(reactionsRef, async (snapshot) => {
+            let totalReactions = 0;
+            let currentUserReaction = null;
+
+            const reactionTypes = ['like', 'heart', 'haha', 'wow', 'sad', 'angry']; // Replace with your actual reaction types
+
+            for (let doc of snapshot.docs) {
+                const reactionData = doc.data();
+                totalReactions += reactionData.userIDs.length;
+
+                if (reactionData.userIDs.includes(currentUser.uid)) {
+                    currentUserReaction = reactionTypes.find(type => type === doc.id);
+                }
+            }
+
+            setReactionsLength(totalReactions);
+            setCurrentUserReaction(currentUserReaction);
+        });
+
+        return () => {
+            unsubscribeReactions();
+        };
+    }, [post.postID, currentUser.uid]);
+
     const handleComment = async (event) => {
+
+        if (commentBody === '') {
+            toast.error("You can't post an empty comment!");
+            return;
+        }
+
+        toast.success("You've commented!")
+        event.preventDefault();
+        try {
+            const formData = new FormData();
+            formData.append('postID', post.postID);
+            formData.append('postAuthorID', post.authorID);
+            formData.append('postAuthorDisplayName', post.authorDisplayName);
+            formData.append('postAuthorUsername', post.authorUsername);
+            formData.append('postAuthorPhotoURL', post.authorPhotoURL);
+            formData.append('commentBody', commentBody);
+            formData.append('commentDate', new Date().toISOString());
+            formData.append('authorID', currentUser.uid);
+            formData.append('authorDisplayName', currentUser.displayName);
+            formData.append('authorUsername', currentUser.username);
+            formData.append('authorPhotoURL', currentUser.userPhotoURL);
+
+            // Call API to create comment
+            await fetch('/api/posts/comment-post', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json()).then(async data => {
+                console.log(data);
+                toast.success("Successfully commented on post!");
+                setCommentBody('');
+            });
+            
+        } catch (error) {
+            console.error(error);
+            toast.error("Error commenting on post. Please try again later.");
+        }
     }
 
+    const handleReaction = async (newReaction) => {
+        const reactionsRef = firestore.collection('posts').doc(post.postID).collection('reactions');
+        const reactionTypes = ['like', 'heart', 'haha', 'wow', 'sad', 'angry']; // Replace with your actual reaction types
+        const notificationsRef = firestore.collection('users').doc(post.authorID).collection('notifications');
+
+        for (let reaction of reactionTypes) {
+            const reactionRef = reactionsRef.doc(reaction);
+            const reactionDoc = await reactionRef.get();
+
+            if (reactionDoc.exists) {
+            const reactionData = reactionDoc.data();
+            const userIDs = reactionData.userIDs;
+
+            if (userIDs.includes(currentUser.uid)) {
+                if (reaction === newReaction) {
+                // User has reacted with the same type again, remove user from userIDs array
+                const updatedUserIDs = userIDs.filter((userID) => userID !== currentUser.uid);
+                await reactionRef.update({ userIDs: updatedUserIDs });
+                setCurrentUserReaction('');
+                } else {
+                // User has reacted with a different type, remove user from current userIDs array
+                const updatedUserIDs = userIDs.filter((userID) => userID !== currentUser.uid);
+                await reactionRef.update({ userIDs: updatedUserIDs });
+                }
+            } else if (reaction === newReaction) {
+                // User has not reacted with this type, add user to userIDs array
+                await reactionRef.update({ userIDs: [...userIDs, currentUser.uid] });
+                
+                if (currentUser.uid !== post.authorID) {
+                // Create a new document in the notificationsRef collection
+                const notificationRef = notificationsRef.doc();
+                await notificationRef.set({
+                    userID: currentUser.uid,
+                    action: "reacted to your post!",
+                    date: new Date().toISOString(), // Get the server timestamp
+                    postID: post.postID,
+                    userPhotoURL: currentUser.userPhotoURL,
+                    displayname: currentUser.displayName,
+                    username: currentUser.username,
+                });
+                }
+                }
+            } else if (reaction === newReaction) {
+            // Reaction does not exist, create reaction and add user to userIDs array
+            await reactionRef.set({ userIDs: [currentUser.uid] });
+
+            if (currentUser.uid !== post.authorID) {
+                // Create a new document in the notificationsRef collection
+                const notificationRef = notificationsRef.doc();
+                await notificationRef.set({
+                userID: currentUser.uid,
+                action: "reacted to your post!",
+                date: new Date().toISOString(),  // Get the server timestamp
+                postID: post.postID,
+                    userPhotoURL: currentUser.userPhotoURL,
+                    displayname: currentUser.displayName,
+                    username: currentUser.username,
+                });
+            }
+            }
+        }
+
+        setReactionOverlayVisible(false);
+    }
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -64,11 +227,11 @@ export function ExpandedPost({ post, currentUser }) {
                         <div id="publish-date" className="flex flex-row gap-2 items-center">
                             <p className="text-xs md:text-sm">{handleDateFormat(post.date)}</p>
                             
-                            { isEdited ? 
+                            { post.isEdited ? 
                                 (
-                                    <div className="relative flex flex-row items-center gap-2">
+                                    <div className="relative flex flex-row items-center gap-2 group">
                                         <i className="hover-tooltip fa-solid fa-clock-rotate-left text-[10px] md:text-xs"/>
-                                        <p className="edited-post-tooltip hidden text-xs">Edited Post</p>
+                                        <p className="edited-post-tooltip hidden group-hover:block text-xs">Edited Post</p>
                                     </div>
                                 ) : null
                             }
@@ -239,43 +402,37 @@ export function ExpandedPost({ post, currentUser }) {
                                     src={likeReaction} 
                                     alt="like reaction" 
                                     className='w-fit h-[40px] hover:scale-125 hover:transform transition-all'
-                                    // onClick={() => handleReaction('like')}
-                                    onClick={() => toast.success("You reacted with a like!")}
+                                    onClick={() => handleReaction('like')}
                                 />
                                 <Image 
                                     src={heartReaction} 
                                     alt="like reaction" 
                                     className='w-fit h-[40px] hover:scale-125 hover:transform transition-all'
-                                    // onClick={() => handleReaction('heart')}
-                                    onClick={() => toast.success("You reacted with a heart!")}
+                                    onClick={() => handleReaction('heart')}
                                 />
                                 <Image 
                                     src={laughReaction} 
                                     alt="like reaction" 
                                     className='w-fit h-[40px] hover:scale-125 hover:transform transition-all'
-                                    // onClick={() => handleReaction('haha')}
-                                    onClick={() => toast.success("You reacted with a haha!")}
+                                    onClick={() => handleReaction('haha')}
                                 />
                                 <Image 
                                     src={wowReaction} 
                                     alt="like reaction" 
                                     className='w-fit h-[40px] hover:scale-125 hover:transform transition-all'
-                                    // onClick={() => handleReaction('wow')}
-                                    onClick={() => toast.success("You reacted with a wow!")}
+                                    onClick={() => handleReaction('wow')}
                                 />
                                 <Image 
                                     src={sadReaction} 
                                     alt="like reaction" 
                                     className='w-fit h-[40px] hover:scale-125 hover:transform transition-all'
-                                    // onClick={() => handleReaction('sad')}
-                                    onClick={() => toast.success("You reacted with a sad!")}
+                                    onClick={() => handleReaction('sad')}
                                 />
                                 <Image 
                                     src={angryReaction} 
                                     alt="like reaction" 
                                     className='w-fit h-[40px] hover:scale-125 hover:transform transition-all'
-                                    // onClick={() => handleReaction('angry')}
-                                    onClick={() => toast.success("You reacted with a angry!")}
+                                    onClick={() => handleReaction('angry')}
                                 />
                             </div>
                         )}
@@ -346,15 +503,14 @@ export function ExpandedPost({ post, currentUser }) {
                     <div className='flex flex-col w-full h-fit gap-3 justify-start items-start'>
                         {comments.map((comment, index) => (
                             <div key={comment.commentID} className='w-full h-fit'>
-                                {/* <Comment 
+                                <Comment 
                                     props = {{
-                                        currentUserID: currentUserID,
-                                        currentUserPhotoURL: currentUser.photoURL,
-                                        currentUserUsername: currentUser.username,
-                                        currentUserDisplayName: currentUser.displayName,
-                                        reportCount: currentUser.reportCount,
-                                        postID: postID,
-                                        isEdited: comment.isEdited,
+                                        currentUser: currentUser,
+                                        postID: post.postID,
+                                        postAuthorID: post.authorID,
+                                        postAuthorDisplayName: post.authorDisplayName,
+                                        postAuthorUsername: post.authorUsername,
+                                        postAuthorPhotoURL: post.authorPhotoURL,
                                         commentID: comment.commentID,
                                         commentBody: comment.commentBody,
                                         commentDate: comment.commentDate,
@@ -362,8 +518,10 @@ export function ExpandedPost({ post, currentUser }) {
                                         authorDisplayName: comment.authorDisplayName,
                                         authorUsername: comment.authorUsername,
                                         authorPhotoURL: comment.authorPhotoURL,
+                                        isEdited: comment.isEdited,
+                                        // replies: comment.replies
                                     }}
-                                /> */}
+                                />
                             </div>
                         ))}
                     </div>
@@ -387,17 +545,18 @@ export function ExpandedPost({ post, currentUser }) {
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     maxLength={100}
-                    onKeyDown={(event => {
-                        if (event.key === 'Enter') {
-                            handleComment(event);
-                        }
-                    })}
+                    // onKeyDown={(event => {
+                    //     if (event.key === 'Enter') {
+                    //         handleComment(event);
+                    //     }
+                    // })}
                     placeholder='Write a comment...' 
                     className={`outline-none resize-none border bg-[#fafafa] dark:bg-black text-md rounded-xl text-raisin_black w-full p-3 transition-all ${isFocused ? 'max-h-[80px]' : 'max-h-[50px]'}`}
                 />
 
                 <Button
-                    type='submit'
+                    type='button'
+                    onClick={handleComment}
                     className='w-[40px] h-[40px] rounded-full ml-2 mt-1'>
                     <i className='fa-solid fa-paper-plane text-sm'></i>
                 </Button>
