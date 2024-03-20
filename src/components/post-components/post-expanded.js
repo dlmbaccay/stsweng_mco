@@ -441,9 +441,7 @@ export function ExpandedPost({ post, currentUser }) {
                     <div id="comment-control" className="flex flex-row justify-center items-center gap-2">
                         <i 
                             onClick={() => {
-                                // setShowPostExpanded(true)
-                                // setPostAction('comment')
-                                toast.success("You're commenting on a post!")
+                                document.getElementById('comment-body').focus();  
                             }}
                             className="fa-solid fa-comment hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" />
                         <p>{commentsLength}</p>
