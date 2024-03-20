@@ -311,12 +311,14 @@ function UserProfile() {
                                 {/* About and Details Containers */}
                                 <div className="flex flex-col items-start xl:w-[30%] 2xl:w-[30%] w-full gap-6">
 
-                                    <Card className="drop-shadow-md flex flex-col w-full p-6 text-sm rounded-md">
-                                        <div className="flex flex-col justify-start gap-4">
-                                            <h1 className="tracking-wide font-bold text-lg text-muted_blue dark:text-light_yellow">About</h1>
-                                            <p className="tracking-wide break-words">{userData.about}</p>
-                                        </div>
-                                    </Card>
+                                    { userData.about && 
+                                        <Card className="drop-shadow-md flex flex-col w-full p-6 text-sm rounded-md">
+                                            <div className="flex flex-col justify-start gap-4">
+                                                <h1 className="tracking-wide font-bold text-lg text-muted_blue dark:text-light_yellow">About</h1>
+                                                <p className="tracking-wide break-words">{userData.about}</p>
+                                            </div>
+                                        </Card>
+                                    }
 
                                     <Card className="drop-shadow-md flex flex-col w-full p-6 text-sm rounded-md">
                                         <h1 className="tracking-wide font-bold text-lg pb-4 text-muted_blue dark:text-light_yellow">Details</h1>
