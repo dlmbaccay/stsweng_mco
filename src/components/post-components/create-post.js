@@ -20,6 +20,7 @@ import { faImage } from "@fortawesome/free-solid-svg-icons"
 export function CreatePost({props}) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [ open, setOpen] = useState(false);
 
     const { uid, username, displayname, userphoto, pets } = props;
     
@@ -115,6 +116,7 @@ export function CreatePost({props}) {
                 setPreviewMedia([]);
                 setSelectedPetIDs([]);
                 setPostTrackerLocation('');
+                setOpen(false);
 
             });
             
@@ -135,7 +137,7 @@ export function CreatePost({props}) {
     }, [selectedPetIDs, pets]);
 
     return (
-        <Dialog>
+        <Dialog  open={open} onOpenChange={setOpen}>
             {/* Trigger Buttons */}
             <div className="flex flex-row items-center"> 
                 <DialogTrigger asChild>

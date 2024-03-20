@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from 'lucide-react';
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 
 export function EditPost({ props }) {
     const [loading, setLoading] = useState(false);
+    const [open, setOpen] = useState(false);
     const [isEdited, setIsEdited] = useState(false);
 
     const { postID, postIsEdited, content, category  } = props;
@@ -24,8 +25,8 @@ export function EditPost({ props }) {
             // Save User Data
             await savePostData();
             setLoading(false);
-            toast.success('Post successfully updated!')
-            window.location.reload();
+            toast.success('Post successfully updated!');
+            setOpen(false);
             handleEditSuccess();
     
         } catch (error) {
@@ -64,7 +65,7 @@ export function EditPost({ props }) {
     };
 
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <i
                     id="edit-control"
@@ -109,14 +110,14 @@ export function EditPost({ props }) {
                         </div>
                     </div>
                     <DialogFooter>
-                        {loading ?
-                            <Button disabled>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Please wait
-                            </Button>
-                            :
-                            <Button type="submit" className="mt-6">Update Post</Button>
-                        }
+                            {loading ?
+                                <Button disabled>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Please wait
+                                </Button>
+                                :
+                                <Button type="submit" className="mt-6">Update Post</Button>
+                            }
                     </DialogFooter>
                 </form>
             </DialogContent>
