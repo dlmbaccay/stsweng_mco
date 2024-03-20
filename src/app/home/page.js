@@ -1,15 +1,22 @@
 "use client"
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { auth } from "@/lib/firebase";
 import WithAuth from "@/components/WithAuth";
 import { ModeToggle } from "@/components/mode-toggle";
 import Loader from "@/components/Loader";
 import NavBar from "@/components/nav/navbar";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
+import { CreatePost } from "@/components/post-components/create-post";
+import { PostSnippet } from "@/components/post-components/post-snippet";
 
 function HomePage() {
+    const [userData, setUserData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [ currentUser, setCurrentUser ] = useState([]);
+
+    const [ activeTab, setActiveTab ] = useState('posts');
 
     useEffect(() => {
         setLoading(true); 
@@ -68,8 +75,55 @@ function HomePage() {
                       expand_lock: true,
                   }}/>
               </div>
-              <div className="w-full h-screen fixed z-10 mt-16">
-                Home Page
+              <div className="w-full h-screen fixed z-10 mt-16 flex justify-center">
+                
+                {/* Tabs */}
+                <div className="mt-6 mb-6 flex flex-row font-bold w-1/2 h-[35px] text-sm bg-off_white dark:bg-gray drop-shadow-md rounded-l-sm rounded-r-sm gap-1">
+                    <div
+                        className={`transition-all w-1/2 flex items-center justify-center rounded-l-sm ${activeTab == 'posts' ? "bg-muted_blue dark:bg-light_yellow text-white dark:text-black" : "hover:bg-inherit hover:border-2 hover:border-primary hover:text-primary cursor-pointer transition-all"}`} 
+                        onClick={() => setActiveTab('For You')}
+                    >
+                        For You
+                    </div>
+
+                    <div
+                        className={`transition-all w-1/2 flex items-center justify-center rounded-r-sm ${activeTab == 'pets' ? "bg-muted_blue dark:bg-light_yellow text-white dark:text-black" : "hover:bg-inherit hover:border-2 hover:border-primary hover:text-primary cursor-pointer transition-all"}`} 
+                        onClick={() => setActiveTab('Following')}
+                    >
+                        Following
+                    </div>
+                </div>
+
+                {/* Create Post */}
+                { currentUser.uid === userData.uid ? 
+                    <Card className="drop-shadow-md rounded-sm mb-6">
+                        <div className="flex flex-row items-center w-full my-2">
+                            <div className="ml-4">
+                                <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.jpg" : userData.userPhotoURL} alt="user photo" width={44} height={44} className="rounded-full aspect-square object-cover" />
+                            </div>
+                            <div className="w-full mr-4">
+                                <CreatePost props={{
+                                    uid: userData.uid,
+                                    username: userData.username,
+                                    displayname: userData.displayName,
+                                    userphoto: userData.userPhotoURL,
+                                    pets: userPets,
+                                }}/>
+                            </div>
+                        </div>
+                    </Card> : null
+                }
+
+                {/* {activeTab == 'For You' ? (
+                    <>
+                        
+                    </>
+                ): (
+                    <>
+                        
+                    </>
+                )} */}
+
               </div>
           </div>
       )}
