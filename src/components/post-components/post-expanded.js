@@ -473,7 +473,12 @@ export function ExpandedPost({ post, currentUser }) {
 
                     {currentUser.uid === post.authorID && 
                         <>
-                            <EditPost post={post}/>
+                            <EditPost props={{
+                                postID: post.postID,
+                                postIsEdited: post.isEdited,
+                                content: post.content,
+                                category: post.category
+                            }}/>
 
                             <DeletePost postID={post.postID}/>
                         </>
