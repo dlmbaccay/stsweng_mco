@@ -54,7 +54,7 @@ function PetProfile() {
     if (activeTab === 'tagged posts' && petData && petData.petOwnerUsername) {
        setIsLoading(true);
        setError(null);
-       fetch(`/api/posts/via-authorUsername?username=${petData.petOwnerUsername}&petId=${petData.petID}`)
+       fetch(`/api/posts/via-authorUsername?username=${petData.petOwnerUsername}`)
          .then(response => response.json())
          .then(data => {
            setPosts(data.postDocs);
@@ -66,7 +66,7 @@ function PetProfile() {
            setIsLoading(false);
          });
     }
-   }, [activeTab, petData?.petOwnerUsername, petData?.petID]);
+   }, [activeTab, petData?.petOwnerUsername]);
 
   useEffect(() => {
     // get current user using auth and firestore
