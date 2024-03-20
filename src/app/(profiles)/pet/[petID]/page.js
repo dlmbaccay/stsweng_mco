@@ -20,6 +20,7 @@ import { FollowButton } from "@/components/profile/follow-user-button";
 import { CreatePost } from "@/components/post-components/create-post";
 import { PetsContainer } from "@/components/profile/pet-container";
 import { set } from "date-fns";
+import { PostSnippet } from "@/components/post-components/post-snippet";
 
 import {
   DropdownMenu,
@@ -43,6 +44,29 @@ function PetProfile() {
   const [ currentUser, setCurrentUser ] = useState(null); 
 
   const [ showMisc, setShowMisc ] = useState(false);
+
+  const [posts, setPosts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  
+
+  useEffect(() => {
+    if (activeTab === 'tagged posts' && petData && petData.petOwnerUsername) {
+       setIsLoading(true);
+       setError(null);
+       fetch(`/api/posts/via-authorUsername?username=${petData.petOwnerUsername}&petId=${petData.petID}`)
+         .then(response => response.json())
+         .then(data => {
+           setPosts(data.postDocs);
+           setIsLoading(false);
+         })
+         .catch(error => {
+           console.error('Error fetching posts:', error);
+           setError(error.message);
+           setIsLoading(false);
+         });
+    }
+   }, [activeTab, petData?.petOwnerUsername, petData?.petID]);
 
   useEffect(() => {
     // get current user using auth and firestore
@@ -276,7 +300,11 @@ function PetProfile() {
 
                         {activeTab == 'tagged posts' ? (
                           <Card className="text-sm p-4 drop-shadow-md rounded-sm">
-                            <p>Tagged Posts Container</p>
+                            <div>
+                                {posts.map((post) => (
+                                  <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                ))}
+                            </div>
                           </Card>
                         ): (
                           <Card className="text-sm p-4 drop-shadow-md rounded-sm">
