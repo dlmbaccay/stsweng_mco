@@ -3,7 +3,7 @@ import { getDocumentsWithCondition } from '@/lib/firestore-crud';
 
 export async function GET(request) {
     const { searchParams } = new URL(request.url);
-    const petID = searchParams.get('id');
+    const petID = searchParams.get('petID');
     
     try {
         const postDocs = await getDocumentsWithCondition('posts', 'taggedPets', 'array-contains', petID);

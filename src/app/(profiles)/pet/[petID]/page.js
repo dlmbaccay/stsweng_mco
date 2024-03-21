@@ -21,6 +21,9 @@ import { CreatePost } from "@/components/post-components/create-post";
 import { PetsContainer } from "@/components/profile/pet-container";
 import { set } from "date-fns";
 import { PostSnippet } from "@/components/post-components/post-snippet";
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { firestore as db } from '@/lib/firebase';
+import { isEqual } from "lodash";
 
 import {
   DropdownMenu,
@@ -39,7 +42,7 @@ function PetProfile() {
   const [ petData, setPetData ] = useState(null);
 
   const [ loading, setLoading ] = useState(false);
-  const [ activeTab, setActiveTab ] = useState("tagged posts"); // tagged posts and milestones
+  const [ activeTab, setActiveTab ] = useState("tagged posts");
 
   const [ currentUser, setCurrentUser ] = useState(null); 
 
@@ -49,12 +52,78 @@ function PetProfile() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   
+  const [petPosts, setPetPosts] = useState([]);
+
+//   useEffect(() => {
+//     let unsubscribe;
+   
+//     if (activeTab === 'tagged posts' && petData && petData.petID && petData.petOwnerUsername) {
+//       console.log('useEffect triggered');
+//        const postsRef = firestore.collection('posts')
+//           .where('taggedPets', 'array-contains', petData.petID)
+//           .where('authorUsername', '==', petData.petOwnerUsername);
+   
+//        unsubscribe = postsRef.onSnapshot((querySnapshot) => {
+//          const postDocs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+   
+//          if (!isEqual(postDocs, petPosts)) {
+//            setPetPosts(postDocs);
+//          }
+//        });
+//     }
+   
+//     return () => unsubscribe && unsubscribe();
+// }, [activeTab, petData, petPosts]);
 
   useEffect(() => {
-    if (activeTab === 'tagged posts' && petData && petData.petOwnerUsername) {
+    if (activeTab === 'tagged posts' && petData && petData.petID) {
        setIsLoading(true);
        setError(null);
-       fetch(`/api/posts/via-authorUsername?username=${petData.petOwnerUsername}`)
+       fetch(`/api/posts/tagged-post?petID=${petData.petID}`)
+         .then(response => response.json())
+         .then(data => {
+           setPosts(data.postDocs);
+           setIsLoading(false);
+         })
+         .catch(error => {
+           console.error('Error fetching posts:', error);
+           setError(error.message);
+           setIsLoading(false);
+         });
+    }
+   }, [activeTab, petData?.petOwnerUsername]);
+
+// useEffect(() => {
+//  if (activeTab === 'tagged posts' && petData && petData.petID) {
+//      setIsLoading(true);
+//      setError(null);
+  
+//      console.log('Fetching tagged posts for petID:', petData.petID); // Debugging log
+  
+//      const fetchTaggedPosts = async () => {
+//        try {
+//          const q = query(collection(db, "posts"), where("taggedPets", "array-contains", petData.petID));
+//          const querySnapshot = await getDocs(q);
+//          const fetchedPosts = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+//          setPosts(fetchedPosts);
+//        } catch (error) {
+//          console.error('Error fetching posts:', error);
+//          setError(error.message);
+//        } finally {
+//          setIsLoading(false);
+//        }
+//      };
+  
+//      fetchTaggedPosts();
+//  }
+// }, [activeTab, petData?.petID]); 
+
+  
+   useEffect(() => {
+    if (activeTab === 'milestones' && petData && petData.petOwnerUsername) {
+       setIsLoading(true);
+       setError(null);
+       fetch(`/api/posts/category-post?category=Milestones`)
          .then(response => response.json())
          .then(data => {
            setPosts(data.postDocs);
@@ -308,7 +377,11 @@ function PetProfile() {
                           </Card>
                         ): (
                           <Card className="text-sm p-4 drop-shadow-md rounded-sm">
-                            <p>Milestones Container</p>
+                            <div>
+                                {posts.map((post) => (
+                                  <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                ))}
+                            </div>
                           </Card>
                         )}
                     </div>
