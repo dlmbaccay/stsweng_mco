@@ -32,7 +32,6 @@ export function PostSnippet({ post, currentUser }) {
     const [reactionsLength, setReactionsLength] = useState(0);
     const [currentUserReaction, setCurrentUserReaction] = useState('');
     const [reactionOverlayVisible, setReactionOverlayVisible] = useState(false);
-    const [postAction, setPostAction] = useState('');
 
     useEffect(() => {
         const commentsRef = firestore.collection('posts').doc(post.postID).collection('comments');
@@ -380,10 +379,7 @@ export function PostSnippet({ post, currentUser }) {
 
                         <div id="comment-control" className="flex flex-row justify-center items-center gap-2">
                             <DialogTrigger asChild>
-                            <i 
-                                onClick={() => {
-                                    setPostAction('comment')
-                                }}
+                            <i
                                 className="fa-solid fa-comment hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" />
                             </DialogTrigger>
                             <p>{commentsLength}</p>
@@ -391,11 +387,7 @@ export function PostSnippet({ post, currentUser }) {
 
                         <div id="share-control">
                             <DialogTrigger asChild>
-                            <i 
-                                onClick={() => {
-                                    setPostAction('share')
-                                    toast.success("You're sharing a post!")
-                                }}
+                            <i
                                 className="fa-solid fa-share hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" />
                             </DialogTrigger>
                         </div>
@@ -434,7 +426,7 @@ export function PostSnippet({ post, currentUser }) {
             <DialogHeader className="flex items-center justify-center w-full">
                 <DialogTitle className="text-md">{post.authorDisplayName}&apos;s Post</DialogTitle>
             </DialogHeader>
-            <ExpandedPost post={post} currentUser={currentUser} postAction={postAction} />
+            <ExpandedPost post={post} currentUser={currentUser} />
         </DialogContent>
     </Dialog>
 

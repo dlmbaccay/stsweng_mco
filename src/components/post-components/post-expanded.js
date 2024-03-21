@@ -1,6 +1,6 @@
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { use, useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
 import { Loader2 } from "lucide-react"
 
@@ -30,7 +30,7 @@ import sadReaction from '/public/images/post-reactions/sad.png'
 import angryReaction from '/public/images/post-reactions/angry.png'
 import { ReportPost } from "./report-components/report-post"
 
-export function ExpandedPost({ post, currentUser, postAction }) {
+export function ExpandedPost({ post, currentUser }) {
 
     const [isEdited, setIsEdited] = useState(false);
     const router = useRouter();
@@ -52,6 +52,8 @@ export function ExpandedPost({ post, currentUser, postAction }) {
     const [isFocused, setIsFocused] = useState(false);
     const [comments, setComments] = useState([]);
     const [commentBody, setCommentBody] = useState('');
+
+    const [sharing, setSharing] = useState(false);
 
     useEffect(() => {
         const commentsRef = firestore.collection('posts').doc(post.postID).collection('comments');
@@ -465,11 +467,24 @@ export function ExpandedPost({ post, currentUser, postAction }) {
                     </div>
 
                     <div id="share-control">
-                        <i 
-                            onClick={() => {
-                                toast.success("You're sharing a post!")
-                            }}
-                            className="fa-solid fa-share hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" />
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <i className="fa-solid fa-share hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" />
+                            </DialogTrigger>
+                            <DialogContent>
+                                <div className="flex flex-col gap-2 w-full h-full">
+                                    <div className="flex flex-row gap-2 items-center">
+                                        <i className="fa-solid fa-link text-sm"></i>
+                                        <p>Copy Link</p>
+                                    </div>
+                                    <div className="flex flex-row gap-2 items-center">
+                                        {/* "Repost" */}
+                                        <i className="fa-solid fa-share text-sm"></i>
+                                        <p>Repost</p>
+                                    </div>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </div>
 
@@ -593,7 +608,7 @@ export function ExpandedPost({ post, currentUser, postAction }) {
                     onBlur={() => setIsFocused(false)}
                     maxLength={100}
                     placeholder='Write a comment...' 
-                    className={`outline-none resize-none border bg-[#fafafa] dark:bg-black text-md rounded-xl text-raisin_black w-full p-3 transition-all ${(isFocused || postAction == "comment") ? 'max-h-[80px]' : 'max-h-[50px]'}`}
+                    className={`outline-none resize-none border bg-[#fafafa] dark:bg-black text-md rounded-xl text-raisin_black w-full p-3 transition-all ${isFocused ? 'max-h-[80px]' : 'max-h-[50px]'}`}
                 />
 
                 <Button
