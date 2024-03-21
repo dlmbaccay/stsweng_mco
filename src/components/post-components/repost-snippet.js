@@ -183,7 +183,7 @@ export function RepostSnippet({post, currentUser}) {
                         }
 
                         {/* reposted post */}
-                        <div id="reposted-post" className="flex flex-col mt-4 border border-black dark:border-white rounded-md p-4">
+                        <div id="reposted-post" className={`${post.content === '' ? "mt-2" : "mt-4"} flex flex-col border border-black dark:border-white rounded-md p-4`}>
 
                             <div className="flex flex-row justify-start items-start">
                                 <div id="author-image">
@@ -352,10 +352,12 @@ export function RepostSnippet({post, currentUser}) {
                             </div>
 
                             <div id="share-control">
-                                <DialogTrigger asChild>
                                 <i
-                                    className="fa-solid fa-share hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" />
-                                </DialogTrigger>
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(`${window.location.origin}/post/${post.postID}`);
+                                        toast.success("Link copied to clipboard!");
+                                    }}
+                                    className="fa-solid fa-link hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" />
                             </div>
                         </div>
 
