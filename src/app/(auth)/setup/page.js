@@ -56,6 +56,9 @@ function SetupPage() {
     useEffect(() => {
         const checkUserSetup = async () => {
             if (user) {
+                if (user.uid == "5QMdCpbNvBMBSJ0wY9i28adWdx72"){
+                    router.push(`/admin/reported-posts`);
+                }
                 const userRef = firestore.doc(`users/${user.uid}`);
                 const doc = await userRef.get();
                 if (doc.exists && doc.data().username) {

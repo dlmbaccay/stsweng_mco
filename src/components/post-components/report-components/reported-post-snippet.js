@@ -30,7 +30,7 @@ export function ReportSnippet({ post }) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ id: post.postID, status: status })
+                body: JSON.stringify({ action: "update-status", id: post.postID, status: status })
             });
             const data = await response.json();
             console.log(data);
@@ -38,6 +38,25 @@ export function ReportSnippet({ post }) {
         } catch (error) {
             console.error('Error verifying post:', error);
             toast.error('Error verifying post');
+        }
+    }
+
+    async function handleDeleteReport(event) {
+        event.preventDefault();
+        try {
+            const response = await fetch(`/api/posts/reported-post`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({action: "delete-report", id: post.postID })
+            });
+            const data = await response.json();
+            console.log(data);
+            toast.success('Report deleted');
+        } catch (error) {
+            console.error('Error deleting post:', error);
+            toast.error('Error deleting post');
         }
     }
 
@@ -50,8 +69,7 @@ export function ReportSnippet({ post }) {
 
                 {/* header */}
                 <div id="post-header" className="flex flex-col justify-between">
-                    <div className="flex flex-row w-full justify-between border-b border-secondary pb-3 mb-4">
-                        <span className="font-semibold">{post.reports.length == 1 ? "1 user has reported:" : post.reports.length+" users have reported:"}</span>
+                    <div className="flex flex-row w-full justify-end border-b border-secondary pb-3 mb-4">
                         <span className={`font-semibold ${post.reportStatus === "pending" ? "text-secondary" : (post.reportStatus === "verified" ? "text-green-600" : "text-primary")}`}>{post.reportStatus === "pending" ? "UNCHECKED" : (post.reportStatus === "verified" ? "VERIFIED" : "DISMISSED")}</span>
                     </div>
                     
@@ -184,25 +202,36 @@ export function ReportSnippet({ post }) {
                         <div className='flex flex-row justify-between items-center w-full my-3 px-4'>
                             <div onClick={() => setShowDetails(!showDetails)} className='flex flex-row items-center w-full hover:text-primary hover:cursor-pointer'>
                                 <FontAwesomeIcon icon={faCircleInfo} className='text-4xl text-primary'></FontAwesomeIcon>
-                                <span id="report-control" className='ml-4 text-md'>See Report Details</span>
+                                <span id="report-control" className='ml-4 text-md'>See List of Report Details:</span>
+                                <span className="ml-4 text-md font-semibold"><span className="text-red-500">{post.reports.length}</span> Total User Reports</span>
                             </div>
                             <FontAwesomeIcon icon={(showDetails ? faAngleDown : faAngleRight)} className='text-3xl text-primary hover:cursor-pointer'/>
                         </div>
                     </div>
-                    <div className={`${showDetails ? "flex":"hidden"}`}>
+                    <div className={`${showDetails ? "flex flex-col":"hidden"}`}>
                         {post.reports.map((report, index) => 
-                            <ReportDetails key={index} details={report} />
+                                <ReportDetails key={index} details={report} />
+                            
                         )}
                     </div>
-                    {post.reportStatus === 'pending' && 
+                    {post.reportStatus === 'pending' ? 
                         <div className="flex w-full justify-center gap-8 mt-4">
                             {/* Buttons */}
-                            <Button type="button" onClick={(e) => handleAction("verified")} className={`w-36 text-lg font-semibold tracking-wide shadow-lg hover:w-40 hover:text-xl transition-all duration-150`}>
+                            <Button type="button" onClick={(e) => handleAction("verified")} className={`w-36 text-lg font-semibold tracking-wide shadow-lg hover:w-40 hover:text-xl transition-all duration-150 border border-secondary`}>
                                 Verify
                             </Button>
                             
                             <Button type="button" onClick={(e) => handleAction("dismissed")} className={`w-36 text-lg font-semibold tracking-wide bg-inherit border border-secondary shadow-lg text-secondary hover:text-primary-foreground`}>
                                 Dismiss
+                            </Button>
+                        </div>
+                    :
+                        <div className="flex w-full justify-center gap-8 mt-4">
+                            <Button type="button" onClick={(e) => handleAction("pending")} className={`w-36 text-lg font-semibold tracking-wide bg-inherit border border-secondary shadow-lg text-secondary hover:text-primary-foreground`}>
+                                Undo
+                            </Button>
+                            <Button type="button" variant={"destructive"} onClick={(e) => handleDeleteReport(e)} className={`w-36 text-lg font-semibold tracking-wide shadow-lg border border-secondary`}>
+                                Delete
                             </Button>
                         </div>
                     }

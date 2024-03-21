@@ -35,18 +35,19 @@ export function ReportDetails({ details }) {
                 </div>
                 
                 <div className='flex flex-row gap-4'>
-                    <div className="mb-2 w-1/3 p-2 rounded-lg">
+                    <div className="mb-2 w-1/2 p-2 rounded-lg">
                         <h3 className='text-md font-semibold'>Reasons for Report:</h3>
-                            <FontAwesomeIcon icon={faAnglesRight} className='text-md text-primary pr-2'/>
+                        <FontAwesomeIcon icon={faAnglesRight} className='text-md text-primary pr-2'/>
                         <span className='text-md capitalize'>
                             {reportReasons.map((reason, index) => (
                                 <span key={index}>{reason}{index === reportReasons.length - 1 ? "" : ", "}</span>
                             ))}
                         </span>
                     </div>
-                    <div className="mb-2 w-2/3 p-2 rounded-lg">
-                        <span className='text-md font-semibold'>Additional Details:</span>
-                        <p className='text-md'>{additionalDetails}</p>
+                    <div className="mb-2 w-1/2 p-2 rounded-lg">
+                        <h3 className='text-md font-semibold'>Additional Details:</h3>
+                        <FontAwesomeIcon icon={faAnglesRight} className='text-md text-primary pr-2'/>
+                        <span className='text-md'>{additionalDetails}</span>
                     </div>
                 </div>
             </div>

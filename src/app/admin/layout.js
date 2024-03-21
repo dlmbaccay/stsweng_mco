@@ -16,15 +16,18 @@ const Layout = ({ children }) => {
     useEffect(() => {
         const checkAuth = () => {
             auth.onAuthStateChanged((user) => {
-                // if (user.uid === "h3ThyLqqAyS0Vh8zxQEYgo1J0kI2") {
-                //     setIsUserValid(true);
-                //     console.log("Welcome Admin!");
+                const adminIDs = ["5QMdCpbNvBMBSJ0wY9i28adWdx72", "h3ThyLqqAyS0Vh8zxQEYgo1J0kI2", "BPkVGVwvFAZskwoi1XGeluHDNTt2", "EGd2StgK9IV2j1FGTqLGrr4u8dr1", "x9QpuLIRWvgVYwkSlQUUC3y052R2", "LIsCrodmyGYPHBHO4K7GkrklXyx2", "sBZ2tTZFLHgmRW9c1CVVx3mqkoY2", "53pEdqC76oaSUrfsjySo4zQQei43"]
                 if (user) {
-                    setIsUserValid(true);
-                    console.log("Welcome Admin!");
+                    if (adminIDs.includes(user.uid)) {
+                        setIsUserValid(true);
+                        console.log("Welcome Admin!");
+                    } else {
+                        router.push("/home");
+                    }
                 } else {
-                    router.push("/  ");
+                    router.push("/not-found");
                 }
+                
             });
         };
 
@@ -33,10 +36,12 @@ const Layout = ({ children }) => {
     
     return (
         <div>
-            {/* Add your main content here */}
-            <main>
-                {children}
-            </main>
+            {isUserValid && (
+                // Add main content here
+                <main>
+                    {children}
+                </main>
+            )}
         </div>
     );
 };

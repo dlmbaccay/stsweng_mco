@@ -39,13 +39,28 @@ export async function GET(request) {
 
 export async function PATCH(request) {
     const body = await request.json();
-    const { id, status} = body;
+    const { action, id, status} = body;
     try {
-        // Use the updateDocument function from firestore-crud.js
-        await updateDocument("posts", id, {
-            reportStatus: status
-        });
-        return NextResponse.json({message: 'update success'}, {status: 200});
+        if (action == "update-status") {
+            // Use the updateDocument function from firestore-crud.js
+            await updateDocument("posts", id, {
+                reportStatus: status
+            });
+
+            return NextResponse.json({message: 'update success'}, {status: 200});
+        } else if (action == "delete-report") {
+            // Use the updateDocument function from firestore-crud.js
+            await updateDocument("posts", id, {
+                reportStatus: "pending",
+                reports: []
+            });
+
+            return NextResponse.json({message: 'update success'}, {status: 200});
+        } else {
+            return NextResponse.json({message: 'Invalid action'}, {status: 400});
+        }
+        
+        
     } catch (error) {
         console.log('Error in API Route:', error);
         return NextResponse.json({ error: error.message }, {status: 500});
