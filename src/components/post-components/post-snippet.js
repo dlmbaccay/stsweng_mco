@@ -405,11 +405,12 @@ export function PostSnippet({ post, currentUser }) {
                         {currentUser.uid === post.authorID && 
                             <>
                                 <EditPost props={{
-                                            postID: post.postID,
-                                            postIsEdited: post.isEdited,
-                                            content: post.content,
-                                            category: post.category
-                                        }}/>
+                                    postID: post.postID,
+                                    postIsEdited: post.isEdited,
+                                    content: post.content,
+                                    category: post.category,
+                                    postType: post.postType
+                                }}/>
 
                                 <DeletePost postID={post.postID}/>
                             </>

@@ -560,7 +560,8 @@ export function ExpandedPost({ post, currentUser }) {
                                 postID: post.postID,
                                 postIsEdited: post.isEdited,
                                 content: post.content,
-                                category: post.category
+                                category: post.category,
+                                postType: post.postType
                             }}/>
 
                             <DeletePost postID={post.postID}/>

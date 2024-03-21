@@ -144,7 +144,7 @@ function UserProfile() {
     useEffect(() => {
         let unsubscribe
 
-        if (userPosts && userFetchFlag) {
+        if (userData && userPosts && userFetchFlag) {
             console.log(userData)
             const postsRef = firestore.collection('posts').where('authorID', "==", userData.uid); // Matches if 'reports' is not empty
 
