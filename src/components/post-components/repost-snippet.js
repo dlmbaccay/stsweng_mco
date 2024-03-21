@@ -21,7 +21,7 @@ import wowReaction from '/public/images/post-reactions/wow.png'
 import sadReaction from '/public/images/post-reactions/sad.png'
 import angryReaction from '/public/images/post-reactions/angry.png'
 
-import ExpandedRepost from "@/components/post-components/repost-expanded"
+import { ExpandedRepost } from "@/components/post-components/repost-expanded"
 
 export function RepostSnippet({post, currentUser}) {
     const [commentsLength, setCommentsLength] = useState(0);
@@ -177,9 +177,11 @@ export function RepostSnippet({post, currentUser}) {
                     {/* body */}
                     <div id="post-body" className='mt-2 md:mt-3 flex flex-col'>
                         { post.content !== '' && post.content !== null && post.content !== undefined &&
-                            <div id="post-content" className="flex flex-col mt-1">
-                                <p className="text-sm md:text-base">{post.content}</p>
-                            </div>
+                            <DialogTrigger asChild>
+                                <div id="post-content" className="flex flex-col mt-1 cursor-pointer">
+                                    <p className="text-sm md:text-base">{post.content}</p>
+                                </div>
+                            </DialogTrigger>
                         }
 
                         {/* reposted post */}
@@ -209,11 +211,11 @@ export function RepostSnippet({post, currentUser}) {
 
 
                             <div id="reposted-post-content" className="flex flex-row items-start justify-between mt-4 gap-8">
-                                <p className="text-sm md:text-base">{post.originalPostContent}</p>
+                                <p className="w-full text-sm md:text-base">{post.originalPostContent}</p>
 
                                 {/* original post images, if any (only show the first one) */}
                                 { post.originalPostMedia && post.originalPostMedia.length > 0 &&
-                                    <div id="reposted-post-images" className="flex">
+                                    <div id="reposted-post-images" className="justify-end flex w-[30%] ">
                                         <Image
                                             src={post.originalPostMedia[0]}
                                             alt="reposted post image"
@@ -226,7 +228,6 @@ export function RepostSnippet({post, currentUser}) {
                             </div>
                         </div>      
                     </div>
-
 
                     {/* footer */}
                     <div id="post-footer" className="mt-4 flex flex-row w-full justify-between relative">

@@ -254,18 +254,17 @@ export function PostSnippet({ post, currentUser }) {
                     </div>
 
                     { (post.category === 'Unknown Owner' || post.category === 'Retrieved Pets') && 
-                    <div className='flex flex-row items-center gap-1 mb-2'>
-                        <p className='text-sm'>Found At:</p>
-                        <p className='line-clamp-1 overflow-hidden text-sm'>{post.postTrackerLocation}</p>
-                    </div>
+                        <div className='flex flex-row items-center gap-1 mb-2'>
+                            <p className='font-semibold'>Found At:</p>
+                            <p className='line-clamp-1 overflow-hidden'>{post.location}</p>
+                        </div>
                     }
 
-                    {
-                    post.category === 'Lost Pets' && 
-                    <div className='flex flex-row items-center gap-1 mb-2'>
-                        <p className='text-sm'>Last Seen:</p>
-                        <p className='line-clamp-1 overflow-hidden text-sm'>{post.postTrackerLocation}</p>
-                    </div>
+                    { post.category === 'Lost Pets' && 
+                        <div className='flex flex-row items-center gap-1 mb-2'>
+                            <p className='font-semibold'>Last Seen At:</p>
+                            <p className='line-clamp-1 overflow-hidden'>{post.location}</p>
+                        </div>
                     }
 
                     <DialogTrigger asChild>
