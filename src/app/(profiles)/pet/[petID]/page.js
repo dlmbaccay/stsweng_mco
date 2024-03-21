@@ -29,6 +29,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { FollowPetButton } from "@/components/profile/follow-pet-button";
 
 function PetProfile() {
 
@@ -162,8 +163,8 @@ function PetProfile() {
                           {/* Followers and Following Section */}
                           <div className="flex flex-row justify-start gap-2 text-sm font-semibold"> 
                             <div className="flex items-center gap-1">
-                                <p>{ petData.following && petData.following.length ? '' : 0 }</p>
-                                <p className="dark:text-light_yellow text-muted_blue">Following</p>
+                                <p>{ petData.followers && petData.followers.length ? petData.followers.length : 0 }</p>
+                                <p className="dark:text-light_yellow text-muted_blue">Followers</p>
                             </div>
                           </div>
                       </div>
@@ -199,9 +200,11 @@ function PetProfile() {
                           </div>  
                           :
                           // <FollowButton props={{ currentUser: currentUser, petData: petData }} />
-                          <Button className="px-3 h-[35px] gap-2 flex items-center justify-center">
-                              Follow
-                          </Button>
+                          <FollowPetButton props={{
+                            pet: petData,
+                            currentUser_uid: currentUser.uid,
+                            currentUser_following: currentUser.following,
+                          }}/>
                       }
                       </div>
                   </div>

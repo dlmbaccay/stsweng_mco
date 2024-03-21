@@ -16,7 +16,7 @@ import { EditUserProfile } from "@/components/edit-dialogs/edit-user-profile";
 import { CreatePetProfile } from "@/components/profile/create-pet-profile";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
 import WithAuth from "@/components/WithAuth";
-import { FollowButton } from "@/components/profile/follow-user-button";
+import { FollowUserButton } from "@/components/profile/follow-user-button";
 import { CreatePost } from "@/components/post-components/create-post";
 import { PetsContainer } from "@/components/profile/pet-container";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -295,12 +295,13 @@ function UserProfile() {
                                         }}/>
                                     ):(
                                         // Follow Button 
-                                        <FollowButton props={{
-                                                profileUser_uid: userData.uid,
-                                                profileUser_name: userData.username,
-                                                currentUser_uid: currentUser.uid,
-                                                profileUser_followers: userData.followers,
-                                                currentUser_following: currentUser.following
+                                        <FollowUserButton props={{
+                                            profileUser_pets: userPets,
+                                            profileUser_uid: userData.uid,
+                                            profileUser_name: userData.username,
+                                            currentUser_uid: currentUser.uid,
+                                            profileUser_followers: userData.followers,
+                                            currentUser_following: currentUser.following
                                         }}/>
                                     )}
                                 </div>
