@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from "./ui/button";
 import toast from 'react-hot-toast';
 import { set } from 'date-fns';
+import Link from 'next/link';
 
 export function PetSnippetCard({ props }) {
     const router = useRouter();
@@ -18,19 +19,21 @@ export function PetSnippetCard({ props }) {
     } = props;
 
     return (
-        <Card className="mb-4 flex flex-col gap-2 items-center justify-center w-1/3 h-[200px] hover:bg-white dark:hover:bg-dark_gray px-6 py-4 hover:drop-shadow-md transition-all hover:scale-105 cursor-pointer"
-            onClick={() => { router.push(`/pet/${petID}`) }}
-        >
-            <Image 
-                src={petPhotoURL == "" ? "/images/petPictureHolder.jpg" : petPhotoURL} 
-                alt="pet photo" width={100} height={100} 
-                className="rounded-full aspect-square object-cover"
-                
-            />
-            <div className="flex flex-col items-center justify-center">
-                <p className="xl:text-sm text-lg font-bold">{petName}</p>
-                <p className="text-sm italic text-center">{petBreed}</p>
-            </div>
-        </Card>
+        <Link href={`/pet/${petID}`} className='block w-[30%] h-full'>
+            <Card className="mb-4 flex flex-col gap-2 items-center justify-center w-full h-[200px] hover:bg-white dark:hover:bg-dark_gray px-6 py-4 hover:drop-shadow-md transition-all hover:scale-105 cursor-pointer"
+                onClick={() => { router.push(`/pet/${petID}`) }}
+            >
+                <Image 
+                    src={petPhotoURL == "" ? "/images/petPictureHolder.jpg" : petPhotoURL} 
+                    alt="pet photo" width={100} height={100} 
+                    className="rounded-full aspect-square object-cover"
+                    
+                />
+                <div className="flex flex-col items-center justify-center">
+                    <p className="xl:text-sm text-lg font-bold">{petName}</p>
+                    <p className="text-sm italic text-center">{petBreed}</p>
+                </div>
+            </Card>
+        </Link>
     )
 }
