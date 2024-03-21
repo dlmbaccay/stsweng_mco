@@ -32,6 +32,7 @@ export function PostSnippet({ post, currentUser }) {
     const [reactionsLength, setReactionsLength] = useState(0);
     const [currentUserReaction, setCurrentUserReaction] = useState('');
     const [reactionOverlayVisible, setReactionOverlayVisible] = useState(false);
+    const [postAction, setPostAction] = useState('');
 
     useEffect(() => {
         const commentsRef = firestore.collection('posts').doc(post.postID).collection('comments');
@@ -230,10 +231,6 @@ export function PostSnippet({ post, currentUser }) {
                     <DialogTrigger asChild>
                         <div id="post-content" className="cursor-pointer">
                             <p
-                                // onClick={() => {
-                                //   setShowPostExpanded(true)
-                                //   setPostAction('view')
-                                // }} 
                                 className='whitespace-pre-line line-clamp-1 text-sm md:text-base md:line-clamp-4 overflow-hidden text-justify'>
                                 {post.content}
                             </p>
@@ -385,8 +382,7 @@ export function PostSnippet({ post, currentUser }) {
                             <DialogTrigger asChild>
                             <i 
                                 onClick={() => {
-                                    // setShowPostExpanded(true)
-                                    // setPostAction('comment')
+                                    setPostAction('comment')
                                 }}
                                 className="fa-solid fa-comment hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" />
                             </DialogTrigger>
@@ -397,8 +393,7 @@ export function PostSnippet({ post, currentUser }) {
                             <DialogTrigger asChild>
                             <i 
                                 onClick={() => {
-                                    // setShowPostExpanded(true)
-                                    // setPostAction('share')
+                                    setPostAction('share')
                                     toast.success("You're sharing a post!")
                                 }}
                                 className="fa-solid fa-share hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" />
@@ -420,18 +415,6 @@ export function PostSnippet({ post, currentUser }) {
 
                         {currentUser.uid === post.authorID && 
                             <>
-                            
-                                {/* <i
-                                    id="edit-control"
-                                    onClick={() => {
-                                        setShowPostExpanded(true)
-                                        setPostAction('edit')
-                                        toast.success("You're editing a post!")
-                                    }}
-                                    className="fa-solid fa-pencil hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" 
-                                /> */}
-
-                                {/* <EditPost postID={post.postID}/> */}
                                 <EditPost props={{
                                             postID: post.postID,
                                             postIsEdited: post.isEdited,
@@ -439,15 +422,6 @@ export function PostSnippet({ post, currentUser }) {
                                             category: post.category
                                         }}/>
 
-                                {/* <i
-                                    id="delete-control"
-                                    onClick={() => {
-                                        // setShowPostExpanded(true)
-                                        // setPostAction('delete')
-                                        toast.success("You're deleting a post!")
-                                    }}
-                                    className="fa-solid fa-trash hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all"
-                                /> */}
                                 <DeletePost postID={post.postID}/>
                             </>
                         }
@@ -460,7 +434,7 @@ export function PostSnippet({ post, currentUser }) {
             <DialogHeader className="flex items-center justify-center w-full">
                 <DialogTitle className="text-md">{post.authorDisplayName}&apos;s Post</DialogTitle>
             </DialogHeader>
-            <ExpandedPost post={post} currentUser={currentUser} />
+            <ExpandedPost post={post} currentUser={currentUser} postAction={postAction} />
         </DialogContent>
     </Dialog>
 

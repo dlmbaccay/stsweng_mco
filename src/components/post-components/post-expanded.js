@@ -30,7 +30,7 @@ import sadReaction from '/public/images/post-reactions/sad.png'
 import angryReaction from '/public/images/post-reactions/angry.png'
 import { ReportPost } from "./report-components/report-post"
 
-export function ExpandedPost({ post, currentUser }) {
+export function ExpandedPost({ post, currentUser, postAction }) {
 
     const [isEdited, setIsEdited] = useState(false);
     const router = useRouter();
@@ -40,6 +40,14 @@ export function ExpandedPost({ post, currentUser }) {
     const [reactionsLength, setReactionsLength] = useState(0);
     const [currentUserReaction, setCurrentUserReaction] = useState('');
     const [reactionOverlayVisible, setReactionOverlayVisible] = useState(false);
+    const [reactionsPerType, setReactionsPerType] = useState({
+        like: { userIDs: [] },
+        heart: { userIDs: [] },
+        haha: { userIDs: [] },
+        wow: { userIDs: [] },
+        sad: { userIDs: [] },
+        angry: { userIDs: [] }
+    });
 
     const [isFocused, setIsFocused] = useState(false);
     const [comments, setComments] = useState([]);
@@ -86,6 +94,19 @@ export function ExpandedPost({ post, currentUser }) {
                     currentUserReaction = reactionTypes.find(type => type === doc.id);
                 }
             }
+
+            // retrieve post reactions, store separately, to be seen in the 'View Reactions' dialog
+
+            const reactionsPerType = {
+                like: snapshot.docs.find(doc => doc.id === 'like')?.data(),
+                heart: snapshot.docs.find(doc => doc.id === 'heart')?.data(),
+                haha: snapshot.docs.find(doc => doc.id === 'haha')?.data(),
+                wow: snapshot.docs.find(doc => doc.id === 'wow')?.data(),
+                sad: snapshot.docs.find(doc => doc.id === 'sad')?.data(),
+                angry: snapshot.docs.find(doc => doc.id === 'angry')?.data()
+            };
+
+            setReactionsPerType(reactionsPerType);
 
             setReactionsLength(totalReactions);
             setCurrentUserReaction(currentUserReaction);
@@ -290,10 +311,6 @@ export function ExpandedPost({ post, currentUser }) {
 
                 <div id="post-content">
                     <p
-                        // onClick={() => {
-                        //   setShowPostExpanded(true)
-                        //   setPostAction('view')
-                        // }} 
                         className='whitespace-pre-line line-clamp-1 text-sm md:text-base md:line-clamp-4 overflow-hidden text-justify'>
                         {post.content}
                     </p>
@@ -450,8 +467,6 @@ export function ExpandedPost({ post, currentUser }) {
                     <div id="share-control">
                         <i 
                             onClick={() => {
-                                // setShowPostExpanded(true)
-                                // setPostAction('share')
                                 toast.success("You're sharing a post!")
                             }}
                             className="fa-solid fa-share hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" />
@@ -491,8 +506,37 @@ export function ExpandedPost({ post, currentUser }) {
                 <DialogTrigger asChild>
                     <p className="text-sm mt-4 hover:underline cursor-pointer w-fit">View Reactions...</p>
                 </DialogTrigger>
-                <DialogContent>
-                    To be implemented...
+                <DialogContent className="w-[350px]">
+                    <div className="flex flex-col gap-2 w-full h-full">
+                        <div className="flex flex-row gap-2 items-center">
+                            <p className="font-bold">Reactions</p>
+                            <p>{reactionsLength}</p>
+                        </div>
+                        <div className="flex flex-row gap-2 items-center">
+                            <Image src={likeReaction} alt="like reaction" className="w-[20px] h-[20px]"/>
+                            <p>{reactionsPerType.like ? reactionsPerType.like.userIDs.length : 0}</p>
+                        </div>
+                        <div className="flex flex-row gap-2 items-center">
+                            <Image src={heartReaction} alt="heart reaction" className="w-[20px] h-[20px]"/>
+                            <p>{reactionsPerType.heart ? reactionsPerType.heart.userIDs.length : 0}</p>
+                        </div>
+                        <div className="flex flex-row gap-2 items-center">
+                            <Image src={laughReaction} alt="haha reaction" className="w-[20px] h-[20px]"/>
+                            <p>{reactionsPerType.haha ? reactionsPerType.haha.userIDs.length : 0}</p>
+                        </div>
+                        <div className="flex flex-row gap-2 items-center">
+                            <Image src={wowReaction} alt="wow reaction" className="w-[20px] h-[20px]"/>
+                            <p>{reactionsPerType.wow ? reactionsPerType.wow.userIDs.length : 0}</p>
+                        </div>
+                        <div className="flex flex-row gap-2 items-center">
+                            <Image src={sadReaction} alt="sad reaction" className="w-[20px] h-[20px]"/>
+                            <p>{reactionsPerType.sad ? reactionsPerType.sad.userIDs.length : 0}</p>
+                        </div>
+                        <div className="flex flex-row gap-2 items-center">
+                            <Image src={angryReaction} alt="angry reaction" className="w-[20px] h-[20px]"/>
+                            <p>{reactionsPerType.angry ? reactionsPerType.angry.userIDs.length : 0}</p>
+                        </div>
+                    </div>
                 </DialogContent>
             </Dialog>
            
@@ -548,13 +592,8 @@ export function ExpandedPost({ post, currentUser }) {
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     maxLength={100}
-                    // onKeyDown={(event => {
-                    //     if (event.key === 'Enter') {
-                    //         handleComment(event);
-                    //     }
-                    // })}
                     placeholder='Write a comment...' 
-                    className={`outline-none resize-none border bg-[#fafafa] dark:bg-black text-md rounded-xl text-raisin_black w-full p-3 transition-all ${isFocused ? 'max-h-[80px]' : 'max-h-[50px]'}`}
+                    className={`outline-none resize-none border bg-[#fafafa] dark:bg-black text-md rounded-xl text-raisin_black w-full p-3 transition-all ${(isFocused || postAction == "comment") ? 'max-h-[80px]' : 'max-h-[50px]'}`}
                 />
 
                 <Button
