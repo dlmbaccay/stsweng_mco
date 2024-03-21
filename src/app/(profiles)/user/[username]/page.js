@@ -22,6 +22,7 @@ import { PetsContainer } from "@/components/profile/pet-container";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTags } from "@fortawesome/free-solid-svg-icons";
 import { PostSnippet } from "@/components/post-components/post-snippet";
+import { RepostSnippet } from "@/components/post-components/repost-snippet";
 
 function UserProfile() {
     const router = useRouter();
@@ -400,7 +401,12 @@ function UserProfile() {
                                             <div className="flex flex-col min-w-full items-center justify-center gap-6">
                                                 {[...userPosts].reverse().map((post) => {
                                                     return (
-                                                        <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                                        (post.postType == 'Original' ?
+                                                            <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                                        
+                                                        : post.postType == 'Repost' ?
+                                                            <RepostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                                        : null)
                                                     )
                                                 })}
                                             </div>

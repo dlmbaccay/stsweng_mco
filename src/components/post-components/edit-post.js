@@ -13,7 +13,7 @@ export function EditPost({ props }) {
     const [open, setOpen] = useState(false);
     const [isEdited, setIsEdited] = useState(false);
 
-    const { postID, postIsEdited, content, category  } = props;
+    const { postID, postIsEdited, content, postType, category  } = props;
 
     const [newContent, setNewContent] = useState(content);
     const [newCategory, setNewCategory] = useState(category);
@@ -37,26 +37,50 @@ export function EditPost({ props }) {
     }
     
     async function savePostData() {
-        await fetch('/api/posts/edit-post', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                action: 'updatePostData', 
-                postID, 
-                isEdited,
-                content: newContent, 
-                category: newCategory
-            }) 
-        }).then(response => {
-            if (response.ok) {
-                const data = response.json();
-                if (data.success) {
-                    toast.success(`Successfully updated post!`);
+        if (postType === 'Original') {
+            await fetch('/api/posts/edit-post', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    action: 'updatePostData', 
+                    postID, 
+                    isEdited,
+                    content: newContent, 
+                    category: newCategory,
+                    postType: postType
+                }) 
+            }).then(response => {
+                if (response.ok) {
+                    const data = response.json();
+                    if (data.success) {
+                        toast.success(`Successfully updated post!`);
+                    }
+                } else {
+                    throw new Error('Failed to save post');
                 }
-            } else {
-                throw new Error('Failed to save post');
-            }
-        });
+            });
+        } else if (postType === 'Repost'){
+            await fetch('/api/posts/edit-post', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    action: 'updatePostData', 
+                    postID, 
+                    isEdited,
+                    content: newContent,
+                    postType: postType
+                }) 
+            }).then(response => {
+                if (response.ok) {
+                    const data = response.json();
+                    if (data.success) {
+                        toast.success(`Successfully updated post!`);
+                    }
+                } else {
+                    throw new Error('Failed to save post');
+                }
+            });
+        }
     }
 
     const handleEditSuccess = () => {
@@ -80,22 +104,24 @@ export function EditPost({ props }) {
                 <form onSubmit={handleSavePostChanges}>
                     <div className="flex flex-col w-full mb-4">
                         <div className="flex flex-col w-full px-10">
-                            <div className="flex justify-end w-full">
-                                <Select required onValueChange={(value) => setNewCategory(value)} value={newCategory}>
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Select Category" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="General">General</SelectItem>
-                                        <SelectItem value="Q&A">Q&A</SelectItem>
-                                        <SelectItem value="Tips">Tips</SelectItem>
-                                        <SelectItem value="Pet Needs">Pet Needs</SelectItem>
-                                        <SelectItem value="Milestones">Milestones</SelectItem>
-                                        <SelectItem value="Lost Pets">Lost Pets</SelectItem>
-                                        <SelectItem value="Unknown Owner">Unknown Owner</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                            {postType === 'Original' && 
+                                <div className="flex justify-end w-full">
+                                    <Select required onValueChange={(value) => setNewCategory(value)} value={newCategory}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select Category" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="General">General</SelectItem>
+                                            <SelectItem value="Q&A">Q&A</SelectItem>
+                                            <SelectItem value="Tips">Tips</SelectItem>
+                                            <SelectItem value="Pet Needs">Pet Needs</SelectItem>
+                                            <SelectItem value="Milestones">Milestones</SelectItem>
+                                            <SelectItem value="Lost Pets">Lost Pets</SelectItem>
+                                            <SelectItem value="Unknown Owner">Unknown Owner</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            }
                             <div className="mt-4">
                                 <Label htmlFor="post-content" className="text-lg font-normal mb-2">Content</Label>
                                 <Textarea

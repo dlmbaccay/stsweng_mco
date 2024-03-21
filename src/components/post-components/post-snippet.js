@@ -24,10 +24,7 @@ import angryReaction from '/public/images/post-reactions/angry.png'
 import { ExpandedPost } from "./post-expanded"
 
 export function PostSnippet({ post, currentUser }) {
-
-    const [isEdited, setIsEdited] = useState(false);
     const [ currentImageIndex, setCurrentImageIndex ] = useState(0)
-
     const [commentsLength, setCommentsLength] = useState(0);
     const [reactionsLength, setReactionsLength] = useState(0);
     const [currentUserReaction, setCurrentUserReaction] = useState('');
@@ -140,8 +137,8 @@ export function PostSnippet({ post, currentUser }) {
     }
 
   return (
-    <Dialog>
-        {/* <DialogTrigger asChild> */}
+    (post.postType === 'Original' &&
+        <Dialog>
             <Card className="w-full drop-shadow-md hover:drop-shadow-md min-h-fit rounded-md p-6 flex flex-col">
 
                 {/* header */}
@@ -420,16 +417,14 @@ export function PostSnippet({ post, currentUser }) {
                     </div>
                 </div>
             </Card>
-        {/* </DialogTrigger> */}
 
-        <DialogContent className="sm:min-w-full md:min-w-[750px] h-[95%] flex flex-col items-start justify-center p-2">
-            <DialogHeader className="flex items-center justify-center w-full">
-                <DialogTitle className="text-md">{post.authorDisplayName}&apos;s Post</DialogTitle>
-            </DialogHeader>
-            <ExpandedPost post={post} currentUser={currentUser} />
-        </DialogContent>
-    </Dialog>
-
-    
+            <DialogContent className="sm:min-w-full md:min-w-[750px] h-[95%] flex flex-col items-start justify-center p-2">
+                <DialogHeader className="flex items-center justify-center w-full">
+                    <DialogTitle className="text-md">{post.authorDisplayName}&apos;s Post</DialogTitle>
+                </DialogHeader>
+                <ExpandedPost post={post} currentUser={currentUser} />
+            </DialogContent>
+        </Dialog>
+    )
   );
 }

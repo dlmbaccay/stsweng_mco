@@ -3,22 +3,28 @@ import { updateDocument } from '@/lib/firestore-crud';
 
 export async function POST(request) {
     const body = await request.json();
-    const { action, postID, isEdited, content, category } = body;
+    const { action, postID, isEdited, content, category, postType } = body;
     try {
         switch (action) {
             case 'updatePostData':
-                // Use the updateDocument function from firestore-crud.js
-                // await updateDocument("posts", postID, {
-                //     content: postContent,
-                //     category: postCategory
-                // });
-                const postData = {
-                    isEdited: true,
-                    content: content,
-                    category: category
-                };
-                await updateDocument('posts', postID, postData);
-                return NextResponse.json({ success: true }, { status: 200 });
+                if (postType === 'Original') {
+                    const postData = {
+                        isEdited: true,
+                        content: content,
+                        category: category
+                    };
+
+                    await updateDocument('posts', postID, postData);
+                    return NextResponse.json({ success: true }, { status: 200 });
+                } else if (postType === 'Repost') {
+                    const postData = {
+                        isEdited: true,
+                        content: content
+                    };
+
+                    await updateDocument('posts', postID, postData);
+                    return NextResponse.json({ success: true }, { status: 200 });
+                }
             default:
                 return NextResponse.json({ message: 'Invalid action' }, { status: 400 });
         }

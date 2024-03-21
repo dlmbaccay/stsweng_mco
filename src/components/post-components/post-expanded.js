@@ -16,8 +16,6 @@ import Link from "next/link"
 import { Comment } from "@/components/post-components/comment"
 import { onSnapshot } from "firebase/firestore"
 
-
-
 import { Card, CardContent } from "@/components/ui/card"
 import { EditPost } from "./edit-post"
 import { DeletePost } from "./delete-post"
@@ -52,8 +50,6 @@ export function ExpandedPost({ post, currentUser }) {
     const [isFocused, setIsFocused] = useState(false);
     const [comments, setComments] = useState([]);
     const [commentBody, setCommentBody] = useState('');
-
-    const [sharing, setSharing] = useState(false);
 
     useEffect(() => {
         const commentsRef = firestore.collection('posts').doc(post.postID).collection('comments');
@@ -221,6 +217,48 @@ export function ExpandedPost({ post, currentUser }) {
         }
 
         setReactionOverlayVisible(false);
+    }
+
+    const [repostBody, setRepostBody] = useState('');
+
+    const handleRepost = async (event) => {
+        event.preventDefault();
+
+        try {
+            const formData = new FormData();
+            formData.append('postType', 'Repost');
+            formData.append('postAuthorID', currentUser.uid);
+            formData.append('postAuthorDisplayName', currentUser.displayName);
+            formData.append('postAuthorUsername', currentUser.username);
+            formData.append('postAuthorPhotoURL', currentUser.userPhotoURL);
+            formData.append('postContent', repostBody);
+            formData.append('originalPostID', post.postID);
+            formData.append('originalPostAuthorID', post.authorID);
+            formData.append('originalPostAuthorDisplayName', post.authorDisplayName);
+            formData.append('originalPostAuthorUsername', post.authorUsername);
+            formData.append('originalPostAuthorPhotoURL', post.authorPhotoURL);
+            formData.append('originalPostDate', post.date);
+            formData.append('originalPostContent', post.content);
+            formData.append('originalPostCategory', post.category);
+            formData.append('originalPostTaggedPets', JSON.stringify(post.taggedPets));
+            formData.append('originalPostTrackerLocation', post.postTrackerLocation);
+            formData.append('originalPostType', 'Repost');
+            formData.append('originalPostMedia', post.imageURLs);
+
+            // Call API to create repost
+            await fetch('/api/posts/repost-post', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json()).then(async data => {
+                console.log(data);
+                toast.success("Successfully reposted post!");
+                setRepostBody('');
+                router.refresh();
+            });
+        } catch (error) {
+            console.error(error);
+            toast.error("Error reposting post. Please try again later.");
+        } 
     }
 
   return (
@@ -472,15 +510,32 @@ export function ExpandedPost({ post, currentUser }) {
                                 <i className="fa-solid fa-share hover:text-muted_blue dark:hover:text-light_yellow hover:cursor-pointer transition-all" />
                             </DialogTrigger>
                             <DialogContent>
-                                <div className="flex flex-col gap-2 w-full h-full">
-                                    <div className="flex flex-row gap-2 items-center">
-                                        <i className="fa-solid fa-link text-sm"></i>
-                                        <p>Copy Link</p>
-                                    </div>
-                                    <div className="flex flex-row gap-2 items-center">
-                                        {/* "Repost" */}
-                                        <i className="fa-solid fa-share text-sm"></i>
-                                        <p>Repost</p>
+                                <DialogTitle>Share Post</DialogTitle>
+                                <div className="flex flex-col gap-4 w-full h-full">
+                                    <textarea 
+                                        name="repost-body" id="repost-body" 
+                                        value={repostBody}
+                                        onChange={(event) => setRepostBody(event.target.value)}
+                                        cols="30" rows="10" 
+                                        placeholder="Write a caption..."
+                                        className="w-full h-[300px] p-2 outline-none resize-none border rounded-xl bg-[#fafafa] dark:bg-black text-raisin_black drop-shadow-sm transition-all"    
+                                    />
+                                    <div className="flex flex-row gap-2 w-full">
+                                        <Button 
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(`${window.location.origin}/post/${post.postID}`);
+                                                toast.success("Link copied to clipboard!");
+                                            }}
+                                            className="w-1/2 items-center justify-center flex flex-row gap-2">
+                                            <i className="fa-solid fa-link text-sm"></i>
+                                            <p>Copy Link</p>
+                                        </Button>
+                                        <Button 
+                                            onClick={(event) => handleRepost(event)}
+                                            className="w-1/2 items-center justify-center flex flex-row gap-2">
+                                            <i className="fa-solid fa-share text-sm"></i>
+                                            <p>Repost</p>
+                                        </Button>
                                     </div>
                                 </div>
                             </DialogContent>
