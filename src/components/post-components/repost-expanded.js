@@ -270,6 +270,9 @@ export function ExpandedRepost({ post, currentUser }) {
                     }
 
                     {/* reposted post */}
+                    <Link
+                        href={`/post/${post.originalPostID}`}
+                    >
                     <div id="reposted-post" className={`${post.content === '' ? "mt-2" : "mt-4"} flex flex-col border border-black dark:border-white rounded-md p-4`}>
 
                         <div className="flex flex-row justify-start items-start">
@@ -312,6 +315,7 @@ export function ExpandedRepost({ post, currentUser }) {
                             }
                         </div>
                     </div>      
+                    </Link>
                 </div>
 
                 {/* footer */}
