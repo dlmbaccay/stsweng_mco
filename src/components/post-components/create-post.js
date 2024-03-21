@@ -94,6 +94,7 @@ export function CreatePost({props}) {
             formData.append('postCategory', postCategory);
             formData.append('postTaggedPets', JSON.stringify(postTaggedPets));
             formData.append('postTrackerLocation', postTrackerLocation);
+            formData.append('postType', "Original");
             for (const file of Array.from(mediaFiles)) {
                 formData.append('files', file);
             }

@@ -15,6 +15,7 @@ export async function POST(request) {
     const postContent = formData.get('postContent');
     const postTaggedPets = JSON.parse(formData.get('postTaggedPets'));
     const postTrackerLocation = formData.get('postTrackerLocation');
+    const postType = formData.get('postType');
     const postMedia = formData.getAll('files');
 
     try {
@@ -27,6 +28,7 @@ export async function POST(request) {
         }
         Promise.all(promises).then(async (values) => {
             const postDetails = {
+                postType: postType,
                 postID: postID,
                 authorID: postAuthorID,
                 authorUsername: postAuthorUsername,
