@@ -26,6 +26,7 @@ const report_reason = [
 export function ReportPost({props}) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [ open, setOpen] = useState(false);
 
     const { currentUser, post, postReports } = props;
 
@@ -64,6 +65,8 @@ export function ReportPost({props}) {
                 const errorData = await response.json();
                 throw new Error(errorData.message);
             }
+
+            setOpen(false);
         } catch (error) {
             console.error("Error reporting post:", error.message);
             setLoading(false);
@@ -73,7 +76,7 @@ export function ReportPost({props}) {
 
 
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             {/* Trigger Buttons */}
             <div className="flex flex-row items-center"> 
                 <DialogTrigger asChild>
