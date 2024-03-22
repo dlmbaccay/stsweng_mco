@@ -54,6 +54,9 @@ function PetProfile() {
   
   const [petPosts, setPetPosts] = useState([]);
 
+  const [taggedPosts, setTaggedPosts] = useState([]);
+  const [milestonePosts, setMilestonePosts] = useState([]);
+
 //   useEffect(() => {
 //     let unsubscribe;
    
@@ -75,23 +78,26 @@ function PetProfile() {
 //     return () => unsubscribe && unsubscribe();
 // }, [activeTab, petData, petPosts]);
 
-  useEffect(() => {
-    if (activeTab === 'tagged posts' && petData && petData.petID) {
-       setIsLoading(true);
-       setError(null);
-       fetch(`/api/posts/tagged-post?petID=${petData.petID}`)
-         .then(response => response.json())
-         .then(data => {
-           setPosts(data.postDocs);
-           setIsLoading(false);
-         })
-         .catch(error => {
-           console.error('Error fetching posts:', error);
-           setError(error.message);
-           setIsLoading(false);
-         });
-    }
-   }, [activeTab, petData?.petOwnerUsername]);
+  // useEffect(() => {
+  //   if (petData) {
+  //      setIsLoading(true);
+  //      setError(null);
+  //     fetch(`/api/posts/tagged-post?petID=${petData.petID}`, {
+  //       method: 'GET'
+  //     })
+  //       .then(response => response.json())
+  //       .then(data => {
+  //         console.log(data.postDocs)
+  //         setTaggedPosts(data.postDocs);
+  //         setIsLoading(false);
+  //       })
+  //       .catch(error => {
+  //         console.error('Error fetching posts:', error);
+  //         setError(error.message);
+  //         setIsLoading(false);
+  //       });
+  //   }
+  //  }, [petData]);
 
 // useEffect(() => {
 //  if (activeTab === 'tagged posts' && petData && petData.petID) {
@@ -117,25 +123,6 @@ function PetProfile() {
 //      fetchTaggedPosts();
 //  }
 // }, [activeTab, petData?.petID]); 
-
-  
-   useEffect(() => {
-    if (activeTab === 'milestones' && petData && petData.petOwnerUsername) {
-       setIsLoading(true);
-       setError(null);
-       fetch(`/api/posts/category-post?category=Milestones`)
-         .then(response => response.json())
-         .then(data => {
-           setPosts(data.postDocs);
-           setIsLoading(false);
-         })
-         .catch(error => {
-           console.error('Error fetching posts:', error);
-           setError(error.message);
-           setIsLoading(false);
-         });
-    }
-   }, [activeTab, petData?.petOwnerUsername]);
 
   useEffect(() => {
     // get current user using auth and firestore
@@ -174,7 +161,10 @@ function PetProfile() {
 
         if (response.ok) {
             const data = await response.json();
-            setPetData(data);
+            console.log(data.taggedPosts)
+            setPetData(data.petDoc);
+            setTaggedPosts(data.taggedPosts);
+            setMilestonePosts(data.milestonePosts);
         } else {
             // Assuming the API returns { message: '...' } on error
             toast.error('Pet not found')
@@ -368,21 +358,17 @@ function PetProfile() {
                         </div>
 
                         {activeTab == 'tagged posts' ? (
-                          <Card className="text-sm p-4 drop-shadow-md rounded-sm">
-                            <div>
-                                {posts.map((post) => (
+                          <div className="flex flex-col min-w-full items-center justify-center gap-6">
+                              {taggedPosts && taggedPosts.map((post) => (
                                   <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
-                                ))}
-                            </div>
-                          </Card>
+                              ))}
+                          </div>
                         ): (
-                          <Card className="text-sm p-4 drop-shadow-md rounded-sm">
-                            <div>
-                                {posts.map((post) => (
+                          <div className="flex flex-col min-w-full items-center justify-center gap-6">
+                                {milestonePosts && milestonePosts.map((post) => (
                                   <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
                                 ))}
-                            </div>
-                          </Card>
+                          </div>
                         )}
                     </div>
                   </div>
