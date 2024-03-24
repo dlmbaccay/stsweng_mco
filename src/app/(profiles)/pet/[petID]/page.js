@@ -31,6 +31,20 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { FollowPetButton } from "@/components/profile/follow-pet-button";
 
+import {
+  collection,
+  query,
+  orderBy,
+  limit,
+  onSnapshot,
+  startAfter,
+  getDocs,
+  where,
+} from "firebase/firestore";
+
+import { PostSnippet } from "@/components/post-components/post-snippet";
+import { RepostSnippet } from "@/components/post-components/repost-snippet";
+
 function PetProfile() {
 
   const router = useRouter();
@@ -68,6 +82,11 @@ function PetProfile() {
     }
   }, []);
 
+
+  const [ fetchedTaggedPosts, setFetchedTaggedPosts ] = useState([]);
+  const [ fetchedMilestones, setFetchedMilestones ] = useState([]);
+  const [ fetchedPosts, setFetchedPosts ] = useState([]);
+
   /**
    * Fetch pet data
    */
@@ -103,8 +122,40 @@ function PetProfile() {
         }
     };
 
+    const fetchTaggedPosts = async () => {
+      const taggedPosts = [];
+      const milestones = [];
+
+      // fetch tagged posts
+      const taggedPostsQuery = query(
+        collection(firestore, 'posts'), 
+        where('petIDs', 'array-contains', urlParams.petID)
+      );
+      const taggedPostsSnapshot = await getDocs(taggedPostsQuery);
+      taggedPostsSnapshot.forEach((doc) => {
+        taggedPosts.push(doc.data());
+      });
+
+      // fetch milestones
+      const milestonesQuery = query(
+        collection(firestore, 'posts'), 
+        where('petIDs', 'array-contains', urlParams.petID),
+        where('category', '==', 'Milestones')
+      );
+      const milestonesSnapshot = await getDocs(milestonesQuery);
+      milestonesSnapshot.forEach((doc) => {
+        milestones.push(doc.data());
+      });
+
+      setFetchedTaggedPosts(taggedPosts);
+      setFetchedMilestones(milestones);
+    }
+
     fetchData();
+    fetchTaggedPosts();
+
   }, [urlParams.petID]);
+
 
   return (
     <>
@@ -121,7 +172,7 @@ function PetProfile() {
               </div>
 
               { petData && 
-                <div className="w-full h-screen fixed z-10 mt-16 flex flex-col items-center justify-start overflow-y-auto">
+                <div className="w-full h-screen z-10 mt-16 pb-32 flex flex-col items-center justify-start">
                   {/* Cover Photo */}
                   <div className="h-[30%] xl:w-[60%] 2xl:w-[60%] w-full border-red">
                       <CoverPhoto 
@@ -280,13 +331,31 @@ function PetProfile() {
                         </div>
 
                         {activeTab == 'tagged posts' ? (
-                          <Card className="text-sm p-4 drop-shadow-md rounded-sm">
-                            <p>Tagged Posts Container</p>
-                          </Card>
-                        ): (
-                          <Card className="text-sm p-4 drop-shadow-md rounded-sm">
-                            <p>Milestones Container</p>
-                          </Card>
+                          <div className="flex flex-col min-w-full items-center justify-center gap-6">
+                            {fetchedTaggedPosts.map((post) => {
+                                return (
+                                    (post.postType == 'Original' ?
+                                        <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                    
+                                    : post.postType == 'Repost' ?
+                                        <RepostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                    : null)
+                                )
+                            })}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col min-w-full items-center justify-center gap-6">
+                            {fetchedMilestones.map((post) => {
+                                return (
+                                    (post.postType == 'Original' ?
+                                        <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                    
+                                    : post.postType == 'Repost' ?
+                                        <RepostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                    : null)
+                                )
+                            })}
+                          </div>
                         )}
                     </div>
                   </div>

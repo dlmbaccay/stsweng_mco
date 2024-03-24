@@ -108,6 +108,12 @@ export function CreatePost({ props }) {
             return;
         }
 
+        // store within postPets array the petIDs of the tagged pets
+        const postPetIDs = [];
+        postTaggedPets.forEach((pet) => {
+            postPetIDs.push(pet.petID);
+        });
+
         setLoading(true);
         try {
             const formData = new FormData();
@@ -118,6 +124,7 @@ export function CreatePost({ props }) {
             formData.append("postContent", postContent);
             formData.append("postCategory", postCategory);
             formData.append("postTaggedPets", JSON.stringify(postTaggedPets));
+            formData.append("postPetIDs", JSON.stringify(postPetIDs));
             formData.append("postTrackerLocation", postTrackerLocation);
             formData.append("postType", "Original");
             for (const file of Array.from(mediaFiles)) {

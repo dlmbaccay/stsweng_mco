@@ -411,7 +411,6 @@ function UserProfile() {
                                                     )
                                                 })}
                                             </div>
-                                            
                                         </>
                                     ): (
                                         <Card className="p-4 rounded-md drop-shadow-md">

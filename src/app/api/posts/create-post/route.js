@@ -14,6 +14,7 @@ export async function POST(request) {
     const postCategory = formData.get('postCategory');
     const postContent = formData.get('postContent');
     const postTaggedPets = JSON.parse(formData.get('postTaggedPets'));
+    const postPetIDs = JSON.parse(formData.get('postPetIDs'));
     const postTrackerLocation = formData.get('postTrackerLocation');
     const postType = formData.get('postType');
     const postMedia = formData.getAll('files');
@@ -37,6 +38,7 @@ export async function POST(request) {
                 content: postContent,
                 category: postCategory,
                 taggedPets: postTaggedPets,
+                petIDs: postPetIDs,
                 location: (postCategory == "Lost Pets" || postCategory == "Unknown Owner") ? postTrackerLocation : "",
                 imageURLs: values,
                 isEdited: false,
