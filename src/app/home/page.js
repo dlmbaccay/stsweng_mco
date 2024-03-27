@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
-import { auth } from "@/lib/firebase";
+import { auth, firestore} from "@/lib/firebase";
 import WithAuth from "@/components/WithAuth";
 import { ModeToggle } from "@/components/mode-toggle";
 import Loader from "@/components/Loader";
@@ -17,6 +18,16 @@ function HomePage() {
     const [ currentUser, setCurrentUser ] = useState([]);
 
     const [ activeTab, setActiveTab ] = useState('posts');
+    const [ userPosts, setUserPosts ] = useState([]);
+
+    const [allPosts, setAllPosts] = useState([]);
+    const [allPostsLoaded, setAllPostsLoaded] = useState(false);
+    const [allPostsLastVisible, setAllPostsLastVisible] = useState(null);
+
+    const [following, setFollowing] = useState([]); 
+    const [followingPosts, setFollowingPosts] = useState([]);
+    const [followingPostsLoaded, setFollowingPostsLoaded] = useState(false);
+    const [followingLastVisible, setFollowingLastVisible] = useState(null);
 
     useEffect(() => {
         setLoading(true); 
@@ -35,7 +46,7 @@ function HomePage() {
                      */
                     const fetchCurrentUser = async (userId) => {
                         const response = await fetch(`/api/users/via-id?id=${userId}`, {
-                            method: 'GET' // Specify GET method
+                            method: 'GET'
                         });
                         if (response.ok) {
                             const data = await response.json();
@@ -50,17 +61,39 @@ function HomePage() {
                     await fetchCurrentUser(user.uid);
                 } catch (error) {
                     console.error('Error fetching current user data:', error);
-                } finally { // Add a 'finally' block
+                } finally { 
                     setLoading(false);
                 }
-            } else {
-                // Handle the case when no user is signed in (optional)
+            } else { // User is signed out
                 setLoading(false);
             }
         });
     
         return unsubscribe; // Clean-up function for the observer
     }, []);
+
+    useEffect(() => {
+        // Fetch user posts
+        if (userData) {
+
+            const fetchUserPosts = async () => {
+                const response = await fetch(`/api/posts/get-post?collection=${'posts'}`, {
+                    method: 'GET' // Specify GET method
+                });
+    
+                if (response.ok) {
+                    const data = await response.json();
+                    setUserPosts(data.postDocs);
+                } else {
+                    // Assuming the API returns { message: '...' } on error
+                    const errorData = await response.json();
+                    throw new Error(errorData.message);
+                }
+            };
+
+            fetchUserPosts();
+        }
+    }, [userData]);
 
   return (
     <>
@@ -114,15 +147,39 @@ function HomePage() {
                     </Card> : null
                 }
 
-                {/* {activeTab == 'For You' ? (
+                {activeTab == 'For You' ? (
                     <>
-                        
+                        <div className="flex flex-col min-w-full items-center justify-center gap-6">
+                            {[...userPosts].reverse().map((post) => {
+                                return (
+                                    (post.postType === 'Original' ?
+                                        <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
+
+                                    : post.postType === 'Repost' ?
+                                        <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                    : null)
+                                    
+                                )
+                            })}
+                        </div>
                     </>
                 ): (
                     <>
-                        
+                        <div className="flex flex-col min-w-full items-center justify-center gap-6">
+                            {[...userPosts].reverse().map((post) => {
+                                return (
+                                    (post.postType == 'Original' ?
+                                        <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
+
+                                    : post.postType == 'Repost' ?
+                                        <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                    : null)
+                                    
+                                )
+                            })}
+                        </div>
                     </>
-                )} */}
+                )}
 
               </div>
           </div>
