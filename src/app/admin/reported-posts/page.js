@@ -23,6 +23,7 @@ function AdminPage() {
     const [ filteredReports, setFilteredReports ] = useState([]);
 
     const [ filter, setFilter ] = useState("all");
+    const [ sort, setSort ] = useState("newest");
 
     useEffect(() => {
         setLoading(true); 
@@ -89,6 +90,35 @@ function AdminPage() {
         }
     },[filter, reportedPosts])
 
+    useEffect(() => {
+        if (sort === "newest") {
+            const sortedPosts = [...filteredReports].sort((a, b) => {
+                const latestCreatedAtA = a.reports.reduce((latest, report) => {
+                    return new Date(report.createdAt) > new Date(latest) ? report.createdAt : latest;
+                }, 0);
+                const latestCreatedAtB = b.reports.reduce((latest, report) => {
+                    return new Date(report.createdAt) > new Date(latest) ? report.createdAt : latest;
+                }, 0);
+                return new Date(latestCreatedAtB) - new Date(latestCreatedAtA);
+            });
+            if (!isEqual(sortedPosts, filteredReports)) {
+                setFilteredReports(sortedPosts);
+            }
+        } else {
+            const sortedPosts = [...filteredReports].sort((a, b) => {
+                const latestCreatedAtA = a.reports.reduce((latest, report) => {
+                    return new Date(report.createdAt) > new Date(latest) ? report.createdAt : latest;
+                }, 0);
+                const latestCreatedAtB = b.reports.reduce((latest, report) => {
+                    return new Date(report.createdAt) > new Date(latest) ? report.createdAt : latest;
+                }, 0);
+                return new Date(latestCreatedAtA) - new Date(latestCreatedAtB);
+            });
+            if (!isEqual(sortedPosts, filteredReports)) {
+                setFilteredReports(sortedPosts);
+            }
+        }
+    }, [sort, filteredReports]);
 
   return (
     <>
@@ -100,20 +130,36 @@ function AdminPage() {
                 <div className="ml-80 w-full flex flex-col">
                     <div className="flex flex-row w-full border-b border-gray shadow-lg p-4 sticky top-0 bg-background z-10 items-center justify-between">
                         <h1 className="text-2xl font-semibold text-primary tracking-wider">Reported Posts</h1>
-                        {/* Add a filter dropdown */}
-                        <div className="flex items-center border border-primary rounded-md">
-                            <Select required onValueChange={(value) => setFilter(value)} defaultValue="all">
-                                <SelectTrigger className="w-full text-primary text-md tracking-wide">
-                                    Filter
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="pending">Unchecked</SelectItem>
-                                    <SelectItem value="verified">Verified</SelectItem>
-                                    <SelectItem value="dismissed">Dismissed</SelectItem>
-                                    <SelectItem value="all">None</SelectItem>
-                                </SelectContent>
-                            </Select>
+
+                        <div className="flex flex-row gap-8">
+                            {/* Add a filter dropdown */}
+                            <div className="flex items-center border border-primary rounded-md">
+                                <Select required onValueChange={(value) => setFilter(value)} defaultValue="all">
+                                    <SelectTrigger className="w-full text-primary text-md tracking-wide">
+                                        Filter
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="pending">Pending</SelectItem>
+                                        <SelectItem value="verified">Verified</SelectItem>
+                                        <SelectItem value="dismissed">Dismissed</SelectItem>
+                                        <SelectItem value="all">None</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            {/* Add a sort dropdown */}
+                            <div className="flex items-center border border-primary rounded-md">
+                                <Select required onValueChange={(value) => setSort(value)} defaultValue="newest">
+                                    <SelectTrigger className="w-full text-primary text-md tracking-wide">
+                                        Sort
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="newest">Newest</SelectItem>
+                                        <SelectItem value="oldest">Oldest</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
+                        
                     </div>
                     <div className="items-center flex flex-col mt-8">
                         {!postsLoading && filteredReports.map((post, index) => (

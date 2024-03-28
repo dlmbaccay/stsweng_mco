@@ -20,6 +20,11 @@ const WithAuth = (WrappedComponent) => {
             if (router.pathname !== '/setup') {
               router.push('/setup');
             }
+          } else {
+            console.log(doc)
+            if (doc.data().ban.status === 'temporary' || doc.data().ban.status === 'permanent') {
+              router.push('/banned');
+            }
           }
         })
         .catch((error) => {
