@@ -99,29 +99,7 @@ function HomePage() {
         }
       }, []);
 
-    // useEffect(() => {
-    //     // Fetch user posts
-    //     if (userData) {
-
-    //         const fetchUserPosts = async () => {
-    //             const response = await fetch(`/api/posts/get-post?collection=posts`, {
-    //                 method: 'GET' // Specify GET method
-    //             });
-    
-    //             if (response.ok) {
-    //                 const data = await response.json();
-    //                 setUserPosts(data.postDocs);
-    //             } else {
-    //                 // Assuming the API returns { message: '...' } on error
-    //                 const errorData = await response.json();
-    //                 throw new Error(errorData.message);
-    //             }
-    //         };
-
-    //         fetchUserPosts();
-    //     }
-    // }, [userData]);
-
+    const [ fetchedFollowing, setFetchedFollowing ] = useState([]);
     const [ fetchedPosts, setFetchedPosts ] = useState([]);
 
     const [allPosts, setAllPosts] = useState([]);
@@ -172,7 +150,7 @@ function HomePage() {
   return (
     <>
       { loading ? <Loader show={true} /> : (currentUser && 
-          <div className="flex">
+          <div className="flex justify-center h-screen">
               {/* Side Navbar */}
               <div className="min-h-16 w-full z-50 fixed">
                   <NavBar props={{
@@ -182,7 +160,8 @@ function HomePage() {
                       expand_lock: true,
                   }}/>
               </div>
-              <div className="w-full h-screen fixed z-10 mt-16 flex justify-center">
+
+              <div className="w-1/2 h-full z-10 mt-16 flex justify-center flex-col">
                 
                 {/* Tabs */}
                 <div className="mt-6 mb-6 flex flex-row font-bold w-1/2 h-[35px] text-sm bg-off_white dark:bg-gray drop-shadow-md rounded-l-sm rounded-r-sm gap-1">
@@ -202,57 +181,58 @@ function HomePage() {
                 </div>
 
                 {/* Create Post */}
-                { currentUser.uid === userData.uid ? 
-                    <Card className="drop-shadow-md rounded-sm mb-6">
-                        <div className="flex flex-row items-center w-full my-2">
-                            <div className="ml-4">
-                                <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.jpg" : userData.userPhotoURL} alt="user photo" width={44} height={44} className="rounded-full aspect-square object-cover" />
+                <div className="">
+                    { currentUser.uid === userData.uid ? 
+                        <Card className="drop-shadow-md rounded-sm mb-6">
+                            <div className="flex flex-row items-center w-full my-2">
+                                <div className="ml-4">
+                                    <Image src={userData.userPhotoURL == "" ? "/images/profilePictureHolder.jpg" : userData.userPhotoURL} alt="user photo" width={44} height={44} className="rounded-full aspect-square object-cover" />
+                                </div>
+                                <div className="w-full mr-4">
+                                    <CreatePost props={{
+                                        uid: userData.uid,
+                                        username: userData.username,
+                                        displayname: userData.displayName,
+                                        userphoto: userData.userPhotoURL,
+                                        pets: userPets,
+                                    }}/>
+                                </div>
                             </div>
-                            <div className="w-full mr-4">
-                                <CreatePost props={{
-                                    uid: userData.uid,
-                                    username: userData.username,
-                                    displayname: userData.displayName,
-                                    userphoto: userData.userPhotoURL,
-                                    pets: userPets,
-                                }}/>
+                        </Card> : null
+                    }
+
+                    {activeTab == 'For You' ? (
+                        <>
+                            <div className="flex flex-col min-w-full items-center justify-center gap-6">
+                                {fetchedPosts.map((post) => {
+                                    return (
+                                        (post.postType == 'Original' ?
+                                            <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                        
+                                        : post.postType == 'Repost' ?
+                                            <RepostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                        : null)
+                                    )
+                                })}
                             </div>
-                        </div>
-                    </Card> : null
-                }
-
-                {activeTab == 'For You' ? (
-                    <>
-                        <div className="flex flex-col min-w-full items-center justify-center gap-6">
-                            {fetchedPosts.map((post) => {
-                                return (
-                                    (post.postType == 'Original' ?
-                                        <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
-                                    
-                                    : post.postType == 'Repost' ?
-                                        <RepostSnippet key={post.postID} post={post} currentUser={currentUser} />
-                                    : null)
-                                )
-                            })}
-                        </div>
-                    </>
-                ): (
-                    <>
-                        <div className="flex flex-col min-w-full items-center justify-center gap-6">
-                            {fetchedPosts.map((post) => {
-                                return (
-                                    (post.postType == 'Original' ?
-                                        <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
-                                    
-                                    : post.postType == 'Repost' ?
-                                        <RepostSnippet key={post.postID} post={post} currentUser={currentUser} />
-                                    : null)
-                                )
-                            })}
-                        </div>
-                    </>
-                )}
-
+                        </>
+                    ): (
+                        <>
+                            <div className="flex flex-col min-w-full items-center justify-center gap-6">
+                                {fetchedPosts.map((post) => {
+                                    return (
+                                        (post.postType == 'Original' ?
+                                            <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                        
+                                        : post.postType == 'Repost' ?
+                                            <RepostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                        : null)
+                                    )
+                                })}
+                            </div>
+                        </>
+                    )}
+                </div>
               </div>
           </div>
       )}
