@@ -11,6 +11,18 @@ import NavBar from "@/components/nav/navbar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
 import { CreatePost } from "@/components/post-components/create-post";
 import { PostSnippet } from "@/components/post-components/post-snippet";
+import { RepostSnippet } from "@/components/post-components/repost-snippet";
+
+import {
+    collection,
+    query,
+    orderBy,
+    limit,
+    onSnapshot,
+    startAfter,
+    getDocs,
+    where,
+  } from "firebase/firestore";
 
 function HomePage() {
     const [userData, setUserData] = useState([]);
@@ -19,15 +31,7 @@ function HomePage() {
 
     const [ activeTab, setActiveTab ] = useState('posts');
     const [ userPosts, setUserPosts ] = useState([]);
-
-    const [allPosts, setAllPosts] = useState([]);
-    const [allPostsLoaded, setAllPostsLoaded] = useState(false);
-    const [allPostsLastVisible, setAllPostsLastVisible] = useState(null);
-
-    const [following, setFollowing] = useState([]); 
-    const [followingPosts, setFollowingPosts] = useState([]);
-    const [followingPostsLoaded, setFollowingPostsLoaded] = useState(false);
-    const [followingLastVisible, setFollowingLastVisible] = useState(null);
+    const urlParams = useParams();
 
     useEffect(() => {
         setLoading(true); 
@@ -73,27 +77,97 @@ function HomePage() {
     }, []);
 
     useEffect(() => {
-        // Fetch user posts
-        if (userData) {
-
-            const fetchUserPosts = async () => {
-                const response = await fetch(`/api/posts/get-post?collection=${'posts'}`, {
-                    method: 'GET' // Specify GET method
-                });
+        // get current user using auth and firestore
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+          if (user) {
+            firestore.collection('users').doc(user.uid).get().then((doc) => {
+              if (doc.exists) {
+                setCurrentUser(doc.data());
+              } else {
+                console.log('No such document!');
+              }
+            }).catch((error) => {
+              console.log('Error getting document:', error);
+            });
+          } else {
+            setCurrentUser(null);
+          }
+        });
     
-                if (response.ok) {
-                    const data = await response.json();
-                    setUserPosts(data.postDocs);
-                } else {
-                    // Assuming the API returns { message: '...' } on error
-                    const errorData = await response.json();
-                    throw new Error(errorData.message);
-                }
-            };
-
-            fetchUserPosts();
+        return () => {
+          unsubscribe();
         }
-    }, [userData]);
+      }, []);
+
+    // useEffect(() => {
+    //     // Fetch user posts
+    //     if (userData) {
+
+    //         const fetchUserPosts = async () => {
+    //             const response = await fetch(`/api/posts/get-post?collection=posts`, {
+    //                 method: 'GET' // Specify GET method
+    //             });
+    
+    //             if (response.ok) {
+    //                 const data = await response.json();
+    //                 setUserPosts(data.postDocs);
+    //             } else {
+    //                 // Assuming the API returns { message: '...' } on error
+    //                 const errorData = await response.json();
+    //                 throw new Error(errorData.message);
+    //             }
+    //         };
+
+    //         fetchUserPosts();
+    //     }
+    // }, [userData]);
+
+    const [ fetchedPosts, setFetchedPosts ] = useState([]);
+
+    const [allPosts, setAllPosts] = useState([]);
+    const [allPostsLoaded, setAllPostsLoaded] = useState(false);
+    const [allPostsLastVisible, setAllPostsLastVisible] = useState(null);
+
+    const [following, setFollowing] = useState([]); 
+    const [followingPosts, setFollowingPosts] = useState([]);
+    const [followingPostsLoaded, setFollowingPostsLoaded] = useState(false);
+    const [followingLastVisible, setFollowingLastVisible] = useState(null);
+
+    useEffect(() => {
+        setLoading(true);
+        const fetchPosts = async () => {
+            const allPosts = [];
+            const following = [];
+      
+            // fetch all posts
+            const allPostsQuery = query(
+              collection(firestore, 'posts')
+            );
+            const allPostsSnapshot = await getDocs(allPostsQuery);
+            allPostsSnapshot.forEach((doc) => {
+              allPosts.push(doc.data());
+            });
+      
+            // fetch following posts
+            const followingQuery = query(
+              collection(firestore, 'posts')
+            //   , 
+            //   where('petIDs', 'array-contains', urlParams.petID),
+            //   where('category', '==', 'Milestones')
+            );
+            const followingSnapshot = await getDocs(followingQuery);
+            followingSnapshot.forEach((doc) => {
+              following.push(doc.data());
+            });
+      
+            setFetchedPosts(allPosts);
+            setFetchedFollowing(following);
+          }
+      
+        //   fetchData();
+          fetchPosts();
+
+    }, []);
 
   return (
     <>
@@ -150,15 +224,14 @@ function HomePage() {
                 {activeTab == 'For You' ? (
                     <>
                         <div className="flex flex-col min-w-full items-center justify-center gap-6">
-                            {[...userPosts].reverse().map((post) => {
+                            {fetchedPosts.map((post) => {
                                 return (
-                                    (post.postType === 'Original' ?
+                                    (post.postType == 'Original' ?
                                         <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
-
-                                    : post.postType === 'Repost' ?
-                                        <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
-                                    : null)
                                     
+                                    : post.postType == 'Repost' ?
+                                        <RepostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                    : null)
                                 )
                             })}
                         </div>
@@ -166,15 +239,14 @@ function HomePage() {
                 ): (
                     <>
                         <div className="flex flex-col min-w-full items-center justify-center gap-6">
-                            {[...userPosts].reverse().map((post) => {
+                            {fetchedPosts.map((post) => {
                                 return (
                                     (post.postType == 'Original' ?
                                         <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
-
-                                    : post.postType == 'Repost' ?
-                                        <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
-                                    : null)
                                     
+                                    : post.postType == 'Repost' ?
+                                        <RepostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                    : null)
                                 )
                             })}
                         </div>
