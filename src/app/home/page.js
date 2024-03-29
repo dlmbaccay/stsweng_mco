@@ -157,10 +157,25 @@ function HomePage() {
         if (currentUser) {
             const fetchData = async () => {
                 // fetch all posts
-                const results = await getAllDocuments('posts');
+                // const results = await getAllDocuments('posts');
+				const querySnapshot = await firestore.collection('posts')
+                .orderBy('date', 'desc')
+				.limit(5)
+                .get();
+            	const results = querySnapshot.docs.map(doc => doc.data());
                 setAllPosts(results);
-                const filteredPosts = await results.filter(post => currentUser.following && currentUser.following.includes(post.authorID) || (post.petIDs && post.petIDs.some(petID => currentUser.following && currentUser.following.includes(petID))));
-                setFollowingPosts(filteredPosts);
+
+				const followingQuerySnapshot = await firestore.collection('posts')
+                    .orderBy('date', 'desc')
+                    .get();
+                const followingPostsResults = followingQuerySnapshot.docs.map(doc => doc.data())
+                    .filter(post => (
+                        (currentUser.following && currentUser.following.includes(post.authorID)) || 
+                        (post.petIDs && post.petIDs.length && post.petIDs.some(petID => currentUser.following && currentUser.following.includes(petID)))
+                    ))
+                    .slice(0, 5); // limit to 5 posts after filtering
+
+                setFollowingPosts(followingPostsResults);
                 console.log(followingPosts)
             };
             fetchData();
@@ -262,6 +277,23 @@ function HomePage() {
 													/>
 												) : null;
 											})}
+
+											{/* {allPostsLoaded ? (
+												<button
+												className={`px-4 py-2 text-white bg-grass rounded-lg text-sm hover:bg-raisin_black transition-all ${loading ? 'hidden' : 'flex'}`}
+												onClick={refreshAllPosts}
+												>
+												Refresh Posts
+												</button>
+											) : (
+												<button
+												className={`px-4 py-2 text-white bg-grass rounded-lg text-sm hover:bg-raisin_black transition-all ${loading ? 'hidden' : 'flex'}`}
+												onClick={fetchMoreAllPosts}
+												disabled={loading}
+												>
+												Load More
+												</button>
+											)} */}
 										</div>
 									</>
 								) : (
@@ -284,6 +316,23 @@ function HomePage() {
 													/>
 												) : null;
 											})}
+
+											{/* {followingPostsLoaded ? (
+												<button
+												className={`px-4 py-2 text-white bg-grass rounded-lg text-sm hover:bg-raisin_black transition-all ${loading ? 'hidden' : 'flex'}`}
+												onClick={refreshFollowingPosts}
+												>
+												Refresh Posts
+												</button>
+											) : (
+												<button
+												className={`px-4 py-2 text-white bg-grass rounded-lg text-sm hover:bg-raisin_black transition-all ${loading ? 'hidden' : 'flex'}`}
+												onClick={fetchMoreFollowingPosts}
+												disabled={loading}
+												>
+												Load More
+												</button>
+											)} */}
 										</div>
 									</>
 								)}
