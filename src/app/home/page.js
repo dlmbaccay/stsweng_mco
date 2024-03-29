@@ -183,6 +183,100 @@ function HomePage() {
         }
 	}, [currentUser]);
 
+	const fetchMoreAllPosts = async () => {
+		if (allPostsLastVisible && !loading) {
+			setLoading(true);
+			const nextQuery = query(
+			  collection(firestore, "posts"),
+			  orderBy("date", "desc"), 
+			  startAfter(allPostsLastVisible), 
+			  limit(5)
+			);
+	
+			const querySnapshot = await getDocs(nextQuery);
+			const newPosts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+			const newLastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+	
+			// Update state based on whether new posts are fetched
+			if (newPosts.length === 0) {
+			  setAllPostsLoaded(true);
+			} else {
+			  setAllPostsLastVisible(newLastVisible);
+			  setAllPosts(prevPosts => [...prevPosts, ...newPosts]);
+			  setAllPostsLoaded(false);
+			}
+	
+			setLoading(false);
+		}
+	  };
+	
+	  const refreshAllPosts = async () => {
+		setLoading(true);
+		const refreshQuery = query(
+		  collection(firestore, "posts"),
+		  orderBy("date", "desc"),
+		  limit(5)
+		);
+	
+		const querySnapshot = await getDocs(refreshQuery);
+		const refreshedPosts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+		setAllPosts(refreshedPosts);
+		setAllPostsLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
+		setAllPostsLoaded(false);
+		setLoading(false);
+	  };
+	
+	  const fetchMoreFollowingPosts = async () => {
+		if (followingLastVisible && !loading) {
+			setLoading(true);
+			const nextQuery = query(
+			  collection(firestore, "posts"),
+			  filter(post => (
+				(currentUser.following && currentUser.following.includes(post.authorID)) || 
+				(post.petIDs && post.petIDs.length && post.petIDs.some(petID => currentUser.following && currentUser.following.includes(petID)))
+				)),
+			  orderBy("date", "desc"), 
+			  startAfter(followingLastVisible), 
+			  limit(5)
+			);
+	
+			const querySnapshot = await getDocs(nextQuery);
+			const newPosts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+			const newLastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+	
+			// Update state based on whether new posts are fetched
+			if (newPosts.length === 0) {
+			  setFollowingPostsLoaded(true);
+			} else {
+			  setFollowingLastVisible(newLastVisible);
+			  setFollowingPosts(prevPosts => [...prevPosts, ...newPosts]);
+			  setFollowingPostsLoaded(false);
+			}
+	
+			setLoading(false);
+		}
+	  };
+	
+	  const refreshFollowingPosts = async () => {
+		setLoading(true);
+		const refreshQuery = query(
+		  collection(firestore, "posts"),
+		  filter(post => (
+			(currentUser.following && currentUser.following.includes(post.authorID)) || 
+			(post.petIDs && post.petIDs.length && post.petIDs.some(petID => currentUser.following && currentUser.following.includes(petID)))
+			)),
+		  orderBy("date", "desc"),
+		  limit(5)
+		);
+	
+		const querySnapshot = await getDocs(refreshQuery);
+		const refreshedPosts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+		setFollowingPosts(refreshedPosts);
+		setFollowingLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
+		setFollowingPostsLoaded(false);
+		setLoading(false);
+	  };
+
 	return (
 		<>
 			{loading ? (
@@ -278,7 +372,7 @@ function HomePage() {
 												) : null;
 											})}
 
-											{/* {allPostsLoaded ? (
+											{allPostsLoaded ? (
 												<button
 												className={`px-4 py-2 text-white bg-grass rounded-lg text-sm hover:bg-raisin_black transition-all ${loading ? 'hidden' : 'flex'}`}
 												onClick={refreshAllPosts}
@@ -293,7 +387,7 @@ function HomePage() {
 												>
 												Load More
 												</button>
-											)} */}
+											)}
 										</div>
 									</>
 								) : (
@@ -317,7 +411,7 @@ function HomePage() {
 												) : null;
 											})}
 
-											{/* {followingPostsLoaded ? (
+											{followingPostsLoaded ? (
 												<button
 												className={`px-4 py-2 text-white bg-grass rounded-lg text-sm hover:bg-raisin_black transition-all ${loading ? 'hidden' : 'flex'}`}
 												onClick={refreshFollowingPosts}
@@ -332,7 +426,7 @@ function HomePage() {
 												>
 												Load More
 												</button>
-											)} */}
+											)}
 										</div>
 									</>
 								)}
