@@ -41,8 +41,10 @@ export async function POST(request) {
             const reports = post.reports;
             return count + reports.length;
         }, 0);
+        
+        console.log(totalReports);
 
-        if (totalReports > 10) {
+        if (totalReports >= 10) {
             // Do something if the post author has received more than 10 reports
             try {
                 const banUntil = new Date();
@@ -86,6 +88,30 @@ export async function PATCH(request) {
             await updateDocument("posts", id, {
                 reportStatus: status
             });
+
+            const reposts = await firestore.collection('posts').where('originalPostID', '==', id).get();
+
+            if (status === "verified") {
+                const repostDocs = reposts.docs.map(doc => doc.data());
+                if (repostDocs.length > 0) {
+                    repostDocs.forEach(async (repost) => {
+                        await updateDocument("posts", repost.postID, {
+                            originalReportStatus: "verified"
+                        });
+                    });
+                }
+            }
+
+            if (status === "dismissed" || status === "pending") {
+                const repostDocs = reposts.docs.map(doc => doc.data());
+                if (repostDocs.length > 0) {
+                    repostDocs.forEach(async (repost) => {
+                        await updateDocument("posts", repost.postID, {
+                            originalReportStatus: status
+                        });
+                    });
+                }
+            }
 
             return NextResponse.json({message: 'update success'}, {status: 200});
         } else if (action == "delete-report") {

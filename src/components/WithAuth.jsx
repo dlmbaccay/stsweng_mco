@@ -21,9 +21,21 @@ const WithAuth = (WrappedComponent) => {
               router.push('/setup');
             }
           } else {
-            console.log(doc)
+
             if (doc.data().ban.status === 'temporary' || doc.data().ban.status === 'permanent') {
+              if (doc.data().ban.status === 'temporary') {
+                if (new Date(doc.data().ban.until) < new Date()) {
+                  firestore.collection('users').doc(user.uid).update({
+                    ban: {
+                      status: 'none',
+                      until: null
+                    }
+                  });
+                  router.push('/home');
+                }
+              } 
               router.push('/banned');
+              
             }
           }
         })

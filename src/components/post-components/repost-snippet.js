@@ -212,23 +212,30 @@ export function RepostSnippet({post, currentUser}) {
                                     </div>
                                 </div>
 
+                                { post.originalReportStatus == "verified" ? 
+                                    <div className="items-center mt-5 w-full flex justify-center">
+                                        <span>This post violates our guidelines and has been taken down.</span>
+                                    </div>
+                                :
+                                    <div id="reposted-post-content" className="flex flex-row items-start justify-between mt-4 gap-8">
+                                        <p className="w-full text-sm md:text-base">{post.originalPostContent}</p>
 
-                                <div id="reposted-post-content" className="flex flex-row items-start justify-between mt-4 gap-8">
-                                    <p className="w-full text-sm md:text-base">{post.originalPostContent}</p>
-
-                                    {/* original post images, if any (only show the first one) */}
-                                    { post.originalPostMedia && post.originalPostMedia.length > 0 &&
-                                        <div id="reposted-post-images" className="justify-end flex w-[30%] ">
-                                            <Image
-                                                src={post.originalPostMedia[0]}
-                                                alt="reposted post image"
-                                                width={100}
-                                                height={100}
-                                                className="rounded-md drop-shadow-sm aspect-square object-cover"
-                                            />
-                                        </div>
-                                    }
-                                </div>
+                                        {/* original post images, if any (only show the first one) */}
+                                        { post.originalPostMedia && post.originalPostMedia.length > 0 &&
+                                            <div id="reposted-post-images" className="justify-end flex w-[30%] ">
+                                                <Image
+                                                    src={post.originalPostMedia[0]}
+                                                    alt="reposted post image"
+                                                    width={100}
+                                                    height={100}
+                                                    className="rounded-md drop-shadow-sm aspect-square object-cover"
+                                                />
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                
+                                
                             </div>     
                         </Link>
                     </div>

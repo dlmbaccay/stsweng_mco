@@ -180,6 +180,7 @@ export function PostSnippet({ post, currentUser }) {
         }
     }
 
+    // When a report for the post is verified, do not display the content
     if (post.reportStatus == "verified") {
         return (
             <Card className="w-full drop-shadow-md hover:drop-shadow-md min-h-fit rounded-md p-6 flex flex-col">
