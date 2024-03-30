@@ -4,7 +4,7 @@ import { toast } from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
-import { isEqual } from "lodash";
+import { isEqual, set } from "lodash";
 import { auth, firestore } from "@/lib/firebase";
 import { handleDateFormat } from "@/lib/helper-functions";
 import  Loader from "@/components/Loader";
@@ -34,7 +34,6 @@ function UserProfile() {
     const [ currentUser, setCurrentUser ] = useState([{}]);
 
     const [ userPets, setUserPets ] = useState([]);
-    const [ userPosts, setUserPosts ] = useState([]);
 
     const [ userFetchFlag, setUserFetchFlag ] = useState(false);
 
@@ -137,6 +136,11 @@ function UserProfile() {
         return () => unsubscribe; // Cleanup function
     }, [currentUser]);
 
+    const [ userPosts, setUserPosts ] = useState([]);
+    const [ userPostsLoaded, setUserPostsLoaded ] = useState(false);
+    const [ userPostsLastVisible, setUserPostsLastVisible ] = useState(null);
+    const [ userPostsLoading, setUserPostsLoading ] = useState(false);
+
     /*
     * This useEffect hook is responsible for fetching and updating the posts of the user whose profile is being viewed.
     * It fetches the posts of the user from the Firestore database and updates the user's posts on the page accordingly.
@@ -145,21 +149,41 @@ function UserProfile() {
         let unsubscribe
 
         if (userData && userPosts && userFetchFlag) {
-            console.log(userData)
-            const postsRef = firestore.collection('posts').where('authorID', "==", userData.uid); // Matches if 'reports' is not empty
+            console.log(userData);
 
-            unsubscribe = postsRef.onSnapshot((querySnapshot) => {
-                
-                const postDocs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                
-                if (!isEqual(postDocs, userPosts)){
-                    setUserPosts(postDocs);
-                }
-            });
+            const fetchUserPosts = async () => {
+                const response = await firestore.collection('posts').where('authorID', '==', userData.uid).get();
+                const postDocs = response.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setUserPosts(postDocs);
+                setUserPostsLastVisible(response.docs[response.docs.length - 1]);
+                setUserPostsLoaded(true);
+            }
+
+            fetchUserPosts();
         }
     
         return () => unsubscribe;
     }, [userPosts, userData, userFetchFlag]);
+
+    const fetchMoreUserPosts = async () => {
+        if (userPostsLastVisible) {
+            setUserPostsLoading(true);
+            const response = await firestore.collection('posts').where('authorID', '==', userData.uid).startAfter(userPostsLastVisible).get();
+            const postDocs = response.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setUserPosts([...userPosts, ...postDocs]);
+            setUserPostsLastVisible(response.docs[response.docs.length - 1]);
+            setUserPostsLoading(false);
+        }
+    }
+
+    const refreshUserPosts = async () => {
+        setUserPostsLoading(true);
+        const response = await firestore.collection('posts').where('authorID', '==', userData.uid).get();
+        const postDocs = response.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setUserPosts(postDocs);
+        setUserPostsLastVisible(response.docs[response.docs.length - 1]);
+        setUserPostsLoading(false);
+    }
     
     /**
      * This useEffect hook is responsible for fetching and updating the pets of the user whose profile is being viewed.
@@ -409,6 +433,25 @@ function UserProfile() {
                                                         : null)
                                                     )
                                                 })}
+
+                                                {userPostsLoaded ? (
+                                                    <button
+                                                        className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${userPostsLoading ? 'hidden' : 'flex'}`}
+												        onClick={refreshUserPosts}
+                                                    >
+                                                        Refresh Posts
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${userPostsLoading ? 'hidden' : 'flex'}`}
+												        onClick={fetchMoreUserPosts}
+                                                        disabled={userPostsLoading}
+                                                    >
+                                                        Load More
+                                                    </button>
+                                                )}
+
+											    {userPostsLoading && <div className="mb-20 flex items-center justify-center">Loading...</div>}
                                             </div>
                                         </>
                                     ): (
