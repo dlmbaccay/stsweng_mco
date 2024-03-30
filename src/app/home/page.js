@@ -8,29 +8,15 @@ import { getAllDocuments } from "@/lib/firestore-crud";
 import WithAuth from "@/components/WithAuth";
 import { ModeToggle } from "@/components/mode-toggle";
 import Loader from "@/components/Loader";
+import toast from "react-hot-toast";
 import NavBar from "@/components/nav/navbar";
+import { Button } from "@/components/ui/button";
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
+	Card
 } from "@/components/ui/card";
 import { CreatePost } from "@/components/post-components/create-post";
 import { PostSnippet } from "@/components/post-components/post-snippet";
 import { RepostSnippet } from "@/components/post-components/repost-snippet";
-
-import {
-	collection,
-	query,
-	orderBy,
-	limit,
-	onSnapshot,
-	startAfter,
-	getDocs,
-	where,
-} from "firebase/firestore";
 
 function HomePage() {
 	const [userData, setUserData] = useState([]);
@@ -96,23 +82,23 @@ function HomePage() {
      * The cleanup function is returned to unsubscribe from the Firestore listener when the component unmounts.
      * This is for the viewer of the page.
      */
-    useEffect(() => {
-        let unsubscribe;
-    
-        if (currentUser) { // info of the current user
-            const userRef = firestore.collection('users').doc(currentUser.uid);
-            // Whenever the user's data in the database changes, update the user's data on the page
-            unsubscribe = userRef.onSnapshot((doc) => {
-                const newData = doc.data();
-                // Prevent infinite loop by setting data only when there is a difference
-                if (JSON.stringify(newData) !== JSON.stringify(currentUser)) {
-                    setCurrentUser(newData);
-                }
-            });
-        } 
-    
-        return () => unsubscribe; // Cleanup function
-    }, [currentUser]);
+	useEffect(() => {
+			let unsubscribe;
+	
+			if (currentUser) { // info of the current user
+					const userRef = firestore.collection('users').doc(currentUser.uid);
+					// Whenever the user's data in the database changes, update the user's data on the page
+					unsubscribe = userRef.onSnapshot((doc) => {
+							const newData = doc.data();
+							// Prevent infinite loop by setting data only when there is a difference
+							if (JSON.stringify(newData) !== JSON.stringify(currentUser)) {
+									setCurrentUser(newData);
+							}
+					});
+			} 
+	
+			return () => unsubscribe; // Cleanup function
+	}, [currentUser]);
 
 	/**
 	 * This useEffect hook is responsible for fetching and updating the pets of the user whose profile is being viewed.
@@ -152,130 +138,183 @@ function HomePage() {
 	const [followingPostsLoaded, setFollowingPostsLoaded] = useState(false);
 	const [followingLastVisible, setFollowingLastVisible] = useState(null);
 
+	const [userFollowing, setUserFollowing] = useState([]);
+	const [loadingPosts, setLoadingPosts] = useState(false);
+
+	// fetch user following for posts
 	useEffect(() => {
-        setLoading(true);
-        if (currentUser) {
-            const fetchData = async () => {
-                // fetch all posts
-                // const results = await getAllDocuments('posts');
-				const querySnapshot = await firestore.collection('posts')
-                .orderBy('date', 'desc')
-				.limit(5)
-                .get();
-            	const results = querySnapshot.docs.map(doc => doc.data());
-                setAllPosts(results);
+		setLoading(true);
+		const fetchUserFollowing = async () => {
+			if (currentUser) {
+				const response = await firestore.collection('users').doc(currentUser.uid).get();
+				const data = response.data();
+				if (data && data.following) {
+					setUserFollowing(data.following);
+				} else {
+					setUserFollowing([]);
+				}
+			}
+		}
 
-				const followingQuerySnapshot = await firestore.collection('posts')
-                    .orderBy('date', 'desc')
-                    .get();
-                const followingPostsResults = followingQuerySnapshot.docs.map(doc => doc.data())
-                    .filter(post => (
-                        (currentUser.following && currentUser.following.includes(post.authorID)) || 
-                        (post.petIDs && post.petIDs.length && post.petIDs.some(petID => currentUser.following && currentUser.following.includes(petID)))
-                    ))
-                    .slice(0, 5); // limit to 5 posts after filtering
-
-                setFollowingPosts(followingPostsResults);
-                console.log(followingPosts)
-            };
-            fetchData();
-            setLoading(false);
-        }
+		fetchUserFollowing().then(() => {
+			setLoading(false);
+		});
 	}, [currentUser]);
 
+	// Initial fetch all posts and following posts
+	useEffect(() => {
+		setLoading(true);
+		if (currentUser) {
+			const fetchData = async () => {
+				// fetch all all posts
+				const allPostsQuery = await firestore.collection('posts')
+				.orderBy('date', 'desc')
+				.limit(5)
+				.get();
+
+				const allPostsResults = allPostsQuery.docs.map(doc => doc.data());
+				setAllPostsLastVisible(allPostsQuery.docs[allPostsQuery.docs.length - 1]);
+				setAllPosts(allPostsResults);
+
+				if (userFollowing.length > 0) {
+					// fetch all following posts
+					const followingPostsQuery = await firestore.collection('posts')
+					.where("authorID", "in", userFollowing)
+					.orderBy("date", "desc")
+					.limit(5)
+					.get();
+					
+					const followingPostsResults = followingPostsQuery.docs.map(doc => doc.data());
+					setFollowingLastVisible(followingPostsQuery.docs[followingPostsQuery.docs.length - 1]);
+					setFollowingPosts(followingPostsResults);
+				}
+					
+				setLoading(false);
+			};
+
+			fetchData();
+		}
+	}, [currentUser]);
+	// useEffect(() => {
+    //     setLoading(true);
+    //     if (currentUser) {
+
+	// 		const fetchUserFollowing = async () => {
+	// 			if (currentUser) {
+	// 				const response = await firestore.collection('users').doc(currentUser.uid).get();
+	// 				const data = response.data();
+	// 				setUserFollowing(data.following);
+	// 			}
+	// 		}
+
+    //         const fetchData = async () => {
+	// 			// fetch all all posts
+	// 			const allPostsQuery = await firestore.collection('posts')
+	// 			.orderBy('date', 'desc')
+	// 			.limit(5)
+	// 			.get();
+
+	// 			const allPostsResults = allPostsQuery.docs.map(doc => doc.data());
+	// 			setAllPostsLastVisible(allPostsQuery.docs[allPostsQuery.docs.length - 1]);
+	// 			setAllPosts(allPostsResults);
+
+	// 			if (userFollowing > 0) {
+	// 				// fetch all following posts
+	// 				const followingPostsQuery = await firestore.collection('posts')
+	// 				.where("authorID", "in", userFollowing)
+	// 				.orderBy("date", "desc")
+	// 				.startAfter(followingLastVisible)
+	// 				.limit(5)
+	// 				.get();
+					
+	// 				const followingPostsResults = followingPostsQuery.docs.map(doc => doc.data());
+	// 				setFollowingLastVisible(followingPostsQuery.docs[followingPostsQuery.docs.length - 1]);
+	// 				setFollowingPosts(followingPostsResults);
+	// 			}
+					
+	// 			setLoading(false);
+    //         };
+
+	// 		fetchUserFollowing();
+    //         fetchData();
+    //     }
+	// }, [currentUser]);
+
 	const fetchMoreAllPosts = async () => {
-		if (allPostsLastVisible && !loading) {
-			setLoading(true);
-			const nextQuery = query(
-			  collection(firestore, "posts"),
-			  orderBy("date", "desc"), 
-			  startAfter(allPostsLastVisible), 
-			  limit(5)
-			);
-	
-			const querySnapshot = await getDocs(nextQuery);
-			const newPosts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-			const newLastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-	
-			// Update state based on whether new posts are fetched
-			if (newPosts.length === 0) {
-			  setAllPostsLoaded(true);
-			} else {
-			  setAllPostsLastVisible(newLastVisible);
-			  setAllPosts(prevPosts => [...prevPosts, ...newPosts]);
-			  setAllPostsLoaded(false);
-			}
-	
-			setLoading(false);
+		setLoadingPosts(true);
+		const nextQuery = await firestore.collection('posts')
+		.orderBy("date", "desc")
+		.startAfter(allPostsLastVisible)
+		.limit(5)
+		.get();
+
+		const newPosts = nextQuery.docs.map(doc => doc.data());
+		const newLastVisible = nextQuery.docs[nextQuery.docs.length - 1];
+
+		// Update state based on whether new posts are fetched
+		if (newPosts.length === 0) {
+			setAllPostsLoaded(true);
+		} else {
+			setAllPostsLastVisible(newLastVisible);
+			setAllPosts(prevPosts => [...prevPosts, ...newPosts]);
+			setAllPostsLoaded(false);
 		}
-	  };
-	
-	  const refreshAllPosts = async () => {
-		setLoading(true);
-		const refreshQuery = query(
-		  collection(firestore, "posts"),
-		  orderBy("date", "desc"),
-		  limit(5)
-		);
-	
-		const querySnapshot = await getDocs(refreshQuery);
-		const refreshedPosts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+		setLoadingPosts(false);
+	}
+
+	const refreshAllPosts = async () => {
+		setLoadingPosts(true);
+		const refreshQuery = await firestore.collection('posts')
+		.orderBy("date", "desc")
+		.limit(5)
+		.get();
+
+		const refreshedPosts = refreshQuery.docs.map(doc => doc.data());
 		setAllPosts(refreshedPosts);
-		setAllPostsLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
+		setAllPostsLastVisible(refreshQuery.docs[refreshQuery.docs.length - 1]);
 		setAllPostsLoaded(false);
-		setLoading(false);
-	  };
-	
-	  const fetchMoreFollowingPosts = async () => {
-		if (followingLastVisible && !loading) {
-			setLoading(true);
-			const nextQuery = query(
-			  collection(firestore, "posts"),
-			  filter(post => (
-				(currentUser.following && currentUser.following.includes(post.authorID)) || 
-				(post.petIDs && post.petIDs.length && post.petIDs.some(petID => currentUser.following && currentUser.following.includes(petID)))
-				)),
-			  orderBy("date", "desc"), 
-			  startAfter(followingLastVisible), 
-			  limit(5)
-			);
-	
-			const querySnapshot = await getDocs(nextQuery);
-			const newPosts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-			const newLastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-	
-			// Update state based on whether new posts are fetched
-			if (newPosts.length === 0) {
-			  setFollowingPostsLoaded(true);
-			} else {
-			  setFollowingLastVisible(newLastVisible);
-			  setFollowingPosts(prevPosts => [...prevPosts, ...newPosts]);
-			  setFollowingPostsLoaded(false);
-			}
-	
-			setLoading(false);
+		setLoadingPosts(false);
+	}
+
+	const fetchMoreFollowingPosts = async () => {
+		setLoadingPosts(true);
+		const nextQuery = await firestore.collection('posts')
+		.where("authorID", "in", currentUser.following)
+		.orderBy("date", "desc")
+		.startAfter(followingLastVisible)
+		.limit(5)
+		.get();
+
+		const newPosts = nextQuery.docs.map(doc => doc.data());
+		const newLastVisible = nextQuery.docs[nextQuery.docs.length - 1];
+
+		// Update state based on whether new posts are fetched
+		if (newPosts.length === 0) {
+			setFollowingPostsLoaded(true);
+		} else {
+			setFollowingLastVisible(newLastVisible);
+			setFollowingPosts(prevPosts => [...prevPosts, ...newPosts]);
+			setFollowingPostsLoaded(false);
 		}
-	  };
-	
-	  const refreshFollowingPosts = async () => {
-		setLoading(true);
-		const refreshQuery = query(
-		  collection(firestore, "posts"),
-		  filter(post => (
-			(currentUser.following && currentUser.following.includes(post.authorID)) || 
-			(post.petIDs && post.petIDs.length && post.petIDs.some(petID => currentUser.following && currentUser.following.includes(petID)))
-			)),
-		  orderBy("date", "desc"),
-		  limit(5)
-		);
-	
-		const querySnapshot = await getDocs(refreshQuery);
-		const refreshedPosts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+		setLoadingPosts(false);
+	}
+
+	const refreshFollowingPosts = async () => {
+		setLoadingPosts(true);
+		const refreshQuery = await firestore.collection('posts')
+		.where("authorID", "in", currentUser.following)
+		.orderBy("date", "desc")
+		.limit(5)
+		.get();
+
+		const refreshedPosts = refreshQuery.docs.map(doc => doc.data());
 		setFollowingPosts(refreshedPosts);
-		setFollowingLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
+		setFollowingLastVisible(refreshQuery.docs[refreshQuery.docs.length - 1]);
 		setFollowingPostsLoaded(false);
-		setLoading(false);
-	  };
+		setLoadingPosts(false);
+	}
 
 	return (
 		<>
@@ -298,7 +337,7 @@ function HomePage() {
 
 						<div className="w-full h-full z-10 mt-16 flex items-center flex-col">
 							{/* Tabs */}
-							<div className="mt-6 mb-6 flex flex-row font-bold w-full md:w-1/2 h-[35px] text-sm bg-off_white dark:bg-gray drop-shadow-md rounded-l-sm rounded-r-sm gap-1">
+							<div className="mt-6 mb-6 flex flex-row font-bold w-full lg:max-w-[650px] md:mr-20 md:ml-20 h-[35px] text-sm bg-off_white dark:bg-gray drop-shadow-md rounded-l-sm rounded-r-sm gap-1">
 								<div
 									className={`transition-all w-1/2 flex items-center justify-center rounded-l-sm ${
 										activeTab == "For You"
@@ -322,8 +361,9 @@ function HomePage() {
 								</div>
 							</div>
 
-							{/* Create Post */}
-							<div className="w-full md:w-1/2">
+							<div className="w-full lg:max-w-[650px] md:px-20 lg:px-0">
+
+								{/* Create Post */}
 								{currentUser && (
 									<Card className="drop-shadow-md rounded-sm mb-6">
 										<div className="flex flex-row items-center w-full my-2">
@@ -353,7 +393,7 @@ function HomePage() {
 
 								{activeTab == "For You" ? (
 									<>
-										<div className="flex flex-col min-w-full items-center justify-center gap-6">
+										<div className="flex flex-col w-full items-center justify-center gap-6">
 											{allPosts.map((post) => {
 												return post.postType ==
 													"Original" ? (
@@ -373,26 +413,29 @@ function HomePage() {
 											})}
 
 											{allPostsLoaded ? (
-												<button
-												className={`px-4 py-2 text-white bg-grass rounded-lg text-sm hover:bg-raisin_black transition-all ${loading ? 'hidden' : 'flex'}`}
+												<Button
+												className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
 												onClick={refreshAllPosts}
 												>
 												Refresh Posts
-												</button>
+												</Button>
 											) : (
-												<button
-												className={`px-4 py-2 text-white bg-grass rounded-lg text-sm hover:bg-raisin_black transition-all ${loading ? 'hidden' : 'flex'}`}
+												<Button
+												className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
 												onClick={fetchMoreAllPosts}
-												disabled={loading}
+												disabled={loadingPosts}
 												>
 												Load More
-												</button>
+												</Button>
 											)}
+
+											{loadingPosts && <div className="mb-20 flex items-center justify-center">Loading...</div>}
 										</div>
 									</>
 								) : (
 									<>
 										<div className="flex flex-col min-w-full items-center justify-center gap-6">
+
 											{followingPosts.map((post) => {
 												return post.postType ==
 													"Original" ? (
@@ -413,20 +456,22 @@ function HomePage() {
 
 											{followingPostsLoaded ? (
 												<button
-												className={`px-4 py-2 text-white bg-grass rounded-lg text-sm hover:bg-raisin_black transition-all ${loading ? 'hidden' : 'flex'}`}
+												className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
 												onClick={refreshFollowingPosts}
 												>
 												Refresh Posts
 												</button>
 											) : (
 												<button
-												className={`px-4 py-2 text-white bg-grass rounded-lg text-sm hover:bg-raisin_black transition-all ${loading ? 'hidden' : 'flex'}`}
+												className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
 												onClick={fetchMoreFollowingPosts}
-												disabled={loading}
+												disabled={loadingPosts}
 												>
 												Load More
 												</button>
 											)}
+
+											{loadingPosts && <div className="mb-20 flex items-center justify-center">Loading...</div>}
 										</div>
 									</>
 								)}
