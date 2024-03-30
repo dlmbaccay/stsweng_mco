@@ -84,8 +84,14 @@ function PetProfile() {
 
 
   const [ fetchedTaggedPosts, setFetchedTaggedPosts ] = useState([]);
+  const [ fetchedTaggedPostsLoaded, setFetchedTaggedPostsLoaded ] = useState(false);
+  const [ fetchedTaggedPostsLastVisible, setFetchedTaggedPostsLastVisible ] = useState(null);
+  const [ fetchedTaggedPostsLoading, setFetchedTaggedPostsLoading ] = useState(false);
+
   const [ fetchedMilestones, setFetchedMilestones ] = useState([]);
-  const [ fetchedPosts, setFetchedPosts ] = useState([]);
+  const [ fetchedMilestonesLoaded, setFetchedMilestonesLoaded ] = useState(false);
+  const [ fetchedMilestonesLastVisible, setFetchedMilestonesLastVisible ] = useState(null);
+  const [ fetchedMilestonesLoading, setFetchedMilestonesLoading ] = useState(false);
 
   /**
    * Fetch pet data
@@ -131,10 +137,15 @@ function PetProfile() {
         collection(firestore, 'posts'), 
         where('petIDs', 'array-contains', urlParams.petID)
       );
+
       const taggedPostsSnapshot = await getDocs(taggedPostsQuery);
       taggedPostsSnapshot.forEach((doc) => {
         taggedPosts.push(doc.data());
       });
+
+      setFetchedTaggedPosts(taggedPosts);
+      setFetchedTaggedPostsLastVisible(taggedPostsSnapshot.docs[taggedPostsSnapshot.docs.length - 1]);
+      setFetchedTaggedPostsLoaded(true);
 
       // fetch milestones
       const milestonesQuery = query(
@@ -147,8 +158,12 @@ function PetProfile() {
         milestones.push(doc.data());
       });
 
-      setFetchedTaggedPosts(taggedPosts);
       setFetchedMilestones(milestones);
+      setFetchedMilestonesLastVisible(milestonesSnapshot.docs[milestonesSnapshot.docs.length - 1]);
+      setFetchedMilestonesLoaded(true);
+
+      // setFetchedTaggedPosts(taggedPosts);
+      // setFetchedMilestones(milestones);
     }
 
     fetchData();
@@ -156,6 +171,64 @@ function PetProfile() {
 
   }, [urlParams.petID]);
 
+  // const fetchMoreUserPosts = async () => {
+  //       if (userPostsLastVisible) {
+  //           setUserPostsLoading(true);
+  //           const response = await firestore.collection('posts').where('authorID', '==', userData.uid).startAfter(userPostsLastVisible).get();
+  //           const postDocs = response.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  //           setUserPosts([...userPosts, ...postDocs]);
+  //           setUserPostsLastVisible(response.docs[response.docs.length - 1]);
+  //           setUserPostsLoading(false);
+  //       }
+  //   }
+
+  const fetchMoreTaggedPosts = async () => {
+    if (fetchedTaggedPostsLastVisible) {
+      setFetchedTaggedPostsLoading(true);
+      const response = await firestore.collection('posts').where('petIDs', 'array-contains', urlParams.petID).startAfter(fetchedTaggedPostsLastVisible).get();
+      const postDocs = response.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setFetchedTaggedPosts([...fetchedTaggedPosts, ...postDocs]);
+      setFetchedTaggedPostsLastVisible(response.docs[response.docs.length - 1]);
+      setFetchedTaggedPostsLoading(false);
+    }
+  }
+  // const refreshUserPosts = async () => {
+  //       setUserPostsLoading(true);
+  //       const response = await firestore.collection('posts').where('authorID', '==', userData.uid).get();
+  //       const postDocs = response.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  //       setUserPosts(postDocs);
+  //       setUserPostsLastVisible(response.docs[response.docs.length - 1]);
+  //       setUserPostsLoading(false);
+  //   }
+
+  const refreshTaggedPosts = async () => {
+    setFetchedTaggedPostsLoading(true);
+    const response = await firestore.collection('posts').where('petIDs', 'array-contains', urlParams.petID).get();
+    const postDocs = response.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setFetchedTaggedPosts(postDocs);
+    setFetchedTaggedPostsLastVisible(response.docs[response.docs.length - 1]);
+    setFetchedTaggedPostsLoading(false);
+  }
+
+  const fetchMoreMilestones = async () => {
+    if (fetchedMilestonesLastVisible) {
+      setFetchedMilestonesLoading(true);
+      const response = await firestore.collection('posts').where('petIDs', 'array-contains', urlParams.petID).where('category', '==', 'Milestones').startAfter(fetchedMilestonesLastVisible).get();
+      const postDocs = response.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setFetchedMilestones([...fetchedMilestones, ...postDocs]);
+      setFetchedMilestonesLastVisible(response.docs[response.docs.length - 1]);
+      setFetchedMilestonesLoading(false);
+    }
+  }
+
+  const refreshMilestones = async () => {
+    setFetchedMilestonesLoading(true);
+    const response = await firestore.collection('posts').where('petIDs', 'array-contains', urlParams.petID).where('category', '==', 'Milestones').get();
+    const postDocs = response.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setFetchedMilestones(postDocs);
+    setFetchedMilestonesLastVisible(response.docs[response.docs.length - 1]);
+    setFetchedMilestonesLoading(false);
+  }
 
   return (
     <>
@@ -342,6 +415,25 @@ function PetProfile() {
                                     : null)
                                 )
                             })}
+
+                            {fetchedTaggedPostsLoaded ? (
+                                <button
+                                    className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${fetchedTaggedPostsLoading ? 'hidden' : 'flex'}`}
+                                    onClick={refreshTaggedPosts}
+                                >
+                                    Refresh Posts
+                                </button>
+                            ) : (
+                                <button
+                                    className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${fetchedTaggedPostsLoading ? 'hidden' : 'flex'}`}
+                                    onClick={fetchMoreTaggedPosts}
+                                    disabled={fetchedTaggedPostsLoading}
+                                >
+                                    Load More
+                                </button>
+                            )}
+
+                            {fetchedTaggedPostsLoading && <div className="mb-20 flex items-center justify-center">Loading...</div>}
                           </div>
                         ) : (
                           <div className="flex flex-col min-w-full items-center justify-center gap-6">
@@ -355,6 +447,25 @@ function PetProfile() {
                                     : null)
                                 )
                             })}
+
+                            {fetchedMilestonesLoaded ? (
+                                <button
+                                    className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${fetchedMilestonesLoading ? 'hidden' : 'flex'}`}
+                                    onClick={refreshMilestones}
+                                >
+                                    Refresh Milestones
+                                </button>
+                            ) : (
+                                <button
+                                    className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${fetchedMilestonesLoading ? 'hidden' : 'flex'}`}
+                                    onClick={fetchMoreMilestones}
+                                    disabled={fetchedMilestonesLoading}
+                                >
+                                    Load More
+                                </button>
+                            )}
+
+                            {fetchedMilestonesLoading && <div className="mb-20 flex items-center justify-center">Loading...</div>}
                           </div>
                         )}
                     </div>
