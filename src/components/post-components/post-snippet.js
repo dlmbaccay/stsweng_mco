@@ -180,62 +180,6 @@ export function PostSnippet({ post, currentUser }) {
         }
     }
 
-    // When a report for the post is verified, do not display the content
-    if (post.reportStatus == "verified") {
-        return (
-            <Card className="w-full drop-shadow-md hover:drop-shadow-md min-h-fit rounded-md p-6 flex flex-col">
-                {/* header */}
-                <div id="post-header" className="flex flex-col md:flex-row justify-between">
-
-                    <div className="flex flex-row justify-start items-start">
-                        <div id="author-image">
-                            <Image src={post.authorPhotoURL ? post.authorPhotoURL : "/images/profilePictureHolder.jpg"} alt="author photo" width={50} height={50} className="rounded-full drop-shadow-sm aspect-square object-cover h-[40px] w-[40px] md:h-[45px] md:w-[45px]" />
-                        </div>
-
-                        <div id="post-meta" className="ml-4 items-center justify-center">
-                            <div id="user-meta" className="flex flex-row gap-2 text-sm md:text-base">
-                                <div id="display-name">
-                                    <p className="font-bold">{post.authorDisplayName}</p>
-                                </div>
-                                <div className='font-bold'>·</div>
-                                <Link href={`/user/${post.authorUsername}`} id="username" className="hover:text-muted_blue dark:hover:text-light_yellow hover:font-bold transition-all">
-                                    <p>@{post.authorUsername}</p>
-                                </Link>
-                            </div>
-
-                            <div id="publish-date" className="flex flex-row gap-2 items-center">
-                                <p className="text-xs md:text-sm">{handleDateFormat(post.date)}</p>
-
-                                {post.isEdited ?
-                                    (
-                                        <div className="relative flex flex-row items-center gap-2 group">
-                                            <i className="hover-tooltip fa-solid fa-clock-rotate-left text-[10px] md:text-xs" />
-                                            <p className="edited-post-tooltip hidden group-hover:block text-xs">Edited Post</p>
-                                        </div>
-                                    ) : null
-                                }
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className='flex flex-col w-fit items-end mt-3 md:mt-0 text-sm md:text-base'>
-                        {post.category !== 'General' && (
-                            <div className='flex flex-row items-center justify-center gap-2'>
-                                <div className='w-3 h-3 rounded-full bg-muted_blue dark:bg-light_yellow'></div>
-                                <p>{post.category}</p>
-                            </div>
-                        )}
-                    </div>
-
-                    </div>
-
-                <div className="items-center mt-5 w-full flex justify-center">
-                    <span>This post violates our guidelines and has been taken down.</span>
-                </div>
-            </Card>
-        )
-    }
-
     return (
         (post.postType === 'Original' &&
             <Dialog>
@@ -323,6 +267,12 @@ export function PostSnippet({ post, currentUser }) {
                             </div>
                         }
 
+                        {post.reportStatus === "verified" ? 
+                            <div className="items-center mt-5 w-full flex justify-center">
+                                <span>This post violates our guidelines and has been taken down.</span>
+                            </div>
+                        :
+                        <>
                         <DialogTrigger asChild>
                             <div id="post-content" className="cursor-pointer">
                                 <p
@@ -356,6 +306,8 @@ export function PostSnippet({ post, currentUser }) {
                                 </DialogTrigger>
                             </div>
                         }
+                        </>
+                        } 
                     </div>
 
                     {/* footer */}

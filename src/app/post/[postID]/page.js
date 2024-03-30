@@ -470,7 +470,12 @@ function Post() {
                                             <p className='line-clamp-1 overflow-hidden'>{post.location}</p>
                                         </div>
                                     }
-
+                                    { post.reportStatus == "verified" ? 
+                                        <div className="items-center mt-5 w-full flex justify-center">
+                                            <span>This post violates our guidelines and has been taken down.</span>
+                                        </div>
+                                    :
+                                    <>
                                     <div id="post-content">
                                         <p
                                             className='whitespace-pre-line line-clamp-1 text-sm md:text-base md:line-clamp-4 overflow-hidden text-justify'>
@@ -499,6 +504,8 @@ function Post() {
                                                 className='rounded-lg cursor-pointer'
                                                 />
                                         </div>
+                                    }
+                                    </>
                                     }
                                 </div>
 
@@ -850,10 +857,18 @@ function Post() {
 
                                 {/* body */}
                                 <div id="post-body" className='mt-2 md:mt-3 flex flex-col'>
+                                { post.reportStatus == "verified" ? 
+                                    <div className="items-center mt-5 w-full flex justify-center">
+                                        <span>This post violates our guidelines and has been taken down.</span>
+                                    </div>
+                                :
+                                <>
                                     { post.content !== '' && post.content !== null && post.content !== undefined &&
-                                        <div id="post-content" className="flex flex-col mt-1 cursor-pointer">
-                                            <p className="text-sm md:text-base">{post.content}</p>
-                                        </div>
+                                        <DialogTrigger asChild>
+                                            <div id="post-content" className="flex flex-col mt-1 cursor-pointer">
+                                                <p className="text-sm md:text-base">{post.content}</p>
+                                            </div>
+                                        </DialogTrigger>
                                     }
 
                                     {/* reposted post */}
@@ -885,24 +900,34 @@ function Post() {
                                         </div>
 
 
-                                        <div id="reposted-post-content" className="flex flex-row items-start justify-between mt-4 gap-8">
-                                            <p className="text-sm md:text-base">{post.originalPostContent}</p>
+                                    
+                                        { post.originalReportStatus == "verified" ? 
+                                            <div className="items-center mt-5 w-full flex justify-center">
+                                                <span>This post violates our guidelines and has been taken down.</span>
+                                            </div>
+                                        :
+                                            <div id="reposted-post-content" className="flex flex-row items-start justify-between mt-4 gap-8">
+                                                <p className="w-full text-sm md:text-base">{post.originalPostContent}</p>
 
-                                            {/* original post images, if any (only show the first one) */}
-                                            { post.originalPostMedia && post.originalPostMedia.length > 0 &&
-                                                <div id="reposted-post-images" className="flex">
-                                                    <Image
-                                                        src={post.originalPostMedia[0]}
-                                                        alt="reposted post image"
-                                                        width={100}
-                                                        height={100}
-                                                        className="rounded-md drop-shadow-sm aspect-square object-cover"
-                                                    />
-                                                </div>
-                                            }
-                                        </div>
+                                                {/* original post images, if any (only show the first one) */}
+                                                { post.originalPostMedia && post.originalPostMedia.length > 0 &&
+                                                    <div id="reposted-post-images" className="justify-end flex w-[30%] ">
+                                                        <Image
+                                                            src={post.originalPostMedia[0]}
+                                                            alt="reposted post image"
+                                                            width={100}
+                                                            height={100}
+                                                            className="rounded-md drop-shadow-sm aspect-square object-cover"
+                                                        />
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        
                                     </div>      
                                     </Link>
+                                </>
+                                }
                                 </div>
 
                                 {/* footer */}

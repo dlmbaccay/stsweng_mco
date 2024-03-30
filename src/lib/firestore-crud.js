@@ -243,3 +243,27 @@ module.exports.deleteReplyDocument = async(postID, commentID, replyID) => {
     }
 }
 
+module.exports.updateBanStatus = async(userID, status) => {
+    try {
+        let until = null;
+        if (status === "temporary" || status === "permanent") {
+            // Check if the status is "temporary" or "permanent"
+            if (status === "temporary") {
+                until = new Date(); // Set the until date to the current date
+                until.setDate(until.getDate() + 3); // Add 3 days to the current date
+            }
+        }
+
+        // Update the ban status in the Firestore database
+        await firestore.collection('users').doc(userID).update({
+            ban: {
+                status: status,
+                until: until
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error updating ban status:', error);
+        throw error;
+    }
+};

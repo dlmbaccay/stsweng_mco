@@ -36,7 +36,7 @@ export async function POST(request) {
                 authorDisplayName: postAuthorDisplayName,
                 authorPhotoURL: postAuthorPhotoURL,
                 content: postContent,
-                category: postCategory,
+                category: (postCategory == "" ? "General" : postCategory),
                 taggedPets: postTaggedPets,
                 petIDs: postPetIDs,
                 location: (postCategory == "Lost Pets" || postCategory == "Unknown Owner") ? postTrackerLocation : "",

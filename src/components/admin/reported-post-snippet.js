@@ -30,7 +30,7 @@ export function ReportSnippet({ post }) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ action: "update-status", id: post.postID, status: status })
+                body: JSON.stringify({ action: "update-status", id: post.postID, author: post.authorID, status: status })
             });
             const data = await response.json();
             console.log(data);
@@ -63,7 +63,7 @@ export function ReportSnippet({ post }) {
 
 
     return (
-        <Dialog>
+        <>
             {/* <DialogTrigger asChild> */}
             <Card className="w-full drop-shadow-md hover:drop-shadow-md min-h-fit rounded-md p-6 flex flex-col">
 
@@ -78,6 +78,7 @@ export function ReportSnippet({ post }) {
                 
                 {/* body */}
                 <div id="post-body" className='mt-2 md:mt-3 flex flex-col'>
+                     
                     <div className="flex flex-row justify-between ">
                         <div className="flex flex-row justify-start items-center">
                             <div id="author-image">
@@ -109,6 +110,7 @@ export function ReportSnippet({ post }) {
                                 </div>
                             </div>
                         </div>
+                        { post.postType !== "Repost" &&
                         <div className='flex flex-col w-fit items-end mt-3 md:mt-1 text-sm md:text-base'>
                         {   post.category !== 'General' && (
                             <div className='flex flex-row items-center justify-center gap-2'>
@@ -117,12 +119,14 @@ export function ReportSnippet({ post }) {
                             </div>
                         )}
                         </div>
+                        }
                     </div>
+                    
 
                     
                     {/* pets */}
                     <div id="post-pets" className="mr-auto my-2">
-                        {post.taggedPets.length > 0 && (
+                        {post.taggedPets && post.taggedPets.length > 0 && (
                             <div className="flex flex-row items-center justify-center gap-2">
                                 {post.taggedPets.length === 1 && <i className="fa-solid fa-tag text-xs md:text-md"></i>}
                                 {post.taggedPets.length > 1 && <i className="fa-solid fa-tags text-xs md:text-md"></i>}
@@ -156,42 +160,78 @@ export function ReportSnippet({ post }) {
                     </div>
                     }
 
-                    <DialogTrigger asChild>
+                    { post.postType == "Repost" ? 
+                    <div id="reposted-post" className={`${post.content === '' ? "mt-2" : "mt-4"} flex flex-col border border-black dark:border-white rounded-md p-4`}>
+
+                        <div className="flex flex-row justify-start items-start">
+                            <div id="author-image">
+                                <Image src={post.originalPostAuthorPhotoURL ? post.originalPostAuthorPhotoURL : "/images/profilePictureHolder.jpg"} alt="author photo" width={50} height={50} className="rounded-full drop-shadow-sm aspect-square object-cover h-[40px] w-[40px] md:h-[45px] md:w-[45px]" />
+                            </div>
+
+                            <div id="post-meta" className="ml-4 items-center justify-center">
+                                <div id="user-meta" className="flex flex-row gap-2 text-sm md:text-base">
+                                    <div id="display-name">
+                                        <p className="font-bold">{post.originalPostAuthorDisplayName}</p>
+                                    </div>
+                                    <div className='font-bold'>·</div>
+                                    <Link href={`/user/${post.originalPostAuthorUsername}`} id="username" className="hover:text-muted_blue dark:hover:text-light_yellow hover:font-bold transition-all">
+                                        <p>@{post.originalPostAuthorUsername}</p>
+                                    </Link>
+                                </div>
+                                
+                                <div id="publish-date" className="flex flex-row gap-2 items-center">
+                                    <p className="text-xs md:text-sm">{handleDateFormat(post.originalPostDate)}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="reposted-post-content" className="flex flex-row items-start justify-between mt-4 gap-8">
+                            <p className="w-full text-sm md:text-base">{post.originalPostContent}</p>
+
+                            {/* original post images, if any (only show the first one) */}
+                            { post.originalPostMedia && post.originalPostMedia.length > 0 &&
+                                <div id="reposted-post-images" className="justify-end flex w-[30%] ">
+                                    <Image
+                                        src={post.originalPostMedia[0]}
+                                        alt="reposted post image"
+                                        width={100}
+                                        height={100}
+                                        className="rounded-md drop-shadow-sm aspect-square object-cover"
+                                    />
+                                </div>
+                            }
+                        </div>
+                    </div>  :  
+                    <>
                         <div id="post-content" className="cursor-pointer">
                             <p
-                                // onClick={() => {
-                                //   setShowPostExpanded(true)
-                                //   setPostAction('view')
-                                // }} 
                                 className='whitespace-pre-line line-clamp-1 text-sm md:text-base md:line-clamp-4 overflow-hidden text-justify'>
                                 {post.content}
                             </p>
                         </div>
-                    </DialogTrigger>
 
-                    { post.imageURLs.length >= 1 &&
-                        <div id="post-image" className='h-[200px] mt-2 md:mt-4 md:h-[300px] w-auto flex items-center justify-center relative'>
-                            {post.imageURLs.length > 1 && (
-                                <>
-                                <i className="text-xl fa-solid fa-circle-chevron-left absolute left-0 cursor-pointer z-10 hover:text-muted_blue dark:hover:text-light_yellow active:scale-110 transition-all pl-2 md:pl-0" 
-                                    onClick={() => {
-                                    setCurrentImageIndex((prevIndex) => (prevIndex - 1 + post.imageURLs.length) % post.imageURLs.length);
-                                    }}
-                                ></i>
-                                <i className="text-xl fa-solid fa-circle-chevron-right absolute right-0 cursor-pointer z-10 hover:text-muted_blue dark:hover:text-light_yellow active:scale-110 transition-all pr-2 md:pr-0" 
-                                    onClick={() => {
-                                    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % post.imageURLs.length);
-                                    }}></i>
-                                </>
-                            )}
-                            <DialogTrigger asChild>
+                        {post.imageURLs && post.imageURLs.length >= 1 &&
+                            <div id="post-image" className='h-[200px] mt-2 md:mt-4 md:h-[300px] w-auto flex items-center justify-center relative'>
+                                {post.imageURLs.length > 1 && (
+                                    <>
+                                    <i className="text-xl fa-solid fa-circle-chevron-left absolute left-0 cursor-pointer z-10 hover:text-muted_blue dark:hover:text-light_yellow active:scale-110 transition-all pl-2 md:pl-0" 
+                                        onClick={() => {
+                                        setCurrentImageIndex((prevIndex) => (prevIndex - 1 + post.imageURLs.length) % post.imageURLs.length);
+                                        }}
+                                    ></i>
+                                    <i className="text-xl fa-solid fa-circle-chevron-right absolute right-0 cursor-pointer z-10 hover:text-muted_blue dark:hover:text-light_yellow active:scale-110 transition-all pr-2 md:pr-0" 
+                                        onClick={() => {
+                                        setCurrentImageIndex((prevIndex) => (prevIndex + 1) % post.imageURLs.length);
+                                        }}></i>
+                                    </>
+                                )}
                                 <Image src={post.imageURLs[currentImageIndex]} alt="post image" 
                                     layout='fill'
                                     objectFit='contain'
                                     className='rounded-lg cursor-pointer'
-                                    />
-                            </DialogTrigger>
-                        </div>
+                                />
+                            </div>
+                        }
+                    </>
                     }
                 </div>
 
@@ -238,15 +278,6 @@ export function ReportSnippet({ post }) {
                     
                 </div>
             </Card>
-            {/* </DialogTrigger> */}
-
-            <DialogContent className="sm:min-w-full md:min-w-[750px] h-[95%] flex flex-col items-start justify-center p-2">
-                <DialogHeader className="flex items-center justify-center w-full">
-                    <DialogTitle className="text-md">{post.authorDisplayName}&apos;s Post</DialogTitle>
-                </DialogHeader>
-            </DialogContent>
-        </Dialog>
-
-        
+        </>
     );
 }

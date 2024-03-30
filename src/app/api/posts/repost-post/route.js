@@ -28,7 +28,7 @@ export async function POST(request) {
 
     try {
         const postID = await firestore.collection("posts").doc().id;
-        
+
         const postDetails = {
             postType: postType,
             postID: postID,
@@ -48,7 +48,7 @@ export async function POST(request) {
             originalPostTaggedPets: originalPostTaggedPets,
             originalPostTrackerLocation: originalPostTrackerLocation,
             originalPostType: originalPostType,
-            originalPostMedia: originalPostMedia,
+            originalPostMedia: originalPostMedia[0] !== ""  ? originalPostMedia : [],
             isEdited: false,
             reports: [],
             reportStatus: "pending",

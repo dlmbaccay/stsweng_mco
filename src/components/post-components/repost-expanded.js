@@ -261,61 +261,77 @@ export function ExpandedRepost({ post, currentUser }) {
 
                 {/* body */}
                 <div id="post-body" className='mt-2 md:mt-3 flex flex-col'>
-                    { post.content !== '' && post.content !== null && post.content !== undefined &&
-                        <DialogTrigger asChild>
-                            <div id="post-content" className="flex flex-col mt-1 cursor-pointer">
-                                <p className="text-sm md:text-base">{post.content}</p>
-                            </div>
-                        </DialogTrigger>
-                    }
+                    { post.reportStatus == "verified" ? 
+                        <div className="items-center mt-5 w-full flex justify-center">
+                            <span>This post violates our guidelines and has been taken down.</span>
+                        </div>
+                    :
+                    <>
+                        { post.content !== '' && post.content !== null && post.content !== undefined &&
+                            <DialogTrigger asChild>
+                                <div id="post-content" className="flex flex-col mt-1 cursor-pointer">
+                                    <p className="text-sm md:text-base">{post.content}</p>
+                                </div>
+                            </DialogTrigger>
+                        }
 
-                    {/* reposted post */}
-                    <Link
-                        href={`/post/${post.originalPostID}`}
-                    >
-                    <div id="reposted-post" className={`${post.content === '' ? "mt-2" : "mt-4"} flex flex-col border border-black dark:border-white rounded-md p-4`}>
+                        {/* reposted post */}
+                        <Link
+                            href={`/post/${post.originalPostID}`}
+                        >
+                        <div id="reposted-post" className={`${post.content === '' ? "mt-2" : "mt-4"} flex flex-col border border-black dark:border-white rounded-md p-4`}>
 
-                        <div className="flex flex-row justify-start items-start">
-                            <div id="author-image">
-                                <Image src={post.originalPostAuthorPhotoURL ? post.originalPostAuthorPhotoURL : "/images/profilePictureHolder.jpg"} alt="author photo" width={50} height={50} className="rounded-full drop-shadow-sm aspect-square object-cover h-[40px] w-[40px] md:h-[45px] md:w-[45px]" />
-                            </div>
+                            <div className="flex flex-row justify-start items-start">
+                                <div id="author-image">
+                                    <Image src={post.originalPostAuthorPhotoURL ? post.originalPostAuthorPhotoURL : "/images/profilePictureHolder.jpg"} alt="author photo" width={50} height={50} className="rounded-full drop-shadow-sm aspect-square object-cover h-[40px] w-[40px] md:h-[45px] md:w-[45px]" />
+                                </div>
 
-                            <div id="post-meta" className="ml-4 items-center justify-center">
-                                <div id="user-meta" className="flex flex-row gap-2 text-sm md:text-base">
-                                    <div id="display-name">
-                                        <p className="font-bold">{post.originalPostAuthorDisplayName}</p>
+                                <div id="post-meta" className="ml-4 items-center justify-center">
+                                    <div id="user-meta" className="flex flex-row gap-2 text-sm md:text-base">
+                                        <div id="display-name">
+                                            <p className="font-bold">{post.originalPostAuthorDisplayName}</p>
+                                        </div>
+                                        <div className='font-bold'>·</div>
+                                        <Link href={`/user/${post.originalPostAuthorUsername}`} id="username" className="hover:text-muted_blue dark:hover:text-light_yellow hover:font-bold transition-all">
+                                            <p>@{post.originalPostAuthorUsername}</p>
+                                        </Link>
                                     </div>
-                                    <div className='font-bold'>·</div>
-                                    <Link href={`/user/${post.originalPostAuthorUsername}`} id="username" className="hover:text-muted_blue dark:hover:text-light_yellow hover:font-bold transition-all">
-                                        <p>@{post.originalPostAuthorUsername}</p>
-                                    </Link>
-                                </div>
-                                
-                                <div id="publish-date" className="flex flex-row gap-2 items-center">
-                                    <p className="text-xs md:text-sm">{handleDateFormat(post.originalPostDate)}</p>
+                                    
+                                    <div id="publish-date" className="flex flex-row gap-2 items-center">
+                                        <p className="text-xs md:text-sm">{handleDateFormat(post.originalPostDate)}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
 
-                        <div id="reposted-post-content" className="flex flex-row items-start justify-between mt-4 gap-8">
-                            <p className="text-sm md:text-base">{post.originalPostContent}</p>
+                        
+                            { post.originalReportStatus == "verified" ? 
+                                    <div className="items-center mt-5 w-full flex justify-center">
+                                        <span>This post violates our guidelines and has been taken down.</span>
+                                    </div>
+                                :
+                                    <div id="reposted-post-content" className="flex flex-row items-start justify-between mt-4 gap-8">
+                                        <p className="w-full text-sm md:text-base">{post.originalPostContent}</p>
 
-                            {/* original post images, if any (only show the first one) */}
-                            { post.originalPostMedia && post.originalPostMedia.length > 0 &&
-                                <div id="reposted-post-images" className="flex">
-                                    <Image
-                                        src={post.originalPostMedia[0]}
-                                        alt="reposted post image"
-                                        width={100}
-                                        height={100}
-                                        className="rounded-md drop-shadow-sm aspect-square object-cover"
-                                    />
-                                </div>
-                            }
-                        </div>
-                    </div>      
-                    </Link>
+                                        {/* original post images, if any (only show the first one) */}
+                                        { post.originalPostMedia && post.originalPostMedia.length > 0 &&
+                                            <div id="reposted-post-images" className="justify-end flex w-[30%] ">
+                                                <Image
+                                                    src={post.originalPostMedia[0]}
+                                                    alt="reposted post image"
+                                                    width={100}
+                                                    height={100}
+                                                    className="rounded-md drop-shadow-sm aspect-square object-cover"
+                                                />
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            
+                        </div>      
+                        </Link>
+                    </>
+                    }
                 </div>
 
                 {/* footer */}

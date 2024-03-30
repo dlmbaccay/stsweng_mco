@@ -1,4 +1,5 @@
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -15,7 +16,10 @@ import toast from "react-hot-toast"
   
 export function DeletePost({postID}) {
     const router = useRouter();
-    const handleDeletePost = async () => {
+    const [open, setOpen] = useState(false);
+
+    const handleDeletePost = async (e) => {
+      e.preventDefault();
         try {
           // Logic to delete the post from your database (Firestore, etc.)
           const response = await fetch(`/api/posts/delete-post`, {
@@ -35,14 +39,11 @@ export function DeletePost({postID}) {
         } catch (error) {
           console.error('Error deleting post:', error);
           toast.error('An error occurred while deleting the post.');
-        } finally {
-          router.refresh();
-
-        }
+        } 
     };
 
     return (
-        <AlertDialog>
+        <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
                 <i
                     id="delete-control"
@@ -58,7 +59,7 @@ export function DeletePost({postID}) {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction><div onClick={handleDeletePost}>Delete</div> </AlertDialogAction>
+                    <div onClick={(e) => handleDeletePost(e)}>Delete</div>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>

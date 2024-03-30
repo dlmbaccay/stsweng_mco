@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { firestore } from '@/lib/firebase';
-import { updateDocument, getDocumentsWithCondition, createReportDocument, hasReported} from '@/lib/firestore-crud'; // Ensure this import is correct
+import { updateDocument, getDocumentsWithCondition, createReportDocument, hasReported} from '@/lib/firestore-crud'; 
+import { checkIfBannable } from '@/lib/helper-functions';
 import { create } from 'lodash';
 
 export async function POST(request) {
@@ -22,18 +23,18 @@ export async function POST(request) {
                 existingReport.reasons = reportData.reasons;
                 existingReport.otherReasons = reportData.otherReasons;
 
-                await updateDocument("posts", post.postID, { reports: post.reports , reportStatus: "pending"});
+                await updateDocument("posts", post.postID, { reports: post.reports});
                 return NextResponse.json({ message: "Report success." }, { status: 200 });
             } else {
                 return NextResponse.json({ message: "You have already reported this post." }, { status: 400 });
             }
         }
 
-        await updateDocument("posts", post.postID, {reports: [...post.reports, reportData], reportStatus: "pending"})
+        await updateDocument("posts", post.postID, {reports: [...post.reports, reportData], reportStatus: post.reportStatus ? post.reportStatus : "pending"});
 
 
-        // LOGIC FOR TEMPORARY BAN
-        // Check if the post author has received more than 10 pending or verified reports
+        // LOGIC FOR BAN
+        // Check if the post author has received reports in multiple posts
         const snapshot = await firestore.collection('posts').where("authorID", "==", post.authorID).where("reportStatus", "in", ["pending", "verified"]).get();
         const authorReports = snapshot.docs.map(doc => doc.data());
 
@@ -41,8 +42,6 @@ export async function POST(request) {
             const reports = post.reports;
             return count + reports.length;
         }, 0);
-        
-        console.log(totalReports);
 
         if (totalReports >= 10) {
             // Do something if the post author has received more than 10 reports
@@ -51,6 +50,21 @@ export async function POST(request) {
                 banUntil.setDate(banUntil.getDate() + 3); // Add 3 days to the current date
 
                 await updateDocument("users", post.authorID, { ban: { status: "temporary", until: banUntil } });
+
+                // Create a notification for admin
+                const notifData = {
+                    type: "ban",
+                    userID: post.authorID,
+                    username: post.authorUsername,
+                    userPhotoURL: post.authorPhotoURL,
+                    desc: "temporarily banned due to excessive reports",
+                    banStatus: "temporary",
+                    until: banUntil,
+                    createdAt: new Date()
+                }
+
+                const adminDocRef = firestore.collection('admin').doc("5QMdCpbNvBMBSJ0wY9i28adWdx72");
+                await adminDocRef.collection('notifications').add(notifData);
             } catch (err) {
                 // Handle the error if the user document update fails
                 console.error("Error updating user document:", err);
@@ -81,7 +95,7 @@ export async function GET(request) {
 
 export async function PATCH(request) {
     const body = await request.json();
-    const { action, id, status} = body;
+    const { action, id, author, status} = body;
     try {
         if (action == "update-status") {
             // Use the updateDocument function from firestore-crud.js
@@ -112,6 +126,9 @@ export async function PATCH(request) {
                     });
                 }
             }
+
+            // Check if user should be permanently banned, if yes then permanently ban.
+            await checkIfBannable(author);
 
             return NextResponse.json({message: 'update success'}, {status: 200});
         } else if (action == "delete-report") {

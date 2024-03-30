@@ -176,6 +176,12 @@ export function RepostSnippet({post, currentUser}) {
                     
                     {/* body */}
                     <div id="post-body" className='mt-2 md:mt-3 flex flex-col'>
+                    { post.reportStatus == "verified" ? 
+                        <div className="items-center mt-5 w-full flex justify-center">
+                            <span>This post violates our guidelines and has been taken down.</span>
+                        </div>
+                    :
+                    <>
                         { post.content !== '' && post.content !== null && post.content !== undefined &&
                             <DialogTrigger asChild>
                                 <div id="post-content" className="flex flex-col mt-1 cursor-pointer">
@@ -238,8 +244,11 @@ export function RepostSnippet({post, currentUser}) {
                                 
                             </div>     
                         </Link>
-                    </div>
+                        </>
+                    }
 
+                    </div>
+                    
                     {/* footer */}
                     <div id="post-footer" className="mt-4 flex flex-row w-full justify-between relative">
                         <div id="left" className="flex flex-row gap-4 text-sm md:text-base items-center">

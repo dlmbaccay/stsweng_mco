@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 import { auth } from "@/lib/firebase";
 
-import AdminNav from "@/components/nav/admin-nav";
+import AdminNav from "@/components/nav/admin/admin-nav";
 
 
 const Layout = ({ children }) => {

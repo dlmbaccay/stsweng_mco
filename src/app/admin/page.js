@@ -6,7 +6,7 @@ import WithAuth from "@/components/WithAuth";
 import { ModeToggle } from "@/components/mode-toggle";
 import Loader from "@/components/Loader";
 
-import AdminNav from "@/components/nav/admin-nav";
+import AdminNav from "@/components/nav/admin/admin-nav";
 
 function AdminPage() {
     const [loading, setLoading] = useState(true);

@@ -348,6 +348,12 @@ export function ExpandedPost({ post, currentUser }) {
                     </div>
                 }
 
+                { post.reportStatus == "verified" ? 
+                    <div className="items-center mt-5 w-full flex justify-center">
+                        <span>This post violates our guidelines and has been taken down.</span>
+                    </div>
+                :
+                <>
                 <div id="post-content">
                     <p
                         className='whitespace-pre-line line-clamp-1 text-sm md:text-base md:line-clamp-4 overflow-hidden text-justify'>
@@ -376,6 +382,8 @@ export function ExpandedPost({ post, currentUser }) {
                             className='rounded-lg cursor-pointer'
                             />
                     </div>
+                }
+                </>
                 }
             </div>
 

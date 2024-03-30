@@ -11,13 +11,15 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Loader from "@/components/Loader";
-import AdminNav from "@/components/nav/admin-nav";
-import { ReportSnippet } from "@/components/post-components/report-components/reported-post-snippet";
+import AdminNav from "@/components/nav/admin/admin-nav";
+import { ReportSnippet } from "@/components/admin/reported-post-snippet";
+import AdminNotifications from "@/components/nav/admin/notifications-tab";
 
-function AdminPage() {
+function ReportsPage() {
     const [loading, setLoading] = useState(true);
     const [ postsLoading, setPostsLoading] = useState(false);
     const [ currentUser, setCurrentUser ] = useState([]);
+    const [ notifications, setNotifications ] = useState([]);
 
     const [ reportedPosts, setReportedPosts ] = useState([]);
     const [ filteredReports, setFilteredReports ] = useState([]);
@@ -51,7 +53,17 @@ function AdminPage() {
             }
         }
 
+        async function getAdminNotifications() {
+            const user = await auth.currentUser;
+            if (user) {
+                const adminNotifs = await firestore.collection('admin').doc(user.uid).collection('notifications').get();
+                const notifs = adminNotifs.docs.map(doc => doc.data());
+                setNotifications(notifs);
+            }
+        }
+
         fetchReportedPosts();
+        getAdminNotifications();
     }, []);
 
     useEffect(() => {
@@ -124,8 +136,8 @@ function AdminPage() {
     <>
       { loading ? <Loader show={true} /> : (currentUser && 
           <div className="flex">
-                <div className="w-80 h-screen fixed">
-                    <AdminNav />
+                <div className="w-80 fixed h-screen">
+                    <AdminNav props={{notifications: notifications}}/>
                 </div>
                 <div className="ml-80 w-full flex flex-col">
                     <div className="flex flex-row w-full border-b border-gray shadow-lg p-4 sticky top-0 bg-background z-10 items-center justify-between">
@@ -180,4 +192,4 @@ function AdminPage() {
   )
 }
 
-export default WithAuth(AdminPage);
+export default WithAuth(ReportsPage);

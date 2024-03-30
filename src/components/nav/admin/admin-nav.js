@@ -5,14 +5,17 @@ import { useRouter, usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import { auth } from "@/lib/firebase";
-import { ModeToggle } from "../mode-toggle";
+import { ModeToggle } from "../../mode-toggle";
+import  AdminNotifications from "./notifications-tab";
 
 
-export default function AdminNav() {
+export default function AdminNav({props}) {
     const router = useRouter();
     const activeTab = usePathname();
     
     const navRef = useRef(null);
+
+    const {notifications} = props;
 
     const handleSignOut = () => {
         auth.signOut().then(() => {
@@ -22,31 +25,9 @@ export default function AdminNav() {
         })
     }
 
-    // Close navbar when clicking outside
-    // useEffect(() => {
-    //     if (expand_lock) {
-    //         return;
-    //     } else {
-    //         const handleClickOutside = (event) => {
-    //             if (navRef.current && !navRef.current.contains(event.target)) {
-    //                 setIsExpanded(false);
-    //             }
-    //         };
-    //         document.addEventListener('mousedown', handleClickOutside);
-    //         return () => document.removeEventListener('mousedown', handleClickOutside);
-    //     }
-    // });
-
-    // const handleClick = (event) => {
-    //     // Check if the event target is the background div
-    //     if (event.target === navRef.current) {
-    //         setIsExpanded(!isExpanded);
-    //     }
-    // };
-
     return (
         <>
-            <div ref={navRef} className={`h-screen border-r border-gray flex flex-col justify-between bg-white dark:bg-dark_gray w-full"`}>
+            <div ref={navRef} className={`h-screen border-r border-gray flex flex-col justify-between bg-white dark:bg-dark_gray w-80"`}>
                 <>
                 {/* admin user meta */}
                 <div className="pt-8 mx-auto">
@@ -57,7 +38,11 @@ export default function AdminNav() {
                     </button>
                     <div className="mx-auto flex flex-col items-center justify-center gap-4 mt-4">
                         <span className="text-md tracking-wide font-medium">ADMIN</span>
-                        <ModeToggle></ModeToggle>
+                        <div className="flex flex-row gap-6">
+                            <ModeToggle></ModeToggle>
+                            <AdminNotifications props={{notifications: notifications}}/>
+                        </div>
+                        
                     </div>
                 </div>
                 <div className="pb-8 text-sm">

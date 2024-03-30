@@ -154,7 +154,6 @@ function UserProfile() {
                 
                 if (!isEqual(postDocs, userPosts)){
                     setUserPosts(postDocs);
-                    
                 }
             });
         }
@@ -399,8 +398,8 @@ function UserProfile() {
                                                     </div>
                                                 </Card> : null
                                             }
-                                            <div className="flex flex-col min-w-full items-center justify-center gap-6">
-                                                {[...userPosts].reverse().map((post) => {
+                                            <div className="flex flex-col min-w-full items-center justify-center gap-6 mb-6">
+                                                {[...userPosts].sort((a, b) => new Date(a.date) - new Date(b.date)).map((post) => {
                                                     return (
                                                         (post.postType == 'Original' ?
                                                             <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
