@@ -27,7 +27,8 @@ export async function POST(request) {
                     birthdate: birthdate,
                     location: location,
                     phoneNumber: phoneNumber,
-                    uid: user.uid
+                    uid: user.uid,
+                    ban: {status: "none", when: null, until: null},
                 };
                 await createUserDocument('users', user.uid, userData);
                 return NextResponse.json({ success: true }, {status: 200});
