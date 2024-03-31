@@ -142,6 +142,7 @@ export function CreatePost({ props }) {
                     setLoading(false);
 
                     toast.success("Post created successfully!");
+                    window.location.reload();
 
                     setPostContent("");
                     setPostCategory("");

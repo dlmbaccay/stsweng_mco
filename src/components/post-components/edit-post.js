@@ -38,6 +38,7 @@ export function EditPost({ props }) {
     
     async function savePostData() {
         if (postType === 'Original') {
+            toast.loading('Updating post...');
             await fetch('/api/posts/edit-post', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -53,13 +54,16 @@ export function EditPost({ props }) {
                 if (response.ok) {
                     const data = response.json();
                     if (data.success) {
+                        toast.dismiss();
                         toast.success(`Successfully updated post!`);
+                        window.location.reload();
                     }
                 } else {
                     throw new Error('Failed to save post');
                 }
             });
         } else if (postType === 'Repost'){
+            toast.loading('Updating post...');
             await fetch('/api/posts/edit-post', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -74,7 +78,9 @@ export function EditPost({ props }) {
                 if (response.ok) {
                     const data = response.json();
                     if (data.success) {
+                        toast.dismiss();
                         toast.success(`Successfully updated post!`);
+                        window.location.reload();
                     }
                 } else {
                     throw new Error('Failed to save post');
@@ -108,16 +114,23 @@ export function EditPost({ props }) {
                                 <div className="flex justify-end w-full">
                                     <Select required onValueChange={(value) => setNewCategory(value)} value={newCategory}>
                                         <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select Category" />
+                                            { newCategory === '' ? 'Select Category' : newCategory ? newCategory : category }
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="General">General</SelectItem>
-                                            <SelectItem value="Q&A">Q&A</SelectItem>
-                                            <SelectItem value="Tips">Tips</SelectItem>
-                                            <SelectItem value="Pet Needs">Pet Needs</SelectItem>
-                                            <SelectItem value="Milestones">Milestones</SelectItem>
-                                            <SelectItem value="Lost Pets">Lost Pets</SelectItem>
-                                            <SelectItem value="Unknown Owner">Unknown Owner</SelectItem>
+                                            {   ( category !== 'Lost Pets' && category !== 'Unknown Owner' ) &&
+                                                <>
+                                                <SelectItem value="General">General</SelectItem>
+                                                <SelectItem value="Q&A">Q&A</SelectItem>
+                                                <SelectItem value="Tips">Tips</SelectItem>
+                                                <SelectItem value="Pet Needs">Pet Needs</SelectItem>
+                                                <SelectItem value="Milestones">Milestones</SelectItem>
+                                                </>
+                                            }
+                                            
+                                            {
+                                                ( category === 'Lost Pets' || category === 'Unknown Owner' ) &&
+                                                <SelectItem value="Found Pets">Found Pets</SelectItem>
+                                            }
                                         </SelectContent>
                                     </Select>
                                 </div>

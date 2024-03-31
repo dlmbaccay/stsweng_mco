@@ -195,50 +195,6 @@ function HomePage() {
 			fetchData();
 		}
 	}, [currentUser]);
-	// useEffect(() => {
-    //     setLoading(true);
-    //     if (currentUser) {
-
-	// 		const fetchUserFollowing = async () => {
-	// 			if (currentUser) {
-	// 				const response = await firestore.collection('users').doc(currentUser.uid).get();
-	// 				const data = response.data();
-	// 				setUserFollowing(data.following);
-	// 			}
-	// 		}
-
-    //         const fetchData = async () => {
-	// 			// fetch all all posts
-	// 			const allPostsQuery = await firestore.collection('posts')
-	// 			.orderBy('date', 'desc')
-	// 			.limit(5)
-	// 			.get();
-
-	// 			const allPostsResults = allPostsQuery.docs.map(doc => doc.data());
-	// 			setAllPostsLastVisible(allPostsQuery.docs[allPostsQuery.docs.length - 1]);
-	// 			setAllPosts(allPostsResults);
-
-	// 			if (userFollowing > 0) {
-	// 				// fetch all following posts
-	// 				const followingPostsQuery = await firestore.collection('posts')
-	// 				.where("authorID", "in", userFollowing)
-	// 				.orderBy("date", "desc")
-	// 				.startAfter(followingLastVisible)
-	// 				.limit(5)
-	// 				.get();
-					
-	// 				const followingPostsResults = followingPostsQuery.docs.map(doc => doc.data());
-	// 				setFollowingLastVisible(followingPostsQuery.docs[followingPostsQuery.docs.length - 1]);
-	// 				setFollowingPosts(followingPostsResults);
-	// 			}
-					
-	// 			setLoading(false);
-    //         };
-
-	// 		fetchUserFollowing();
-    //         fetchData();
-    //     }
-	// }, [currentUser]);
 
 	const fetchMoreAllPosts = async () => {
 		setLoadingPosts(true);

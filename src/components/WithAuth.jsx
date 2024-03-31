@@ -23,7 +23,7 @@ const WithAuth = (WrappedComponent) => {
               router.push('/setup');
             }
           } else {
-            if (user.uid !== "5QMdCpbNvBMBSJ0wY9i28adWdx72" && doc.data().ban.status === 'temporary' || doc.data().ban.status === 'permanent') {
+            if (user.uid !== "5QMdCpbNvBMBSJ0wY9i28adWdx72" && doc.data().ban && doc.data().ban.status === 'temporary' || doc.data().ban.status === 'permanent') {
               if (doc.data().ban.status === 'temporary') {
                 if (doc.data().ban.until.toDate() < new Date()) {
                   (async () => {
