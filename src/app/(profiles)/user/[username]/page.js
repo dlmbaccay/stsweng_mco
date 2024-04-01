@@ -322,7 +322,7 @@ function UserProfile() {
                                             }
                                             <div className="flex flex-col min-w-full items-center justify-center gap-6 mb-6">
 
-                                                { !userPosts ? (
+                                                { userPosts.length === 0 ? (
                                                     <div className="flex items-center justify-center">
                                                         <p>No posts yet.</p>
                                                     </div>
@@ -339,14 +339,14 @@ function UserProfile() {
                                                     })
                                                 )}
 
-                                                {userPostsLoaded ? (
+                                                { userPosts.length !== 0 && userPostsLoaded ? (
                                                     <button
                                                         className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
 												        onClick={refreshUserPosts}
                                                     >
                                                         Refresh Posts
                                                     </button>
-                                                ) : (
+                                                ) : userPosts.length !== 0 && !userPostsLoaded ? (
                                                     <button
                                                         className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
 												        onClick={fetchMoreUserPosts}
@@ -354,7 +354,7 @@ function UserProfile() {
                                                     >
                                                         Load More
                                                     </button>
-                                                )}
+                                                ) : null }
 
 											    {loadingPosts && <div className="mb-20 flex items-center justify-center">Loading...</div>}
                                             </div>

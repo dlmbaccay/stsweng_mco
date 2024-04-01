@@ -1,44 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import Image from "next/image";
 import { auth, firestore } from "@/lib/firebase";
-import { getAllDocuments } from "@/lib/firestore-crud";
 import WithAuth from "@/components/WithAuth";
-import { ModeToggle } from "@/components/mode-toggle";
 import Loader from "@/components/Loader";
-import toast from "react-hot-toast";
 import NavBar from "@/components/nav/navbar";
 import { Button } from "@/components/ui/button";
-import {
-	Card
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { CreatePost } from "@/components/post-components/create-post";
 import { PostSnippet } from "@/components/post-components/post-snippet";
 import { RepostSnippet } from "@/components/post-components/repost-snippet";
 
 function HomePage() {
-	const [userData, setUserData] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [currentUser, setCurrentUser] = useState([]);
 	const [userPets, setUserPets] = useState([]);
-
 	const [activeTab, setActiveTab] = useState("Lost Pets");
-	const urlParams = useParams();
-
 	const [ lostPets, setLostPets ] = useState([]);
     const [ lostPetsLoaded, setLostPetsLoaded ] = useState(false);
     const [ lostPetsLastVisible, setLostPetsLastVisible ] = useState(null);
-
     const [ unknownOwnerPets, setUnknownOwnerPets ] = useState([]);
     const [ unknownOwnerPetsLoaded, setUnknownOwnerPetsLoaded ] = useState(false);
     const [ unknownOwnerPetsLastVisible, setUnknownOwnerPetsLastVisible ] = useState(null);
-
     const [ foundPets, setFoundPets ] = useState([]);
     const [ foundPetsLoaded, setFoundPetsLoaded ] = useState(false);
     const [ foundPetsLastVisible, setFoundPetsLastVisible ] = useState(null);
-
 	const [loadingPosts, setLoadingPosts] = useState(false);
 
 	useEffect(() => {
@@ -334,32 +322,38 @@ function HomePage() {
 								{ activeTab == "Lost Pets" ? (
 									<>
 										<div className="flex flex-col w-full items-center justify-center gap-6">
-											{lostPets.map((post) => {
-												return post.postType ==
-													"Original" ? (
-													<PostSnippet
-														key={post.postID}
-														post={post}
-														currentUser={currentUser}
-													/>
-												) : post.postType ==
-												  "Repost" ? (
-													<RepostSnippet
-														key={post.postID}
-														post={post}
-														currentUser={currentUser}
-													/>
-												) : <div className="">No lost pets...</div>;
-											})}
+											{ lostPets.length === 0 ? (
+												<div className="flex items-center justify-center gap-2">
+													<p className="font-semibold">No Lost Pets!</p>
+													<i className="fa-solid fa-frog"/>
+												</div>
+												) : (
+													lostPets.map((post) => {
+														return post.postType == "Original" ? (
+															<PostSnippet
+																key={post.postID}
+																post={post}
+																currentUser={currentUser}
+															/>
+														) : post.postType == "Repost" ? (
+															<RepostSnippet
+																key={post.postID}
+																post={post}
+																currentUser={currentUser}
+															/>
+														) : null;
+													})
+												)
+											}
 
-											{lostPetsLoaded ? (
+											{ lostPets.length !== 0 && lostPetsLoaded ? (
 												<Button
 												className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
 												onClick={refreshLostPets}
 												>
 												Refresh Posts
 												</Button>
-											) : (
+											) : lostPets.length !== 0 && !lostPetsLoaded ? (
 												<Button
 												className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
 												onClick={fetchMoreLostPets}
@@ -367,41 +361,47 @@ function HomePage() {
 												>
 												Load More
 												</Button>
-											)}
+											) : null }
 
-											{loadingPosts && <div className="mb-20 flex items-center justify-center">Loading...</div>}
+											{ loadingPosts && <div className="mb-20 flex items-center justify-center">Loading...</div>}
 										</div>
 									</>
 								) : activeTab == "Unknown Owners" ? (
 									<>
 										<div className="flex flex-col min-w-full items-center justify-center gap-6">
 
-											{unknownOwnerPets.map((post) => {
-												return post.postType ==
-													"Original" ? (
-													<PostSnippet
-														key={post.postID}
-														post={post}
-														currentUser={currentUser}
-													/>
-												) : post.postType ==
-												  "Repost" ? (
-													<RepostSnippet
-														key={post.postID}
-														post={post}
-														currentUser={currentUser}
-													/>
-												) : null;
-											})}
+											{ unknownOwnerPets.length === 0 ? (
+												<div className="flex items-center justify-center gap-2">
+													<p className="font-semibold">No Lost Pets!</p>
+													<i className="fa-solid fa-frog"/>
+												</div>
+												) : (
+													unknownOwnerPets.map((post) => {
+														return post.postType == "Original" ? (
+															<PostSnippet
+																key={post.postID}
+																post={post}
+																currentUser={currentUser}
+															/>
+														) : post.postType == "Repost" ? (
+															<RepostSnippet
+																key={post.postID}
+																post={post}
+																currentUser={currentUser}
+															/>
+														) : null;
+													})
+												)
+											}
 
-											{unknownOwnerPetsLoaded ? (
+											{ unknownOwnerPets.length !== 0 && unknownOwnerPetsLoaded ? (
 												<button
 												className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
 												onClick={refreshUnknownOwnerPets}
 												>
 												Refresh Posts
 												</button>
-											) : (
+											) : unknownOwnerPets.length !== 0 && !unknownOwnerPetsLoaded ? (
 												<button
 												className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
 												onClick={fetchMoreUnknownOwnerPets}
@@ -409,41 +409,47 @@ function HomePage() {
 												>
 												Load More
 												</button>
-											)}
+											) : null }
 
-											{loadingPosts && <div className="mb-20 flex items-center justify-center">Loading...</div>}
+											{ loadingPosts && <div className="mb-20 flex items-center justify-center">Loading...</div>}
 										</div>
 									</>
 								) : activeTab == "Found Pets" ? (
                                     <>
                                         <div className="flex flex-col min-w-full items-center justify-center gap-6">
 
-                                            {foundPets.map((post) => {
-                                                return post.postType ==
-                                                    "Original" ? (
-                                                    <PostSnippet
-                                                        key={post.postID}
-                                                        post={post}
-                                                        currentUser={currentUser}
-                                                    />
-                                                ) : post.postType ==
-                                                  "Repost" ? (
-                                                    <RepostSnippet
-                                                        key={post.postID}
-                                                        post={post}
-                                                        currentUser={currentUser}
-                                                    />
-                                                ) : null;
-                                            })}
+                                            { foundPets.length === 0 ? (
+												<div className="flex items-center justify-center gap-2">
+													<p className="font-semibold">No Posts Yet</p>
+													<i className="fa-solid fa-frog"/>
+												</div>
+												) : (
+													foundPets.map((post) => {
+														return post.postType == "Original" ? (
+															<PostSnippet
+																key={post.postID}
+																post={post}
+																currentUser={currentUser}
+															/>
+														) : post.postType == "Repost" ? (
+															<RepostSnippet
+																key={post.postID}
+																post={post}
+																currentUser={currentUser}
+															/>
+														) : null;
+													})
+												)
+											}
 
-                                            {foundPetsLoaded ? (
+                                            { foundPets.length !== 0 && foundPetsLoaded ? (
                                                 <button
                                                 className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
                                                 onClick={refreshFoundPets}
                                                 >
                                                 Refresh Posts
                                                 </button>
-                                            ) : (
+                                            ) : foundPets.length !== 0 && !foundPetsLoaded ? (
                                                 <button
                                                 className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
                                                 onClick={fetchMoreFoundPets}
@@ -451,9 +457,9 @@ function HomePage() {
                                                 >
                                                 Load More
                                                 </button>
-                                            )}
+                                            ) : null }
 
-                                            {loadingPosts && <div className="mb-20 flex items-center justify-center">Loading...</div>}
+                                            { loadingPosts && <div className="mb-20 flex items-center justify-center">Loading...</div>}
                                         </div>
                                     </>
                                 ) : null}

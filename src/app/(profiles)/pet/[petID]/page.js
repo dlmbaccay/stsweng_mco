@@ -374,9 +374,10 @@ function PetProfile() {
                         {activeTab == 'tagged posts' ? (
                           <div className="flex flex-col min-w-full items-center justify-center gap-6">
                             
-                            { !fetchedTaggedPosts ? 
+                            { fetchedTaggedPosts.length === 0 ? 
                               <div className="flex items-center justify-center gap-2">
-                                <p className="text-lg font-semibold">No Posts Yet</p>
+                                <p className="font-semibold">No Tagged Posts Yet</p>
+                                <i className="fa-solid fa-frog"/>
                               </div>
                               : (
                                 fetchedTaggedPosts.map((post) => {
@@ -391,14 +392,14 @@ function PetProfile() {
                                 })  
                             )}
 
-                            {fetchedTaggedPostsLoaded ? (
+                            { fetchedTaggedPosts.length !== 0 && fetchedTaggedPostsLoaded ? (
                                 <button
                                     className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
                                     onClick={refreshTaggedPosts}
                                 >
                                     Refresh Posts
                                 </button>
-                            ) : (
+                            ) : fetchedTaggedPosts.length !== 0 && !fetchedTaggedPostsLoaded ? (
                                 <button
                                     className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
                                     onClick={fetchMoreTaggedPosts}
@@ -406,15 +407,16 @@ function PetProfile() {
                                 >
                                     Load More
                                 </button>
-                            )}
+                            ) : null }
 
                             {loadingPosts && <div className="mb-20 flex items-center justify-center">Loading...</div>}
                           </div>
                         ) : (
                           <div className="flex flex-col min-w-full items-center justify-center gap-6">
-                            { !fetchedMilestones ?
+                            { fetchedMilestones.length === 0 ?
                               <div className="flex items-center justify-center gap-2">
-                                <p className="text-lg font-semibold">No Milestones Yet</p>
+                                <p className="font-semibold">No Milestones Yet</p>
+                                <i className="fa-solid fa-frog"/>
                               </div>
                               : (
                                 fetchedMilestones.map((post) => {
@@ -429,14 +431,14 @@ function PetProfile() {
                                 })  
                             )}
 
-                            {fetchedMilestonesLoaded ? (
+                            { fetchedMilestones.length !== 0 && fetchedMilestonesLoaded ? (
                                 <button
                                     className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
                                     onClick={refreshMilestones}
                                 >
                                     Refresh Milestones
                                 </button>
-                            ) : (
+                            ) : fetchedMilestones.length !== 0 && !fetchedMilestonesLoaded ? (
                                 <button
                                     className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
                                     onClick={fetchMoreMilestones}
@@ -444,7 +446,7 @@ function PetProfile() {
                                 >
                                     Load More
                                 </button>
-                            )}
+                            ) : null }
 
                             {loadingPosts && <div className="mb-20 flex items-center justify-center">Loading...</div>}
                           </div>

@@ -268,32 +268,38 @@ function HomePage() {
 								{activeTab == "For You" ? (
 									<>
 										<div className="flex flex-col w-full items-center justify-center gap-6">
-											{allPosts.map((post) => {
-												return post.postType ==
-													"Original" ? (
-													<PostSnippet
-														key={post.postID}
-														post={post}
-														currentUser={currentUser}
-													/>
-												) : post.postType ==
-												  "Repost" ? (
-													<RepostSnippet
-														key={post.postID}
-														post={post}
-														currentUser={currentUser}
-													/>
-												) : null;
-											})}
+											{ allPosts.length === 0 ? (
+												<div className="flex items-center justify-center gap-2">
+													<p className="font-semibold">No Posts Yet</p>
+													<i className="fa-solid fa-frog"/>
+												</div>
+												) : (
+													allPosts.map((post) => {
+														return post.postType == "Original" ? (
+															<PostSnippet
+																key={post.postID}
+																post={post}
+																currentUser={currentUser}
+															/>
+														) : post.postType == "Repost" ? (
+															<RepostSnippet
+																key={post.postID}
+																post={post}
+																currentUser={currentUser}
+															/>
+														) : null;
+													})
+												)
+											}
 
-											{allPostsLoaded ? (
+											{ allPosts.length !== 0 && allPostsLoaded ? (
 												<Button
 												className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
 												onClick={refreshAllPosts}
 												>
 												Refresh Posts
 												</Button>
-											) : (
+											) : allPosts.length !== 0 && !allPostsLoaded ? (
 												<Button
 												className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
 												onClick={fetchMoreAllPosts}
@@ -301,7 +307,7 @@ function HomePage() {
 												>
 												Load More
 												</Button>
-											)}
+											) : null }
 
 											{loadingPosts && <div className="mb-20 flex items-center justify-center">Loading...</div>}
 										</div>
@@ -310,32 +316,38 @@ function HomePage() {
 									<>
 										<div className="flex flex-col min-w-full items-center justify-center gap-6">
 
-											{followingPosts.map((post) => {
-												return post.postType ==
-													"Original" ? (
-													<PostSnippet
-														key={post.postID}
-														post={post}
-														currentUser={currentUser}
-													/>
-												) : post.postType ==
-												  "Repost" ? (
-													<RepostSnippet
-														key={post.postID}
-														post={post}
-														currentUser={currentUser}
-													/>
-												) : null;
-											})}
+											{ followingPosts.length === 0 ? (
+												<div className="flex items-center justify-center gap-2">
+													<p className="font-semibold">No Posts Yet</p>
+													<i className="fa-solid fa-frog"/>
+												</div>
+												) : (
+													followingPosts.map((post) => {
+														return post.postType == "Original" ? (
+															<PostSnippet
+																key={post.postID}
+																post={post}
+																currentUser={currentUser}
+															/>
+														) : post.postType == "Repost" ? (
+															<RepostSnippet
+																key={post.postID}
+																post={post}
+																currentUser={currentUser}
+															/>
+														) : null;
+													})
+												)
+											}
 
-											{followingPostsLoaded ? (
+											{ followingPosts.length !== 0 && followingPostsLoaded ? (
 												<button
 												className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
 												onClick={refreshFollowingPosts}
 												>
 												Refresh Posts
 												</button>
-											) : (
+											) : followingPosts.length !== 0 && ! followingPostsLoaded ? (
 												<button
 												className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
 												onClick={fetchMoreFollowingPosts}
@@ -343,7 +355,7 @@ function HomePage() {
 												>
 												Load More
 												</button>
-											)}
+											) : null }
 
 											{loadingPosts && <div className="mb-20 flex items-center justify-center">Loading...</div>}
 										</div>
