@@ -13,9 +13,9 @@ import { CreatePost } from "@/components/post-components/create-post";
 import { PostSnippet } from "@/components/post-components/post-snippet";
 import { RepostSnippet } from "@/components/post-components/repost-snippet";
 
-function HomePage() {
+function PetTrackerPage() {
 	const [loading, setLoading] = useState(true);
-	const [currentUser, setCurrentUser] = useState([]);
+	const [currentUser, setCurrentUser] = useState(null);
 	const [userPets, setUserPets] = useState([]);
 	const [activeTab, setActiveTab] = useState("Lost Pets");
 	const [ lostPets, setLostPets ] = useState([]);
@@ -292,7 +292,7 @@ function HomePage() {
 							<div className="w-full lg:max-w-[650px] md:px-20 lg:px-0">
 
 								{/* Create Post */}
-								{currentUser && (
+								{(currentUser && activeTab !== "Found Pets") && (
 									<Card className="drop-shadow-md rounded-sm mb-6">
 										<div className="flex flex-row items-center w-full my-2">
 											<div className="ml-4">
@@ -312,6 +312,7 @@ function HomePage() {
 														displayname: currentUser.displayName,
 														userphoto: currentUser.userPhotoURL,
 														pets: userPets,
+														type: activeTab
 													}}
 												/>
 											</div>
@@ -472,4 +473,4 @@ function HomePage() {
 	);
 }
 
-export default WithAuth(HomePage);
+export default WithAuth(PetTrackerPage);

@@ -315,6 +315,7 @@ function UserProfile() {
                                                                 displayname: currentUser.displayName,
                                                                 userphoto: currentUser.userPhotoURL,
                                                                 pets: userPets,
+                                                                type: 'Default'
                                                             }}/>
                                                         </div>
                                                     </div>
