@@ -27,109 +27,7 @@ function HomePage() {
 	const [activeTab, setActiveTab] = useState("Lost Pets");
 	const urlParams = useParams();
 
-	useEffect(() => {
-		setLoading(true);
-		/**
-		 * Subscribes to authentication state changes.
-		 * @type {function}
-		 */
-		const unsubscribe = auth.onAuthStateChanged(async (user) => {
-			if (user) {
-				// User is signed in
-				// Fetch signed-in user's data
-				try {
-					/**
-					 * Fetches the data for the currently signed-in user.
-					 * @param {string} userId - The ID of the signed-in user.
-					 * @returns {Promise<object>} The user data.
-					 */
-					const fetchCurrentUser = async (userId) => {
-						const response = await fetch(
-							`/api/users/via-id?id=${userId}`,
-							{
-								method: "GET",
-							}
-						);
-						if (response.ok) {
-							const data = await response.json();
-							setCurrentUser(data);
-						} else {
-							// Assuming the API returns { message: '...' } on error
-							const errorData = await response.json();
-							throw new Error(errorData.message);
-						}
-					};
-
-					await fetchCurrentUser(user.uid);
-				} catch (error) {
-					console.error("Error fetching current user data:", error);
-				} finally {
-					setLoading(false);
-				}
-			} else {
-				// User is signed out
-				setLoading(false);
-			}
-		});
-
-		return unsubscribe; // Clean-up function for the observer
-	}, []);
-
-	/**
-     * This useEffect hook is responsible for fetching and updating the data of the current user.
-     * It subscribes to changes in the current user's data in the Firestore database and updates the current user's data on the page accordingly.
-     * The cleanup function is returned to unsubscribe from the Firestore listener when the component unmounts.
-     * This is for the viewer of the page.
-     */
-	useEffect(() => {
-			let unsubscribe;
-	
-			if (currentUser) { // info of the current user
-					const userRef = firestore.collection('users').doc(currentUser.uid);
-					// Whenever the user's data in the database changes, update the user's data on the page
-					unsubscribe = userRef.onSnapshot((doc) => {
-							const newData = doc.data();
-							// Prevent infinite loop by setting data only when there is a difference
-							if (JSON.stringify(newData) !== JSON.stringify(currentUser)) {
-									setCurrentUser(newData);
-							}
-					});
-			} 
-	
-			return () => unsubscribe; // Cleanup function
-	}, [currentUser]);
-
-	// /**
-	//  * This useEffect hook is responsible for fetching and updating the pets of the user whose profile is being viewed.
-	//  * It fetches the pets of the user from the Firestore database and updates the user's pets on the page accordingly.
-	//  *
-	//  */
-	useEffect(() => {
-		// Fetch user pets
-		if (currentUser) {
-			const fetchUserPets = async () => {
-				const response = await fetch(
-					`/api/pets/retrieve-user-pets?uid=${currentUser.uid}`,
-					{
-						method: "GET", // Specify GET method
-					}
-				);
-
-				if (response.ok) {
-					const data = await response.json();
-					setUserPets(data.userPets);
-				} else {
-					// Assuming the API returns { message: '...' } on error
-					const errorData = await response.json();
-					throw new Error(errorData.message);
-				}
-			};
-
-			fetchUserPets();
-		}
-	}, [currentUser]);
-
-    const [ lostPets, setLostPets ] = useState([]);
+	const [ lostPets, setLostPets ] = useState([]);
     const [ lostPetsLoaded, setLostPetsLoaded ] = useState(false);
     const [ lostPetsLastVisible, setLostPetsLastVisible ] = useState(null);
 
@@ -143,51 +41,92 @@ function HomePage() {
 
 	const [loadingPosts, setLoadingPosts] = useState(false);
 
-	// Initial fetch all posts and following posts
 	useEffect(() => {
 		setLoading(true);
-		if (currentUser) {
-			const fetchData = async () => {
-				
-                // fetch all lost pets
-                const lostPetsQuery = await firestore.collection('posts')
-                .where('category', '==', 'Lost Pets')
-                .orderBy('date', 'desc')
-                .limit(5)
-                .get();
 
-                const lostPetsResults = lostPetsQuery.docs.map(doc => doc.data());
-                setLostPetsLastVisible(lostPetsQuery.docs[lostPetsQuery.docs.length - 1]);
-                setLostPets(lostPetsResults);
+		const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+			if (user) {
+				console.log("User is signed in.");
 
-                // fetch all unknown owner pets
-                const unknownOwnerPetsQuery = await firestore.collection('posts')
-                .where('category', '==', 'Unknown Owner')
-                .orderBy('date', 'desc')
-                .limit(5)
-                .get();
+				const unsubscribeUser = firestore.collection('users').doc(user.uid).onSnapshot((doc) => {
+					const userData = doc.data()
+					setCurrentUser(userData);
 
-                const unknownOwnerPetsResults = unknownOwnerPetsQuery.docs.map(doc => doc.data());
-                setUnknownOwnerPetsLastVisible(unknownOwnerPetsQuery.docs[unknownOwnerPetsQuery.docs.length - 1]);
-                setUnknownOwnerPets(unknownOwnerPetsResults);
+					console.log('current user: ', userData);
 
-                // fetch all found pets
-                const foundPetsQuery = await firestore.collection('posts')
-                .where('category', '==', 'Found Pets')
-                .orderBy('date', 'desc')
-                .limit(5)
-                .get();
+					// fetch lost pets
+					const fetchLostPets = async () => {
+						const lostPetsQuery = await firestore.collection('posts')
+						.where('category', '==', 'Lost Pets')
+						.orderBy('date', 'desc')
+						.limit(5)
+						.get();
 
-                const foundPetsResults = foundPetsQuery.docs.map(doc => doc.data());
-                setFoundPetsLastVisible(foundPetsQuery.docs[foundPetsQuery.docs.length - 1]);
-                setFoundPets(foundPetsResults);
+						const lostPetsData = lostPetsQuery.docs.map(doc => doc.data());
+						setLostPets(lostPetsData);
+						setLostPetsLastVisible(lostPetsQuery.docs[lostPetsQuery.docs.length - 1]);
+
+						console.log('lost pets: ', lostPetsData)
+					}
+
+					// fetch unknown owner pets
+					const fetchUnknownOwnerPets = async () => {
+						const unknownOwnerPetsQuery = await firestore.collection('posts')
+						.where('category', '==', 'Unknown Owner')
+						.orderBy('date', 'desc')
+						.limit(5)
+						.get();
+
+						const unknownOwnerPetsData = unknownOwnerPetsQuery.docs.map(doc => doc.data());
+						setUnknownOwnerPets(unknownOwnerPetsData);
+						setUnknownOwnerPetsLastVisible(unknownOwnerPetsQuery.docs[unknownOwnerPetsQuery.docs.length - 1]);
+
+						console.log('unknown owner pets: ', unknownOwnerPetsData)
+					}
+
+					// fetch found pets 
+					const fetchFoundPets = async () => {
+						const foundPetsQuery = await firestore.collection('posts')
+						.where('category', '==', 'Found Pets')
+						.orderBy('date', 'desc')
+						.limit(5)
+						.get();
+
+						const foundPetsData = foundPetsQuery.docs.map(doc => doc.data());
+						setFoundPets(foundPetsData);
+						setFoundPetsLastVisible(foundPetsQuery.docs[foundPetsQuery.docs.length - 1]);
+
+						console.log('found pets: ', foundPetsData)
+					}
+
+					fetchLostPets();
+					fetchUnknownOwnerPets();
+					fetchFoundPets();
+				});
+
+				const unsubscribePets = firestore.collection('pets').where('petOwnerID', '==', user.uid).onSnapshot((querySnapshot) => {
+					const userPetsData = querySnapshot.docs.map(doc => doc.data());
+					setUserPets(userPetsData);
+
+					console.log('user pets: ', userPetsData)
+				});
 
 				setLoading(false);
-			};
 
-			fetchData();
-		}
-	}, [currentUser]);
+				// Cleanup function to unsubscribe from the document listeners when the component unmounts
+				return () => {
+					unsubscribeUser();
+					unsubscribePets();
+				};
+			} else {
+				console.log("No user is signed in.");
+				setLoading(false);
+			}
+		});
+
+		// Cleanup function to unsubscribe from the auth listener when the component unmounts
+		return () => unsubscribeAuth();
+	}, []);
 
     const fetchMoreLostPets = async () => {
         setLoadingPosts(true);
