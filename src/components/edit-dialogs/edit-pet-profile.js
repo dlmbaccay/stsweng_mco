@@ -55,6 +55,7 @@ export function EditPetProfile({ props }) {
             location.reload();
             toast.dismiss();
             toast.success('Successfully updated profile details!');
+            window.location.reload();
         } catch (error) {
             console.error('Error saving pet data: ', error);
             setSaveLoading(false);

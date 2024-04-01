@@ -133,6 +133,7 @@ export function EditUserProfile({props}) {
                 const data = response.json();
                 if (data.success) {
                     toast.success(`Successfully updated profile details!`);
+                    window.location.reload();
                 }
             } else {
                 throw new Error('Failed to save user data');
