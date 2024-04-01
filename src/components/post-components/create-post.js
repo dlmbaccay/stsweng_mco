@@ -35,7 +35,7 @@ export function CreatePost({ props }) {
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
 
-    const { uid, username, displayname, userphoto, pets } = props;
+    const { uid, username, displayname, userphoto, pets, type } = props;
 
     const [postAuthorID, setPostAuthorID] = useState(uid);
     const [postAuthorUsername, setPostAuthorUsername] = useState(username);
@@ -43,7 +43,9 @@ export function CreatePost({ props }) {
         useState(displayname);
     const [postAuthorPhotoURL, setPostAuthorPhotoURL] = useState(userphoto);
     const [postContent, setPostContent] = useState("");
-    const [postCategory, setPostCategory] = useState("General");
+    // const [postCategory, setPostCategory] = useState("General");
+    const initialCategory = type === "Lost Pets" ? "Lost Pets" : type === "Unknown Owners" ? "Unknown Owner" : "General";
+    const [ postCategory, setPostCategory ] = useState(initialCategory);
     const [postTaggedPets, setPostTaggedPets] = useState([]);
     const [postImageURLs, setPostImageURLs] = useState([]);
     const [postTrackerLocation, setPostTrackerLocation] = useState("");
@@ -171,6 +173,11 @@ export function CreatePost({ props }) {
         }
     }, [selectedPetIDs, pets]);
 
+    useEffect(() => {
+        setPostCategory(initialCategory);
+    }, [type]);
+
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             {/* Trigger Buttons */}
@@ -214,12 +221,10 @@ export function CreatePost({ props }) {
                                     {" "}
                                     Post Category{" "}
                                 </Label>
-                                <Select
-                                    required
-                                    onValueChange={(value) =>
-                                        setPostCategory(value)
-                                    }
-                                    defaultValue="General"
+                               <Select
+                                required
+                                onValueChange={setPostCategory}
+                                defaultValue={postCategory}
                                 >
                                     <SelectTrigger className="w-full">
                                         <SelectValue
@@ -228,25 +233,37 @@ export function CreatePost({ props }) {
                                         />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="General">
-                                            General
-                                        </SelectItem>
-                                        <SelectItem value="Q&A">Q&A</SelectItem>
-                                        <SelectItem value="Tips">
-                                            Tips
-                                        </SelectItem>
-                                        <SelectItem value="Pet Needs">
-                                            Pet Needs
-                                        </SelectItem>
-                                        <SelectItem value="Milestones">
-                                            Milestones
-                                        </SelectItem>
-                                        <SelectItem value="Lost Pets">
-                                            Lost Pets
-                                        </SelectItem>
-                                        <SelectItem value="Unknown Owner">
-                                            Unknown Owner
-                                        </SelectItem>
+                                        {(type === "Lost Pets") ? (
+                                            <SelectItem value="Lost Pets">
+                                                Lost Pets
+                                            </SelectItem>
+                                        ) : type === "Unknown Owners" ? (
+                                            <SelectItem value="Unknown Owner">
+                                                Unknown Owner
+                                            </SelectItem>
+                                        ) : (
+                                            <>
+                                                <SelectItem value="General">
+                                                    General
+                                                </SelectItem>
+                                                <SelectItem value="Q&A">Q&A</SelectItem>
+                                                <SelectItem value="Tips">
+                                                    Tips
+                                                </SelectItem>
+                                                <SelectItem value="Pet Needs">
+                                                    Pet Needs
+                                                </SelectItem>
+                                                <SelectItem value="Milestones">
+                                                    Milestones
+                                                </SelectItem>
+                                                <SelectItem value="Lost Pets">
+                                                    Lost Pets
+                                                </SelectItem>
+                                                <SelectItem value="Unknown Owner">
+                                                    Unknown Owner
+                                                </SelectItem>
+                                            </>
+                                        )}
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -274,8 +291,9 @@ export function CreatePost({ props }) {
                         </div>
 
                         {/* Conditional Location Input for Pet Tracker Categories */}
-                        {(postCategory == "Lost Pets" ||
-                            postCategory == "Unknown Owner") && (
+                        {((postCategory == "Lost Pets" ||
+                            postCategory == "Unknown Owner") || (type == "Lost Pets" ||
+                            type == "Unknown Owners")) && (
                             <div className="flex w-full flex-col px-10">
                                 <Label
                                     htmlFor="pet-location"
