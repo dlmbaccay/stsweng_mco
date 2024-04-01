@@ -23,13 +23,15 @@ export function checkUsername(val) {
 }
 
 export function checkDisplayName(val) {
-  const regex = /^[^\s]+(\s+[^\s]+)*$/;
-
-  return regex.test(val) && val.length >= 1 && val.length <= 30;
+  if (val) {
+    const regex = /^[^\s]+(\s+[^\s]+)*$/;
+    return regex.test(val) && val.length >= 1 && val.length <= 30;
+  }
 }
 
 export function checkLocation(val) {
-  const regex = /^[^\s]+(\s+[^\s]+)*$/;
-
-  return regex.test(val) && val.length >= 2 && val.length <= 30;
+  if (val) {
+    const regex = /^[^\s]+(\s+[^\s]+)*$/;
+    return regex.test(val) && val.length >= 2 && val.length <= 30;
+  }
 }
