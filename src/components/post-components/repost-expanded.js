@@ -229,7 +229,7 @@ export function ExpandedRepost({ post, currentUser }) {
 
                     <div className="flex flex-row justify-start items-start">
                         <div id="author-image">
-                            <Image src={post.authorPhotoURL ? post.authorPhotoURL : "/images/profilePictureHolder.jpg"} alt="author photo" width={50} height={50} className="rounded-full drop-shadow-sm aspect-square object-cover h-[40px] w-[40px] md:h-[45px] md:w-[45px]" />
+                            <Image src={post.authorPhotoURL ? post.authorPhotoURL : "/images/profilePictureHolder.jpg"} alt="author photo" width={50} height={50} className="rounded-full drop-shadow-sm aspect-square object-cover h-[40px] w-[40px] md:h-[45px] md:w-[45px] cursor-pointer hover:opacity-60" onClick={() => router.push(`/user/${post.authorUsername}`)} />
                         </div>
 
                         <div id="post-meta" className="ml-4 items-center justify-center">
