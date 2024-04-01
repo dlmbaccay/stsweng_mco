@@ -335,14 +335,14 @@ export function ExpandedPost({ post, currentUser }) {
                 </div>
 
                 { (post.category === 'Unknown Owner' || post.category === 'Retrieved Pets') && 
-                    <div className='flex flex-row items-center gap-1 mb-2'>
+                    <div className='flex flex-row items-center gap-1 mb-2 text-sm md:text-base'>
                         <p className='font-semibold'>Found At:</p>
                         <p className='line-clamp-1 overflow-hidden'>{post.location}</p>
                     </div>
                 }
 
                 { post.category === 'Lost Pets' && 
-                    <div className='flex flex-row items-center gap-1 mb-2'>
+                    <div className='flex flex-row items-center gap-1 mb-2 text-sm md:text-base'>
                         <p className='font-semibold'>Last Seen At:</p>
                         <p className='line-clamp-1 overflow-hidden'>{post.location}</p>
                     </div>
