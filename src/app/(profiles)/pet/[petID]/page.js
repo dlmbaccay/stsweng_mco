@@ -215,15 +215,15 @@ function PetProfile() {
               { petData && 
                 <div className="w-full h-screen z-10 mt-16 pb-32 flex flex-col items-center justify-start">
                   {/* Cover Photo */}
-                  <div className="h-[30%] xl:w-[60%] 2xl:w-[60%] w-full border-red">
-                      <CoverPhoto 
+                  <div className="h-[30%] xl:w-[60%] 2xl:w-[60%] w-full">
+                      <Image
                           src={petData.petOwnerCoverPhotoURL ? petData.petOwnerCoverPhotoURL : "/images/cover0-image.png"}
-                          alt="cover photo"
+                          alt={"cover photo"}
                           width={0}
                           height={0}
                           sizes="100vw"
                           className='w-full h-full rounded-b-lg aspect-square object-cover drop-shadow-xl outline-none border-none'
-                          />
+                      />
                   </div>
 
                   {/* Profile Details */}
