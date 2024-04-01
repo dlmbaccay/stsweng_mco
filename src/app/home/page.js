@@ -258,6 +258,7 @@ function HomePage() {
 														displayname: currentUser.displayName,
 														userphoto: currentUser.userPhotoURL,
 														pets: userPets,
+														type: 'Default'
 													}}
 												/>
 											</div>
