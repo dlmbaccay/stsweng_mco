@@ -17,6 +17,7 @@ import {
 import { CreatePost } from "@/components/post-components/create-post";
 import { PostSnippet } from "@/components/post-components/post-snippet";
 import { RepostSnippet } from "@/components/post-components/repost-snippet";
+import { set } from "lodash";
 
 function HomePage() {
 	const [userData, setUserData] = useState([]);
@@ -28,108 +29,6 @@ function HomePage() {
 	const [userPosts, setUserPosts] = useState([]);
 	const urlParams = useParams();
 
-	useEffect(() => {
-		setLoading(true);
-		/**
-		 * Subscribes to authentication state changes.
-		 * @type {function}
-		 */
-		const unsubscribe = auth.onAuthStateChanged(async (user) => {
-			if (user) {
-				// User is signed in
-				// Fetch signed-in user's data
-				try {
-					/**
-					 * Fetches the data for the currently signed-in user.
-					 * @param {string} userId - The ID of the signed-in user.
-					 * @returns {Promise<object>} The user data.
-					 */
-					const fetchCurrentUser = async (userId) => {
-						const response = await fetch(
-							`/api/users/via-id?id=${userId}`,
-							{
-								method: "GET",
-							}
-						);
-						if (response.ok) {
-							const data = await response.json();
-							setCurrentUser(data);
-						} else {
-							// Assuming the API returns { message: '...' } on error
-							const errorData = await response.json();
-							throw new Error(errorData.message);
-						}
-					};
-
-					await fetchCurrentUser(user.uid);
-				} catch (error) {
-					console.error("Error fetching current user data:", error);
-				} finally {
-					setLoading(false);
-				}
-			} else {
-				// User is signed out
-				setLoading(false);
-			}
-		});
-
-		return unsubscribe; // Clean-up function for the observer
-	}, []);
-
-	/**
-     * This useEffect hook is responsible for fetching and updating the data of the current user.
-     * It subscribes to changes in the current user's data in the Firestore database and updates the current user's data on the page accordingly.
-     * The cleanup function is returned to unsubscribe from the Firestore listener when the component unmounts.
-     * This is for the viewer of the page.
-     */
-	useEffect(() => {
-			let unsubscribe;
-	
-			if (currentUser) { // info of the current user
-					const userRef = firestore.collection('users').doc(currentUser.uid);
-					// Whenever the user's data in the database changes, update the user's data on the page
-					unsubscribe = userRef.onSnapshot((doc) => {
-							const newData = doc.data();
-							// Prevent infinite loop by setting data only when there is a difference
-							if (JSON.stringify(newData) !== JSON.stringify(currentUser)) {
-									setCurrentUser(newData);
-							}
-					});
-			} 
-	
-			return () => unsubscribe; // Cleanup function
-	}, [currentUser]);
-
-	/**
-	 * This useEffect hook is responsible for fetching and updating the pets of the user whose profile is being viewed.
-	 * It fetches the pets of the user from the Firestore database and updates the user's pets on the page accordingly.
-	 *
-	 */
-	useEffect(() => {
-		// Fetch user pets
-		if (currentUser) {
-			const fetchUserPets = async () => {
-				const response = await fetch(
-					`/api/pets/retrieve-user-pets?uid=${currentUser.uid}`,
-					{
-						method: "GET", // Specify GET method
-					}
-				);
-
-				if (response.ok) {
-					const data = await response.json();
-					setUserPets(data.userPets);
-				} else {
-					// Assuming the API returns { message: '...' } on error
-					const errorData = await response.json();
-					throw new Error(errorData.message);
-				}
-			};
-
-			fetchUserPets();
-		}
-	}, [currentUser]);
-
 	const [allPosts, setAllPosts] = useState([]);
 	const [allPostsLoaded, setAllPostsLoaded] = useState(false);
 	const [allPostsLastVisible, setAllPostsLastVisible] = useState(null);
@@ -138,63 +37,82 @@ function HomePage() {
 	const [followingPostsLoaded, setFollowingPostsLoaded] = useState(false);
 	const [followingLastVisible, setFollowingLastVisible] = useState(null);
 
-	const [userFollowing, setUserFollowing] = useState([]);
 	const [loadingPosts, setLoadingPosts] = useState(false);
+	const [userFollowing, setUserFollowing] = useState([]);
 
-	// fetch user following for posts
 	useEffect(() => {
 		setLoading(true);
-		const fetchUserFollowing = async () => {
-			if (currentUser) {
-				const response = await firestore.collection('users').doc(currentUser.uid).get();
-				const data = response.data();
-				if (data && data.following) {
-					setUserFollowing(data.following);
-				} else {
-					setUserFollowing([]);
-				}
-			}
-		}
 
-		fetchUserFollowing().then(() => {
-			setLoading(false);
-		});
-	}, [currentUser]);
+		const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+			if (user) {
+				console.log("User is signed in.");
 
-	// Initial fetch all posts and following posts
-	useEffect(() => {
-		setLoading(true);
-		if (currentUser) {
-			const fetchData = async () => {
-				// fetch all all posts
-				const allPostsQuery = await firestore.collection('posts')
-				.orderBy('date', 'desc')
-				.limit(5)
-				.get();
+				const unsubscribeUser = firestore.collection('users').doc(user.uid).onSnapshot((doc) => {
+					const userData = doc.data()
+					setCurrentUser(userData);
+					setUserFollowing(doc.data().following);
 
-				const allPostsResults = allPostsQuery.docs.map(doc => doc.data());
-				setAllPostsLastVisible(allPostsQuery.docs[allPostsQuery.docs.length - 1]);
-				setAllPosts(allPostsResults);
+					console.log('current user: ', userData);
+					console.log('user following: ', doc.data().following);
 
-				if (userFollowing.length > 0) {
-					// fetch all following posts
-					const followingPostsQuery = await firestore.collection('posts')
-					.where("authorID", "in", userFollowing)
-					.orderBy("date", "desc")
-					.limit(5)
-					.get();
-					
-					const followingPostsResults = followingPostsQuery.docs.map(doc => doc.data());
-					setFollowingLastVisible(followingPostsQuery.docs[followingPostsQuery.docs.length - 1]);
-					setFollowingPosts(followingPostsResults);
-				}
-					
+					// fetch all posts 
+					const fetchAllPosts = async () => {
+						const allPostsQuery = await firestore.collection('posts')
+						.orderBy("date", "desc")
+						.limit(5)
+						.get();
+
+						const allPostsData = allPostsQuery.docs.map(doc => doc.data());
+						setAllPosts(allPostsData);
+						setAllPostsLastVisible(allPostsQuery.docs[allPostsQuery.docs.length - 1]);
+
+						console.log('all posts: ', allPostsData)
+					}
+
+					// fetch following posts
+					const fetchFollowingPosts = async () => {
+						const followingPostsQuery = await firestore.collection('posts')
+						.where("authorID", "in", doc.data().following)
+						.orderBy("date", "desc")
+						.limit(5)
+						.get();
+
+						const followingPostsData = followingPostsQuery.docs.map(doc => doc.data());
+						setFollowingPosts(followingPostsData);
+						setFollowingLastVisible(followingPostsQuery.docs[followingPostsQuery.docs.length - 1]);
+
+						console.log('following posts: ', followingPostsData)
+					}
+
+					fetchAllPosts();
+					if (doc.data().following.length > 0) {
+						fetchFollowingPosts();
+					}
+				});
+
+				const unsubscribePets = firestore.collection('pets').where('petOwnerID', '==', user.uid).onSnapshot((querySnapshot) => {
+					const userPetsData = querySnapshot.docs.map(doc => doc.data());
+					setUserPets(userPetsData);
+
+					console.log('user pets: ', userPetsData)
+				});
+
 				setLoading(false);
-			};
 
-			fetchData();
-		}
-	}, [currentUser]);
+				// Cleanup function to unsubscribe from the document listeners when the component unmounts
+				return () => {
+					unsubscribeUser();
+					unsubscribePets();
+				};
+			} else {
+				console.log("No user is signed in.");
+				setLoading(false);
+			}
+		});
+
+		// Cleanup function to unsubscribe from the auth listener when the component unmounts
+		return () => unsubscribeAuth();
+	}, []);
 
 	const fetchMoreAllPosts = async () => {
 		setLoadingPosts(true);
