@@ -38,7 +38,7 @@ export function EditPost({ props }) {
     
     async function savePostData() {
         if (postType === 'Original') {
-            // toast.loading('Updating post...');
+            toast.loading('Updating post...');
             await fetch('/api/posts/edit-post', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -64,7 +64,7 @@ export function EditPost({ props }) {
                 window.location.reload();
             });
         } else if (postType === 'Repost'){
-            // toast.loading('Updating post...');
+            toast.loading('Updating post...');
             await fetch('/api/posts/edit-post', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
