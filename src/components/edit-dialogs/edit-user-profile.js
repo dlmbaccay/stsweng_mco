@@ -137,6 +137,8 @@ export function EditUserProfile({props}) {
             } else {
                 throw new Error('Failed to save user data');
             }
+        }).finally(() => {
+            window.location.reload();
         });
     }
 

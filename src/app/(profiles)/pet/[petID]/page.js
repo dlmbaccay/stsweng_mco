@@ -29,81 +29,174 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { FollowPetButton } from "@/components/profile/follow-pet-button";
+
+import {
+  collection,
+  query,
+  orderBy,
+  limit,
+  onSnapshot,
+  startAfter,
+  getDocs,
+  where,
+} from "firebase/firestore";
+
+import { PostSnippet } from "@/components/post-components/post-snippet";
+import { RepostSnippet } from "@/components/post-components/repost-snippet";
 
 function PetProfile() {
 
   const router = useRouter();
   const urlParams = useParams();
-
   const [ petData, setPetData ] = useState(null);
-
   const [ loading, setLoading ] = useState(false);
   const [ activeTab, setActiveTab ] = useState("tagged posts"); // tagged posts and milestones
-
   const [ currentUser, setCurrentUser ] = useState(null); 
-
   const [ showMisc, setShowMisc ] = useState(false);
+  const [ fetchedTaggedPosts, setFetchedTaggedPosts ] = useState([]);
+  const [ fetchedTaggedPostsLoaded, setFetchedTaggedPostsLoaded ] = useState(false);
+  const [ fetchedTaggedPostsLastVisible, setFetchedTaggedPostsLastVisible ] = useState(null);
+  const [ fetchedMilestones, setFetchedMilestones ] = useState([]);
+  const [ fetchedMilestonesLoaded, setFetchedMilestonesLoaded ] = useState(false);
+  const [ fetchedMilestonesLastVisible, setFetchedMilestonesLastVisible ] = useState(null);
+  const [ loadingPosts, setLoadingPosts ] = useState(false);
 
-  useEffect(() => {
-    // get current user using auth and firestore
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        firestore.collection('users').doc(user.uid).get().then((doc) => {
-          if (doc.exists) {
-            setCurrentUser(doc.data());
-          } else {
-            console.log('No such document!');
-          }
-        }).catch((error) => {
-          console.log('Error getting document:', error);
-        });
-      } else {
-        setCurrentUser(null);
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    }
-  }, []);
-
-  /**
-   * Fetch pet data
-   */
   useEffect(() => {
     setLoading(true);
+    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+      let unsubscribeCurrentUser;
+      let unsubscribePetData;
 
-    // Fetch profile data
-    const fetchProfileData = async (petID) => {
-        const response = await fetch(`/api/pets/via-id?id=${petID}`, {
-            method: 'GET' // Specify GET method
+      if (user) {
+        console.log('User is signed in.')
+        
+        // fetch current user data
+        unsubscribeCurrentUser = firestore.collection('users').doc(user.uid).onSnapshot((doc) => {
+          setCurrentUser(doc.data());
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            setPetData(data);
-        } else {
-            // Assuming the API returns { message: '...' } on error
-            toast.error('Pet not found')
-            const errorData = await response.json();
-            throw new Error(errorData.message);
-        }
-    };
+        // fetch pet data
+        unsubscribePetData = firestore.collection('pets').doc(urlParams.petID).onSnapshot((doc) => {
+          setPetData(doc.data());
 
-    const fetchData = async () => {
-        try {
-          await Promise.all([
-            fetchProfileData(urlParams.petID),
-          ]);
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        } finally {
-          setLoading(false);
-        }
-    };
+          // fetch tagged posts
+          const fetchTaggedPosts = async () => {
+            const response = await firestore.collection('posts').where('petIDs', 'array-contains', urlParams.petID).orderBy("date", "desc").limit(5).get();
+            const taggedPosts = response.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setFetchedTaggedPosts(taggedPosts);
+            setFetchedTaggedPostsLastVisible(response.docs[response.docs.length - 1]);
 
-    fetchData();
-  }, [urlParams.petID]);
+            console.log('Fetched tagged posts:', taggedPosts);
+          }
+
+          // fetch milestones
+          const fetchMilestones = async () => {
+            const response = await firestore.collection('posts').where('petIDs', 'array-contains', urlParams.petID).where('category', '==', 'Milestones').orderBy("date", "desc").limit(5).get();
+            const milestones = response.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setFetchedMilestones(milestones);
+            setFetchedMilestonesLastVisible(response.docs[response.docs.length - 1]);
+
+            console.log('Fetched milestones:', milestones);
+          }
+
+          fetchTaggedPosts();
+          fetchMilestones();
+        });
+
+        setLoading(false);
+      } else {
+        console.log('User is signed out.')
+        setCurrentUser(null);
+        setPetData(null);
+      }
+      return () => {
+        unsubscribeAuth();
+        unsubscribeCurrentUser();
+        unsubscribePetData();
+      }
+    });
+  }, [urlParams]);
+
+  const fetchMoreTaggedPosts = async () => {
+    setLoadingPosts(true);
+    const nextQuery = await firestore.collection('posts')
+    .where('petIDs', 'array-contains', urlParams.petID)
+    .orderBy("date", "desc")
+    .startAfter(fetchedTaggedPostsLastVisible)
+    .limit(5)
+    .get();
+
+    const newPosts = nextQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const newLastVisible = nextQuery.docs[nextQuery.docs.length - 1];
+
+    // Update state based on whether new posts are fetched
+    if (newPosts.length === 0) {
+        setFetchedTaggedPostsLoaded(true);
+    } else {
+        setFetchedTaggedPostsLastVisible(newLastVisible);
+        setFetchedTaggedPosts(prevPosts => [...prevPosts, ...newPosts]);
+        setFetchedTaggedPostsLoaded(false);
+    }
+
+    setLoadingPosts(false);
+  }
+
+  const refreshTaggedPosts = async () => {
+    setLoadingPosts(true);
+    const refreshQuery = await firestore.collection('posts')
+    .where('petIDs', 'array-contains', urlParams.petID)
+    .orderBy("date", "desc")
+    .limit(5)
+    .get();
+
+    const refreshedPosts = refreshQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setFetchedTaggedPosts(refreshedPosts);
+    setFetchedTaggedPostsLastVisible(refreshQuery.docs[refreshQuery.docs.length - 1]);
+    setFetchedTaggedPostsLoaded(false);
+    setLoadingPosts(false);
+  }
+
+  const fetchMoreMilestones = async () => {
+    setLoadingPosts(true);
+    const nextQuery = await firestore.collection('posts')
+    .where('petIDs', 'array-contains', urlParams.petID)
+    .where('category', '==', 'Milestones')
+    .orderBy("date", "desc")
+    .startAfter(fetchedMilestonesLastVisible)
+    .limit(5)
+    .get();
+
+    const newPosts = nextQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const newLastVisible = nextQuery.docs[nextQuery.docs.length - 1];
+
+    // Update state based on whether new posts are fetched
+    if (newPosts.length === 0) {
+        setFetchedMilestonesLoaded(true);
+    } else {
+        setFetchedMilestonesLastVisible(newLastVisible);
+        setFetchedMilestones(prevPosts => [...prevPosts, ...newPosts]);
+        setFetchedMilestonesLoaded(false);
+    }
+
+    setLoadingPosts(false);
+  }
+
+  const refreshMilestones = async () => {
+    setLoadingPosts(true);
+    const refreshQuery = await firestore.collection('posts')
+    .where('petIDs', 'array-contains', urlParams.petID)
+    .where('category', '==', 'Milestones')
+    .orderBy("date", "desc")
+    .limit(5)
+    .get();
+
+    const refreshedPosts = refreshQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setFetchedMilestones(refreshedPosts);
+    setFetchedMilestonesLastVisible(refreshQuery.docs[refreshQuery.docs.length - 1]);
+    setFetchedMilestonesLoaded(false);
+    setLoadingPosts(false);
+  }
 
   return (
     <>
@@ -120,24 +213,24 @@ function PetProfile() {
               </div>
 
               { petData && 
-                <div className="w-full h-screen fixed z-10 mt-16 flex flex-col items-center justify-start overflow-y-auto">
+                <div className="w-full h-screen z-10 mt-16 pb-32 flex flex-col items-center justify-start">
                   {/* Cover Photo */}
-                  <div className="h-[30%] xl:w-[60%] 2xl:w-[60%] w-full border-red">
-                      <CoverPhoto 
+                  <div className="h-[30%] xl:w-[60%] 2xl:w-[60%] w-full">
+                      <Image
                           src={petData.petOwnerCoverPhotoURL ? petData.petOwnerCoverPhotoURL : "/images/cover0-image.png"}
-                          alt="cover photo"
+                          alt={"cover photo"}
                           width={0}
                           height={0}
                           sizes="100vw"
                           className='w-full h-full rounded-b-lg aspect-square object-cover drop-shadow-xl outline-none border-none'
-                          />
+                      />
                   </div>
 
                   {/* Profile Details */}
                   <div className="flex items-start justify-start xl:w-[60%] 2xl:w-[60%] w-full h-[110px] lg:px-10 px-5">
                       {/* Profile Photo */}
                       <div className="-translate-y-12 flex items-center justify-center w-[20%]">
-                          <Image src={petData.petPhotoURL == "" ? "/images/petPictureHolder.jpg" : petData.petPhotoURL} alt="pet photo" width={175} height={175} className="border-2 border-white dark:border-dark_gray rounded-full aspect-square object-cover drop-shadow-md" />
+                          <Image src={petData.petPhotoURL == "" ? "" : petData.petPhotoURL} alt="pet photo" width={175} height={175} className="border-2 border-white dark:border-dark_gray rounded-full aspect-square object-cover drop-shadow-md" />
                       </div>
 
                       {/* Display Name, Username, Followers, Following */}
@@ -162,8 +255,8 @@ function PetProfile() {
                           {/* Followers and Following Section */}
                           <div className="flex flex-row justify-start gap-2 text-sm font-semibold"> 
                             <div className="flex items-center gap-1">
-                                <p>{ petData.following && petData.following.length ? '' : 0 }</p>
-                                <p className="dark:text-light_yellow text-muted_blue">Following</p>
+                                <p>{ petData.followers && petData.followers.length ? petData.followers.length : 0 }</p>
+                                <p className="dark:text-light_yellow text-muted_blue">Followers</p>
                             </div>
                           </div>
                       </div>
@@ -199,9 +292,11 @@ function PetProfile() {
                           </div>  
                           :
                           // <FollowButton props={{ currentUser: currentUser, petData: petData }} />
-                          <Button className="px-3 h-[35px] gap-2 flex items-center justify-center">
-                              Follow
-                          </Button>
+                          <FollowPetButton props={{
+                            pet: petData,
+                            currentUser_uid: currentUser.uid,
+                            currentUser_following: currentUser.following,
+                          }}/>
                       }
                       </div>
                   </div>
@@ -210,12 +305,14 @@ function PetProfile() {
                   <div className="flex flex-col xl:flex-row xl:w-[60%] 2xl:w-[60%] w-full px-10 mt-8">
                     {/* About and Details Containers */}
                     <div className="flex flex-col items-start xl:w-[30%] 2xl:w-[30%] w-full gap-6">
+                      { petData.about &&
                         <Card className="drop-shadow-md flex flex-col w-full p-6 text-sm rounded-md">
                             <div className="flex flex-col justify-start gap-4">
                                 <h1 className="tracking-wide font-bold text-lg text-muted_blue dark:text-light_yellow">About</h1>
                                 <p className="tracking-wide break-words">{petData.petAbout}</p>
                             </div>
                         </Card>
+                      }
 
                         <Card className="drop-shadow-md flex flex-col w-full p-6 text-sm rounded-md">
                             <h1 className="tracking-wide font-bold text-lg pb-4 text-muted_blue dark:text-light_yellow">Details</h1>
@@ -275,13 +372,84 @@ function PetProfile() {
                         </div>
 
                         {activeTab == 'tagged posts' ? (
-                          <Card className="text-sm p-4 drop-shadow-md rounded-sm">
-                            <p>Tagged Posts Container</p>
-                          </Card>
-                        ): (
-                          <Card className="text-sm p-4 drop-shadow-md rounded-sm">
-                            <p>Milestones Container</p>
-                          </Card>
+                          <div className="flex flex-col min-w-full items-center justify-center gap-6">
+                            
+                            { fetchedTaggedPosts.length === 0 ? 
+                              <div className="flex items-center justify-center gap-2">
+                                <p className="font-semibold">No Tagged Posts Yet</p>
+                                <i className="fa-solid fa-frog"/>
+                              </div>
+                              : (
+                                fetchedTaggedPosts.map((post) => {
+                                  return (
+                                      (post.postType == 'Original' ?
+                                          <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                      
+                                      : post.postType == 'Repost' ?
+                                          <RepostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                      : null)
+                                  )
+                                })  
+                            )}
+
+                            { fetchedTaggedPosts.length !== 0 && fetchedTaggedPostsLoaded ? (
+                                <button
+                                    className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
+                                    onClick={refreshTaggedPosts}
+                                >
+                                    Refresh Posts
+                                </button>
+                            ) : fetchedTaggedPosts.length !== 0 && !fetchedTaggedPostsLoaded ? (
+                                <button
+                                    className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
+                                    onClick={fetchMoreTaggedPosts}
+                                    disabled={loadingPosts}
+                                >
+                                    Load More
+                                </button>
+                            ) : null }
+
+                            {loadingPosts && <div className="mb-20 flex items-center justify-center">Loading...</div>}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col min-w-full items-center justify-center gap-6">
+                            { fetchedMilestones.length === 0 ?
+                              <div className="flex items-center justify-center gap-2">
+                                <p className="font-semibold">No Milestones Yet</p>
+                                <i className="fa-solid fa-frog"/>
+                              </div>
+                              : (
+                                fetchedMilestones.map((post) => {
+                                  return (
+                                      (post.postType == 'Original' ?
+                                          <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                      
+                                      : post.postType == 'Repost' ?
+                                          <RepostSnippet key={post.postID} post={post} currentUser={currentUser} />
+                                      : null)
+                                  )
+                                })  
+                            )}
+
+                            { fetchedMilestones.length !== 0 && fetchedMilestonesLoaded ? (
+                                <button
+                                    className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
+                                    onClick={refreshMilestones}
+                                >
+                                    Refresh Milestones
+                                </button>
+                            ) : fetchedMilestones.length !== 0 && !fetchedMilestonesLoaded ? (
+                                <button
+                                    className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
+                                    onClick={fetchMoreMilestones}
+                                    disabled={loadingPosts}
+                                >
+                                    Load More
+                                </button>
+                            ) : null }
+
+                            {loadingPosts && <div className="mb-20 flex items-center justify-center">Loading...</div>}
+                          </div>
                         )}
                     </div>
                   </div>

@@ -14,7 +14,9 @@ export async function POST(request) {
     const postCategory = formData.get('postCategory');
     const postContent = formData.get('postContent');
     const postTaggedPets = JSON.parse(formData.get('postTaggedPets'));
+    const postPetIDs = JSON.parse(formData.get('postPetIDs'));
     const postTrackerLocation = formData.get('postTrackerLocation');
+    const postType = formData.get('postType');
     const postMedia = formData.getAll('files');
 
     try {
@@ -27,17 +29,21 @@ export async function POST(request) {
         }
         Promise.all(promises).then(async (values) => {
             const postDetails = {
+                postType: postType,
                 postID: postID,
                 authorID: postAuthorID,
                 authorUsername: postAuthorUsername,
                 authorDisplayName: postAuthorDisplayName,
                 authorPhotoURL: postAuthorPhotoURL,
                 content: postContent,
-                category: postCategory,
+                category: (postCategory == "" ? "General" : postCategory),
                 taggedPets: postTaggedPets,
+                petIDs: postPetIDs,
                 location: (postCategory == "Lost Pets" || postCategory == "Unknown Owner") ? postTrackerLocation : "",
                 imageURLs: values,
                 isEdited: false,
+                reports: [],
+                reportStatus: "pending",
                 date: new Date().toISOString()
             };
             // Call a function to save the post details to the database

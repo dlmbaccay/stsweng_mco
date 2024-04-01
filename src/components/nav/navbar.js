@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
@@ -38,13 +39,11 @@ export default function NavBar({props}) {
         <>
             <div ref={navRef} className={`h-16 w-full px-4 grid grid-cols-3 justify-between bg-white dark:bg-dark_gray drop-shadow-lg pb-0.5`}>
                 <>
-                {/* user meta */}
+                {/* Logo Left */}
                 <div className="flex flex-row items-center justify-start">
-                    <button 
-                        onClick={() => { router.push(`/user/${username}`)}}
-                        className='group flex flex-row justify-center items-center gap-4'>
-                            {<Image src={'/images/logo.png'} alt={'profile picture'} width={44} height={44} className='rounded-full aspect-square object-cover'/>}
-                    </button>
+                    <Link className='group flex flex-row justify-center items-center gap-4' href={`/home`}>
+                        {<Image src={'/images/logo.png'} alt={'bantaybuddy logo'} width={44} height={44} className='rounded-full aspect-square object-cover' priority/>}
+                    </Link>
                 </div>
                 
                 
@@ -55,40 +54,25 @@ export default function NavBar({props}) {
                 
                         
                         {/* Home Button */}
-                        <button 
-                            onClick={() => router.push('/home')} className={`px-8 transition-all duration-150 flex flex-row items-center gap-3 ${activeTab === '/home' ? 'border-b-[3px] border-primary text-primary' : 'text-background hover:text-primary stroke-[50px] stroke-primary'}`}>
-                            <div className="rounded-full">
-                                <FontAwesomeIcon icon={faHouse} className={`w-6 h-6`}></FontAwesomeIcon>
-                            </div>
-                        </button>
+                        <Link href={`/home`} className={`px-8 transition-all duration-150 flex flex-row items-center gap-3 ${activeTab === '/home' ? 'border-b-[3px] border-primary text-primary' : 'text-background hover:text-primary stroke-[50px] stroke-primary'}`}>
+                            <FontAwesomeIcon icon={faHouse} className={`w-6 h-6`}></FontAwesomeIcon>
+                        </Link>
 
                         {/* Pet Tracker Button */}
-                        <button 
-                            onClick={() => router.push('/pet-tracker')} className={`px-8 transition-all duration-150 flex flex-row items-center gap-3 ${activeTab === '/pet-tracker' ? 'border-b-[3px] border-primary text-primary' : 'text-background hover:text-primary stroke-[50px] stroke-primary'}`}>
-                            <div className="rounded-full">
-                                <FontAwesomeIcon icon={faPaw} className={`w-6 h-6`}></FontAwesomeIcon>
-                            </div>
-                        </button>
-
+                        <Link href={`/pet-tracker`} className={`px-8 transition-all duration-150 flex flex-row items-center gap-3 ${activeTab === '/pet-tracker' ? 'border-b-[3px] border-primary text-primary' : 'text-background hover:text-primary stroke-[50px] stroke-primary'}`}>
+                            <FontAwesomeIcon icon={faPaw} className={`w-6 h-6`}></FontAwesomeIcon>
+                        </Link>
                         
 
                         {/* Profile Button */}
-                        <button 
-                            onClick={() => router.push('/user/'+username)} className={`px-8 transition-all duration-150 flex flex-row items-center gap-3 ${activeTab === '/user/'+username ? 'border-b-[3px] border-primary text-primary' : 'text-background hover:text-primary stroke-[50px] stroke-primary'}`}>
-                            <div className="rounded-full">
-                                <FontAwesomeIcon icon={faUser} className={`w-6 h-6`}></FontAwesomeIcon>
-                            </div>
-                            {/* {isExpanded && <span className="text-muted_blue dark:text-light_yellow font-semibold tracking-wider">Profile</span>} */}
-                        </button>
+                        <Link href={`/user/${username}`} className={`px-8 transition-all duration-150 flex flex-row items-center gap-3 ${activeTab === '/user/'+username ? 'border-b-[3px] border-primary text-primary' : 'text-background hover:text-primary stroke-[50px] stroke-primary'}`}>
+                            <FontAwesomeIcon icon={faUser} className={`w-6 h-6`}></FontAwesomeIcon>
+                        </Link>
 
                         {/* Adoption Button */}
-                        <button 
-                            onClick={() => router.push('/adopt')} className={`px-8 transition-all duration-150 flex flex-row items-center gap-3 ${activeTab === '/adopt' ? 'border-b-[3px] border-primary text-primary' : 'text-background hover:text-primary stroke-[50px] stroke-primary'}`}>
-                            <div className="rounded-full">
-                                <FontAwesomeIcon icon={faHandHoldingHeart} className={`w-6 h-6`}></FontAwesomeIcon>
-                            </div>
-                            {/* {isExpanded && <span className="text-muted_blue dark:text-light_yellow font-semibold tracking-wider">Settings</span>} */}
-                        </button>
+                        <Link href={`/adopt`} className={`px-8 transition-all duration-150 flex flex-row items-center gap-3 ${activeTab === '/adopt' ? 'border-b-[3px] border-primary text-primary' : 'text-background hover:text-primary stroke-[50px] stroke-primary'}`}>
+                            <FontAwesomeIcon icon={faHandHoldingHeart} className={`w-6 h-6`}></FontAwesomeIcon>
+                        </Link>
                     </div>
 
                 </div>
@@ -112,35 +96,35 @@ export default function NavBar({props}) {
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator className="bg-secondary"/>
                                     <DropdownMenuItem className="mt-2 focus:bg-inherit focus:border-b-2 focus:border-primary focus:rounded-none mx-2">
-                                        <button onClick={() => router.push('/home')} className="transition-all duration-300 flex flex-row items-center gap-3">
+                                        <Link href={`/home`} className="transition-all duration-300 flex flex-row items-center gap-3 w-full">
                                             <FontAwesomeIcon icon={faHouse} className={`w-6 h-6 ${activeTab === '/home' ? 'text-primary' : 'text-background stroke-[50px] stroke-primary'}`}/>
-                                            <span className="text-primary font-semibold tracking-wider">Home</span>
-                                        </button>
+                                            <p className="text-primary font-semibold tracking-wider">Home</p>
+                                        </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem className="mt-2 focus:bg-inherit focus:border-b-2 focus:border-primary focus:rounded-none mx-2">
-                                        <button onClick={() => router.push('/pet-tracker')} className="transition-all duration-300 flex flex-row items-center gap-3">
+                                        <Link href={`/pet-tracker`} className="transition-all duration-300 flex flex-row items-center gap-3 w-full">
                                             <FontAwesomeIcon icon={faPaw} className={`w-6 h-6 ${activeTab === '/pet-tracker' ? 'text-primary' : 'text-background stroke-[50px] stroke-primary'}`}/>
                                             <span className="text-primary font-semibold tracking-wider">Pet Tracker</span>
-                                        </button>
+                                        </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem className="mt-2 focus:bg-inherit focus:border-b-2 focus:border-primary focus:rounded-none mx-2">
-                                        <button onClick={() => router.push(`/user/${username}`)} className="transition-all duration-300 flex flex-row items-center gap-3">
+                                        <Link href={`/user/${username}`} className="transition-all duration-300 flex flex-row items-center gap-3 w-full">
                                             <FontAwesomeIcon icon={faUser} className={`w-6 h-6 ${activeTab === '/user/'+username ? 'text-primary' : 'text-background stroke-[50px] stroke-primary'}`}/>
                                             <span className="text-primary font-semibold tracking-wider">Profile</span>
-                                        </button>
+                                        </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem className="mt-2 focus:bg-inherit focus:border-b-2 focus:border-primary focus:rounded-none mx-2">
-                                        <button onClick={() => router.push('/adopt')} className="transition-all duration-300 flex flex-row items-center gap-3">
+                                        <Link href={`/adopt`} className="transition-all duration-300 flex flex-row items-center gap-3 w-full">
                                             <FontAwesomeIcon icon={faHandHoldingHeart} className={`w-6 h-6 ${activeTab === '/adopt' ? 'text-primary' : 'text-background stroke-[50px] stroke-primary'}`}/>
                                             <span className="text-primary font-semibold tracking-wider">Adoption</span>
-                                        </button>
+                                        </Link>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                     </div>
                     {/* Notifications Button */}
                     <button 
-                        onClick={() => router.push('/pet-tracker')} className={`px-6 transition-all duration-300 flex flex-row items-center gap-3`}>
+                        onClick={() => ""} className={`px-6 transition-all duration-300 flex flex-row items-center gap-3`}>
                         <div className="rounded-full">
                             <FontAwesomeIcon icon={faBell} className="w-6 h-6 text-muted_blue dark:text-light_yellow"></FontAwesomeIcon>
                         </div>
@@ -163,23 +147,21 @@ export default function NavBar({props}) {
                             
                             <DropdownMenuItem className="focus:bg-inherit focus:border-b-2 focus:border-primary focus:rounded-none mx-2">
                                 {/* Profile Button */}
-                                <button 
-                                    onClick={() => router.push('/user/'+username)} className={`transition-all duration-300 flex flex-row items-center gap-3`}>
+                                <Link href={`/user/${username}`} className="transition-all duration-300 flex flex-row items-center gap-3 w-full">
                                     <div className="p-1.5 rounded-full">
                                         <FontAwesomeIcon icon={faUser} className="w-6 h-6 text-primary"></FontAwesomeIcon>
                                     </div>
                                     <span className="text-primary font-semibold tracking-wider">View Profile</span>
-                                </button>
+                                </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem className="focus:bg-inherit focus:border-b-2 focus:border-primary focus:rounded-none mx-2">
                                 {/* Settings Button */}
-                                <button 
-                                    onClick={() => router.push('/settings')} className={`transition-all duration-300 flex flex-row items-center gap-3`}>
+                                <Link href={`/settings`} className="transition-all duration-300 flex flex-row items-center gap-3 w-full">
                                     <div className="p-1.5 rounded-full">
                                         <FontAwesomeIcon icon={faUserGear} className="w-6 h-6 text-primary"></FontAwesomeIcon>
                                     </div>
                                     <span className="text-primary font-semibold tracking-wider">Settings</span>
-                                </button>
+                                </Link>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator className="bg-secondary"/>
                             <DropdownMenuItem className="focus:bg-inherit focus:border-b-2 focus:border-primary focus:rounded-none mx-2">

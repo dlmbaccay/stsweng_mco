@@ -59,6 +59,11 @@ export default function Landing() {
         // check if user is already verified
         if (user.emailVerified) {          
           toast.success('Signed in successfully!');
+
+          if (user.uid == "5QMdCpbNvBMBSJ0wY9i28adWdx72") {
+            router.push(`/admin/reported-posts`);
+          }
+
           const hasNoData = await userHasNoPriorData(user.uid);
           if (hasNoData) {
             router.push('/setup');
