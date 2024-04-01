@@ -1,25 +1,14 @@
-import Image from "next/image"
 import { useState } from "react"
 import { toast } from "react-hot-toast"
-import { handleImageFilePreview } from "@/lib/helper-functions"
-import { checkDisplayName, checkLocation } from "@/lib/formats"
-import { firestore } from "@/lib/firebase"
 import { updateDocument} from "@/lib/firestore-crud"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { PhoneInput } from "@/components/ui/phone-input"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import RoundImage from "@/components/round-image"
 import Loader from "../Loader"
 
 
-export function FollowButton({props}) {
+export function FollowUserButton({props}) {
     const [loading, setLoading] = useState(false);
 
-    const { profileUser_uid, profileUser_name, currentUser_uid, profileUser_followers, currentUser_following } = props;
+    const { profileUser_pets, profileUser_uid, profileUser_name, currentUser_uid, profileUser_followers, currentUser_following } = props;
 
     const handleFollow = async () => {
         setLoading(true);
@@ -29,9 +18,19 @@ export function FollowButton({props}) {
                 await updateDocument('users', currentUser_uid, {following: currentUser_following.filter(uid => uid !== profileUser_uid)});
                 toast.success("Unfollowed " + profileUser_name);
             } else {
-                await updateDocument('users', profileUser_uid, {followers: [...profileUser_followers, currentUser_uid]});
-                await updateDocument('users', currentUser_uid, {following: [...currentUser_following, profileUser_uid]});
-                toast.success("Followed " + profileUser_name);
+                const newFollowers = [...profileUser_followers, currentUser_uid]
+                let newFollowing = [...currentUser_following, profileUser_uid]
+                await updateDocument('users', profileUser_uid, {followers: newFollowers});
+                await updateDocument('users', currentUser_uid, {following: newFollowing});
+                profileUser_pets.forEach(async pet => {
+                    if (!pet.followers.includes(currentUser_uid)) {
+                        newFollowing = [...newFollowing, pet.petID]
+                        await updateDocument('pets', pet.petID, {followers: [...pet.followers, currentUser_uid]});
+                        await updateDocument('users', currentUser_uid, {following: newFollowing});
+                    }
+                    
+                })
+                toast.success("Followed " + profileUser_name + " and their pets");
             }
         } catch (error) {
             console.error('Error following/unfollowing user:', error);

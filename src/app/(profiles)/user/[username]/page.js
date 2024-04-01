@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
+import { isEqual, set } from "lodash";
 import { auth, firestore } from "@/lib/firebase";
 import { handleDateFormat } from "@/lib/helper-functions";
 import  Loader from "@/components/Loader";
@@ -15,12 +16,13 @@ import { EditUserProfile } from "@/components/edit-dialogs/edit-user-profile";
 import { CreatePetProfile } from "@/components/profile/create-pet-profile";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
 import WithAuth from "@/components/WithAuth";
-import { FollowButton } from "@/components/profile/follow-user-button";
+import { FollowUserButton } from "@/components/profile/follow-user-button";
 import { CreatePost } from "@/components/post-components/create-post";
 import { PetsContainer } from "@/components/profile/pet-container";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTags } from "@fortawesome/free-solid-svg-icons";
 import { PostSnippet } from "@/components/post-components/post-snippet";
+import { RepostSnippet } from "@/components/post-components/repost-snippet";
 
 function UserProfile() {
     const router = useRouter();
@@ -32,161 +34,114 @@ function UserProfile() {
     const [ currentUser, setCurrentUser ] = useState([{}]);
 
     const [ userPets, setUserPets ] = useState([]);
+
     const [ userPosts, setUserPosts ] = useState([]);
+    const [ userPostsLoaded, setUserPostsLoaded ] = useState(false);
+    const [ userPostsLastVisible, setUserPostsLastVisible ] = useState(null);
+
+    const [ loadingPosts, setLoadingPosts ] = useState(false);
 
     useEffect(() => {
-        setLoading(true); 
-    
-        // Fetch profile data
-        const fetchProfileData = async (username) => {
-            const response = await fetch(`/api/users/via-username?username=${username}`, {
-                method: 'GET' // Specify GET method
-            });
+        setLoading(true);
 
-            if (response.ok) {
-                const data = await response.json();
-                setUserData(data);
+        const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+            let unsubscribeCurrentUser;
+            let unsubscribeProfileUser;
+            let unsubscribeUserPets;
+
+            if (user) {
+                console.log("User is signed in.");
+
+                // fetch current user data
+                unsubscribeCurrentUser = firestore.collection('users').doc(user.uid).onSnapshot((doc) => {
+                    const userData = doc.data()
+                    setCurrentUser(userData);
+                });
+
+                // fetch profile user data
+                unsubscribeProfileUser = firestore.collection('users').where('username', '==', urlParams.username).onSnapshot((querySnapshot) => {
+                    const profileUserData = querySnapshot.docs.map(doc => doc.data())[0];
+                    setUserData(profileUserData);
+
+                    console.log('profile user data:', profileUserData);
+
+                    // fetch profile user pets
+                    unsubscribeUserPets = firestore.collection('pets').where('petOwnerID', '==', profileUserData.uid).onSnapshot((querySnapshot) => {
+                        const userPetsData = querySnapshot.docs.map(doc => doc.data());
+                        setUserPets(userPetsData);
+
+                        console.log('user pets:', userPetsData);
+                    });
+
+                    // fetch profile user posts
+                    const fetchUserPosts = async () => {
+                        const response = await firestore.collection('posts').where('authorID', '==', profileUserData.uid).orderBy("date", "desc").limit(5).get();
+                        const postDocs = response.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        setUserPosts(postDocs);
+                        setUserPostsLastVisible(response.docs[response.docs.length - 1]);
+
+                        console.log('user posts:', postDocs);
+                    };
+                    
+                    fetchUserPosts();
+                });
+
+                setLoading(false);
             } else {
-                // Assuming the API returns { message: '...' } on error
-                const errorData = await response.json();
-                throw new Error(errorData.message);
-            }
-        };
-
-        // Fetch signed-in user's data
-        const fetchCurrentUser = async (userId) => {
-            const response = await fetch(`/api/users/via-id?id=${userId}`, {
-                method: 'GET' // Specify GET method
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setCurrentUser(data);
-            } else {
-                // Assuming the API returns { message: '...' } on error
-                const errorData = await response.json();
-                throw new Error(errorData.message);
-            }
-        };
-
-        const fetchData = async () => {
-            try {
-                const user = await auth.currentUser;
-                await Promise.all([
-                    fetchProfileData(urlParams.username),
-                    fetchCurrentUser(user.uid)
-                ]);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            } finally {
+                console.log("No user is signed in.");
                 setLoading(false);
             }
-        };
 
-        fetchData();
+            // Cleanup function to unsubscribe from the document listeners when the component unmounts
+            return () => {
+                unsubscribeCurrentUser();
+                unsubscribeProfileUser();
+                unsubscribeUserPets();
+            };
+        });
+
+        // Cleanup function to unsubscribe from the auth listener when the component unmounts
+        return () => unsubscribeAuth();
     }, [urlParams]);
 
-    /**
-     * This useEffect hook is responsible for fetching and updating the data of the user whose profile is being viewed.
-     * It subscribes to changes in the user's data in the Firestore database and updates the user's data on the page accordingly.
-     * The cleanup function is returned to unsubscribe from the Firestore listener when the component unmounts.
-     */
-    useEffect(() => {
-        let unsubscribe;
+    const fetchMoreUserPosts = async () => {
+        setLoadingPosts(true);
+        const nextQuery = await firestore.collection('posts')
+        .where('authorID', '==', userData.uid)
+        .orderBy("date", "desc")
+        .startAfter(userPostsLastVisible)
+        .limit(5)
+        .get();
 
-        if (userData) { // info of the user whose profile is being viewed
-            const userRef = firestore.collection('users').doc(userData.uid);
-            // Whenever the user's data in the database changes, update the user's data on the page
-            unsubscribe = userRef.onSnapshot((doc) => {
-                const newData = doc.data();
-                // Prevent infinite loop by setting data only when there is a difference
-                if (JSON.stringify(newData) !== JSON.stringify(userData)) {
-                    setUserData(newData);
-                }
-            });
-        } 
+        const newPosts = nextQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const newLastVisible = nextQuery.docs[nextQuery.docs.length - 1];
 
-        return () => unsubscribe; // Cleanup function
-    }, [userData]);
-    
-    /**
-     * This useEffect hook is responsible for fetching and updating the data of the current user.
-     * It subscribes to changes in the current user's data in the Firestore database and updates the current user's data on the page accordingly.
-     * The cleanup function is returned to unsubscribe from the Firestore listener when the component unmounts.
-     * This is for the viewer of the page.
-     */
-    useEffect(() => {
-        let unsubscribe;
-    
-        if (currentUser) { // info of the current user
-            const userRef = firestore.collection('users').doc(currentUser.uid);
-            // Whenever the user's data in the database changes, update the user's data on the page
-            unsubscribe = userRef.onSnapshot((doc) => {
-                const newData = doc.data();
-                // Prevent infinite loop by setting data only when there is a difference
-                if (JSON.stringify(newData) !== JSON.stringify(currentUser)) {
-                    setCurrentUser(newData);
-                }
-            });
-        } 
-    
-        return () => unsubscribe; // Cleanup function
-    }, [currentUser]);
-    
-    /**
-     * This useEffect hook is responsible for fetching and updating the pets of the user whose profile is being viewed.
-     * It fetches the pets of the user from the Firestore database and updates the user's pets on the page accordingly.
-     * 
-     */
-    useEffect(() => {
-        // Fetch user pets
-        if (userData) {
-
-            const fetchUserPets = async () => {
-                const response = await fetch(`/api/pets/retrieve-user-pets?uid=${userData.uid}`, {
-                    method: 'GET' // Specify GET method
-                });
-    
-                if (response.ok) {
-                    const data = await response.json();
-                    setUserPets(data.userPets);
-                } else {
-                    // Assuming the API returns { message: '...' } on error
-                    const errorData = await response.json();
-                    throw new Error(errorData.message);
-                }
-            };
-
-            fetchUserPets();
+        // Update state based on whether new posts are fetched
+        if (newPosts.length === 0) {
+            setUserPostsLoaded(true);
+        } else {
+            setUserPostsLastVisible(newLastVisible);
+            setUserPosts(prevPosts => [...prevPosts, ...newPosts]);
+            setUserPostsLoaded(false);
         }
-    }, [userData]);
 
-     /**
-     * This useEffect hook is responsible for fetching and updating the posts of the user whose profile is being viewed.
-     * It fetches the posts of the user from the Firestore database and updates the user's posts on the page accordingly.
-     * 
-     */
-     useEffect(() => {
-        // Fetch user posts
-        if (userData) {
+        setLoadingPosts(false);
+    }
 
-            const fetchUserPosts = async () => {
-                const response = await fetch(`/api/posts/via-authorUsername?username=${userData.username}`, {
-                    method: 'GET' // Specify GET method
-                });
-    
-                if (response.ok) {
-                    const data = await response.json();
-                    setUserPosts(data.postDocs);
-                } else {
-                    // Assuming the API returns { message: '...' } on error
-                    const errorData = await response.json();
-                    throw new Error(errorData.message);
-                }
-            };
+    const refreshUserPosts = async () => {
+        setLoadingPosts(true);
+        const refreshQuery = await firestore.collection('posts')
+        .where('authorID', '==', userData.uid)
+        .orderBy("date", "desc")
+        .limit(5)
+        .get();
 
-            fetchUserPosts();
-        }
-    }, [userData]);
+        const refreshedPosts = refreshQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setUserPosts(refreshedPosts);
+        setUserPostsLastVisible(refreshQuery.docs[refreshQuery.docs.length - 1]);
+        setUserPostsLoaded(false);
+        setLoadingPosts(false);
+    }
 
     return (
         <>
@@ -203,12 +158,9 @@ function UserProfile() {
                     </div>
                     
                     { userData &&
-                        <div className="w-full h-screen fixed z-10 mt-16 pb-32 flex flex-col items-center justify-start ">
+                        <div className="w-full h-screen z-10 mt-16 pb-32 flex flex-col items-center justify-start">
                             {/* Cover Photo */}
-                            <div className="h-[30%] xl:w-[60%] 2xl:w-[60%] w-full border-red">
-                                {/* <CoverPhoto 
-                                    src={userData.coverPhotoURL ? userData.coverPhotoURL : "/images/cover0-image.png"}
-                                    alt="cover photo"/> */}
+                            <div className="h-[30%] xl:w-[60%] 2xl:w-[60%] w-full">
                                 <Image
                                     src={userData.coverPhotoURL ? userData.coverPhotoURL : "/images/cover0-image.png"}
                                     alt={"cover photo"}
@@ -251,7 +203,6 @@ function UserProfile() {
                                 <div className="flex h-full items-end justify-end w-[20%]">
                                     {currentUser && currentUser.uid === userData.uid ? (
                                         // Edit Button 
-                                        // <Button className="mx-auto text-lg dark:bg-light_yellow bg-muted_blue px-6 text-dark_gray mt-6 font-medium">Edit</Button>
                                         <EditUserProfile props={{
                                             uid: userData.uid,
                                             displayName: userData.displayName,
@@ -265,12 +216,13 @@ function UserProfile() {
                                         }}/>
                                     ):(
                                         // Follow Button 
-                                        <FollowButton props={{
-                                                profileUser_uid: userData.uid,
-                                                profileUser_name: userData.username,
-                                                currentUser_uid: currentUser.uid,
-                                                profileUser_followers: userData.followers,
-                                                currentUser_following: currentUser.following
+                                        <FollowUserButton props={{
+                                            profileUser_pets: userPets,
+                                            profileUser_uid: userData.uid,
+                                            profileUser_name: userData.username,
+                                            currentUser_uid: currentUser.uid,
+                                            profileUser_followers: userData.followers,
+                                            currentUser_following: currentUser.following
                                         }}/>
                                     )}
                                 </div>
@@ -282,12 +234,14 @@ function UserProfile() {
                                 {/* About and Details Containers */}
                                 <div className="flex flex-col items-start xl:w-[30%] 2xl:w-[30%] w-full gap-6">
 
-                                    <Card className="drop-shadow-md flex flex-col w-full p-6 text-sm rounded-md">
-                                        <div className="flex flex-col justify-start gap-4">
-                                            <h1 className="tracking-wide font-bold text-lg text-muted_blue dark:text-light_yellow">About</h1>
-                                            <p className="tracking-wide break-words">{userData.about}</p>
-                                        </div>
-                                    </Card>
+                                    { userData.about && 
+                                        <Card className="drop-shadow-md flex flex-col w-full p-6 text-sm rounded-md">
+                                            <div className="flex flex-col justify-start gap-4">
+                                                <h1 className="tracking-wide font-bold text-lg text-muted_blue dark:text-light_yellow">About</h1>
+                                                <p className="tracking-wide break-words">{userData.about}</p>
+                                            </div>
+                                        </Card>
+                                    }
 
                                     <Card className="drop-shadow-md flex flex-col w-full p-6 text-sm rounded-md">
                                         <h1 className="tracking-wide font-bold text-lg pb-4 text-muted_blue dark:text-light_yellow">Details</h1>
@@ -356,24 +310,54 @@ function UserProfile() {
                                                         </div>
                                                         <div className="w-full mr-4">
                                                             <CreatePost props={{
-                                                                uid: userData.uid,
-                                                                username: userData.username,
-                                                                displayname: userData.displayName,
-                                                                userphoto: userData.userPhotoURL,
+                                                                uid: currentUser.uid,
+                                                                username: currentUser.username,
+                                                                displayname: currentUser.displayName,
+                                                                userphoto: currentUser.userPhotoURL,
                                                                 pets: userPets,
                                                             }}/>
                                                         </div>
                                                     </div>
                                                 </Card> : null
                                             }
-                                            <div className="flex flex-col min-w-full items-center justify-center gap-6">
-                                                {[...userPosts].reverse().map((post) => {
-                                                    return (
-                                                        <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
-                                                    )
-                                                })}
+                                            <div className="flex flex-col min-w-full items-center justify-center gap-6 mb-6">
+
+                                                { userPosts.length === 0 ? (
+                                                    <div className="flex items-center justify-center">
+                                                        <p>No posts yet.</p>
+                                                    </div>
+                                                ) : (
+                                                    userPosts.map((post) => {
+                                                        return (
+                                                            (post.postType == 'Original' ?
+                                                                <PostSnippet key={post.id} post={post} currentUser={currentUser} />
+                                                            
+                                                            : post.postType == 'Repost' ?
+                                                                <RepostSnippet key={post.id} post={post} currentUser={currentUser} />
+                                                            : null)
+                                                        )
+                                                    })
+                                                )}
+
+                                                { userPosts.length !== 0 && userPostsLoaded ? (
+                                                    <button
+                                                        className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
+												        onClick={refreshUserPosts}
+                                                    >
+                                                        Refresh Posts
+                                                    </button>
+                                                ) : userPosts.length !== 0 && !userPostsLoaded ? (
+                                                    <button
+                                                        className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
+												        onClick={fetchMoreUserPosts}
+                                                        disabled={loadingPosts}
+                                                    >
+                                                        Load More
+                                                    </button>
+                                                ) : null }
+
+											    {loadingPosts && <div className="mb-20 flex items-center justify-center">Loading...</div>}
                                             </div>
-                                            
                                         </>
                                     ): (
                                         <Card className="p-4 rounded-md drop-shadow-md">
@@ -385,7 +369,8 @@ function UserProfile() {
                                                 location: userData.location,
                                                 userPhotoURL: userData.userPhotoURL,
                                                 coverPhotoURL: userData.coverPhotoURL,
-                                                pets: userPets
+                                                pets: userPets,
+                                                currentUserID: currentUser.uid,
                                             }}/>}
                                             
                                         </Card>

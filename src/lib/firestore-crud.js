@@ -180,4 +180,90 @@ module.exports.createPetDocument = async (collection, documentId, data) => {
         console.error('Error creating pet document:', error);
         throw error;
     }
+
+};
+
+module.exports.createCommentDocument = async(postID, commentID, data) => {
+    try {
+        // Add the data to the Firestore database
+        await firestore.collection("posts").doc(postID).collection("comments").doc(commentID).set(data);
+    } catch (error) {
+        console.error('Error creating comment document:', error);
+        throw error;
+    }
+};
+
+module.exports.updateCommentDocument = async(postID, commentID, data) => {
+    try {
+        // Update the document in the Firestore database
+        await firestore.collection("posts").doc(postID).collection("comments").doc(commentID).update(data);
+    } catch (error) {
+        console.error('Error updating comment document:', error);
+        throw error;
+    }
+};
+
+module.exports.deleteCommentDocument = async(postID, commentID) => {
+    try {
+        // Delete the document from the Firestore database
+        await firestore.collection("posts").doc(postID).collection("comments").doc(commentID).delete();
+    } catch (error) {
+        console.error('Error deleting comment document:', error);
+        throw error;
+    }
+};
+
+module.exports.createReplyDocument= async(postID, commentID, replyID, data) => {
+    try {
+        // Add the data to the Firestore database
+        await firestore.collection("posts").doc(postID).collection("comments").doc(commentID).collection("replies").doc(replyID).set(data);
+    } catch (error) {
+        console.error('Error creating reply document:', error);
+        throw error;
+    }
+};
+
+module.exports.updateReplyDocument = async(postID, commentID, replyID, data) => {
+    try {
+        // Update the document in the Firestore database
+        await firestore.collection("posts").doc(postID).collection("comments").doc(commentID).collection("replies").doc(replyID).update(data);
+    } catch (error) {
+        console.error('Error updating reply document:', error);
+        throw error;
+    }
+};
+
+module.exports.deleteReplyDocument = async(postID, commentID, replyID) => {
+    try {
+        // Delete the document from the Firestore database
+        await firestore.collection("posts").doc(postID).collection("comments").doc(commentID).collection("replies").doc(replyID).delete();
+    } catch (error) {
+        console.error('Error deleting reply document:', error);
+        throw error;
+    }
 }
+
+module.exports.updateBanStatus = async(userID, status) => {
+    try {
+        let until = null;
+        if (status === "temporary" || status === "permanent") {
+            // Check if the status is "temporary" or "permanent"
+            if (status === "temporary") {
+                until = new Date(); // Set the until date to the current date
+                until.setDate(until.getDate() + 3); // Add 3 days to the current date
+            }
+        }
+
+        // Update the ban status in the Firestore database
+        await firestore.collection('users').doc(userID).update({
+            ban: {
+                status: status,
+                until: until
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error updating ban status:', error);
+        throw error;
+    }
+};

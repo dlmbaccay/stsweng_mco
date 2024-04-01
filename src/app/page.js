@@ -22,6 +22,9 @@ export default function Home() {
       setTimeout(() => {
         if (user) {
           toast.success("Welcome back! 👋");
+          if (user.uid == "5QMdCpbNvBMBSJ0wY9i28adWdx72") {
+            router.push(`/admin/reported-posts`)
+          }
           router.push(`/home`)
         } else {
           router.push("/landing")
