@@ -38,7 +38,7 @@ export function EditPost({ props }) {
     
     async function savePostData() {
         if (postType === 'Original') {
-            toast.loading('Updating post...');
+            // toast.loading('Updating post...');
             await fetch('/api/posts/edit-post', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -56,14 +56,15 @@ export function EditPost({ props }) {
                     if (data.success) {
                         toast.dismiss();
                         toast.success(`Successfully updated post!`);
-                        window.location.reload();
                     }
                 } else {
                     throw new Error('Failed to save post');
                 }
+            }).finally(() => {
+                window.location.reload();
             });
         } else if (postType === 'Repost'){
-            toast.loading('Updating post...');
+            // toast.loading('Updating post...');
             await fetch('/api/posts/edit-post', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -80,11 +81,12 @@ export function EditPost({ props }) {
                     if (data.success) {
                         toast.dismiss();
                         toast.success(`Successfully updated post!`);
-                        window.location.reload();
                     }
                 } else {
                     throw new Error('Failed to save post');
                 }
+            }).finally(() => {
+                window.location.reload();
             });
         }
     }
