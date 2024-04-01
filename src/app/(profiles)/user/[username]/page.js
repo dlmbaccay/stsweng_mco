@@ -160,10 +160,7 @@ function UserProfile() {
                     { userData &&
                         <div className="w-full h-screen z-10 mt-16 pb-32 flex flex-col items-center justify-start">
                             {/* Cover Photo */}
-                            <div className="h-[30%] xl:w-[60%] 2xl:w-[60%] w-full border-red">
-                                {/* <CoverPhoto 
-                                    src={userData.coverPhotoURL ? userData.coverPhotoURL : "/images/cover0-image.png"}
-                                    alt="cover photo"/> */}
+                            <div className="h-[30%] xl:w-[60%] 2xl:w-[60%] w-full">
                                 <Image
                                     src={userData.coverPhotoURL ? userData.coverPhotoURL : "/images/cover0-image.png"}
                                     alt={"cover photo"}
