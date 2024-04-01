@@ -313,10 +313,10 @@ function UserProfile() {
                                                         </div>
                                                         <div className="w-full mr-4">
                                                             <CreatePost props={{
-                                                                uid: userData.uid,
-                                                                username: userData.username,
-                                                                displayname: userData.displayName,
-                                                                userphoto: userData.userPhotoURL,
+                                                                uid: currentUser.uid,
+                                                                username: currentUser.username,
+                                                                displayname: currentUser.displayName,
+                                                                userphoto: currentUser.userPhotoURL,
                                                                 pets: userPets,
                                                             }}/>
                                                         </div>
