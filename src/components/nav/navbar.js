@@ -42,7 +42,7 @@ export default function NavBar({props}) {
                 {/* Logo Left */}
                 <div className="flex flex-row items-center justify-start">
                     <Link className='group flex flex-row justify-center items-center gap-4' href={`/home`}>
-                        {<Image src={'/images/logo.png'} alt={'bantaybuddy logo'} width={44} height={44} className='rounded-full aspect-square object-cover'/>}
+                        {<Image src={'/images/logo.png'} alt={'bantaybuddy logo'} width={44} height={44} className='rounded-full aspect-square object-cover' priority/>}
                     </Link>
                 </div>
                 
