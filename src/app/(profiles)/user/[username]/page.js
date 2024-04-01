@@ -35,211 +35,113 @@ function UserProfile() {
 
     const [ userPets, setUserPets ] = useState([]);
 
-    const [ userFetchFlag, setUserFetchFlag ] = useState(false);
-
-    useEffect(() => {
-        setLoading(true); 
-    
-        // Fetch profile data
-        const fetchProfileData = async (username) => {
-            const response = await fetch(`/api/users/via-username?username=${username}`, {
-                method: 'GET' // Specify GET method
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setUserData(data);
-                setUserFetchFlag(true);
-            } else {
-                // Assuming the API returns { message: '...' } on error
-                const errorData = await response.json();
-                throw new Error(errorData.message);
-            }
-        };
-
-        // Fetch signed-in user's data
-        const fetchCurrentUser = async (userId) => {
-            const response = await fetch(`/api/users/via-id?id=${userId}`, {
-                method: 'GET' // Specify GET method
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setCurrentUser(data);
-            } else {
-                // Assuming the API returns { message: '...' } on error
-                const errorData = await response.json();
-                throw new Error(errorData.message);
-            }
-        };
-
-        const fetchData = async () => {
-            try {
-                const user = await auth.currentUser;
-                await Promise.all([
-                    fetchProfileData(urlParams.username),
-                    fetchCurrentUser(user.uid)
-                ]);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [urlParams]);
-
-    /**
-     * This useEffect hook is responsible for fetching and updating the data of the user whose profile is being viewed.
-     * It subscribes to changes in the user's data in the Firestore database and updates the user's data on the page accordingly.
-     * The cleanup function is returned to unsubscribe from the Firestore listener when the component unmounts.
-     */
-    useEffect(() => {
-        let unsubscribe;
-
-        if (userData) { // info of the user whose profile is being viewed
-            const userRef = firestore.collection('users').doc(userData.uid);
-            // Whenever the user's data in the database changes, update the user's data on the page
-            unsubscribe = userRef.onSnapshot((doc) => {
-                const newData = doc.data();
-                // Prevent infinite loop by setting data only when there is a difference
-                if (JSON.stringify(newData) !== JSON.stringify(userData)) {
-                    setUserData(newData);
-                }
-            });
-        } 
-
-        return () => unsubscribe; // Cleanup function
-    }, [userData]);
-    
-    /**
-     * This useEffect hook is responsible for fetching and updating the data of the current user.
-     * It subscribes to changes in the current user's data in the Firestore database and updates the current user's data on the page accordingly.
-     * The cleanup function is returned to unsubscribe from the Firestore listener when the component unmounts.
-     * This is for the viewer of the page.
-     */
-    useEffect(() => {
-        let unsubscribe;
-    
-        if (currentUser) { // info of the current user
-            const userRef = firestore.collection('users').doc(currentUser.uid);
-            // Whenever the user's data in the database changes, update the user's data on the page
-            unsubscribe = userRef.onSnapshot((doc) => {
-                const newData = doc.data();
-                // Prevent infinite loop by setting data only when there is a difference
-                if (JSON.stringify(newData) !== JSON.stringify(currentUser)) {
-                    setCurrentUser(newData);
-                }
-            });
-        } 
-    
-        return () => unsubscribe; // Cleanup function
-    }, [currentUser]);
-
     const [ userPosts, setUserPosts ] = useState([]);
     const [ userPostsLoaded, setUserPostsLoaded ] = useState(false);
     const [ userPostsLastVisible, setUserPostsLastVisible ] = useState(null);
-    const [ userPostsLoading, setUserPostsLoading ] = useState(false);
 
-    /*
-    * This useEffect hook is responsible for fetching and updating the posts of the user whose profile is being viewed.
-    * It fetches the posts of the user from the Firestore database and updates the user's posts on the page accordingly.
-     */ 
+    const [ loadingPosts, setLoadingPosts ] = useState(false);
+
     useEffect(() => {
-        let unsubscribe
+        setLoading(true);
 
-        if (userData && userPosts && userFetchFlag) {
-            console.log(userData);
+        const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+            let unsubscribeCurrentUser;
+            let unsubscribeProfileUser;
+            let unsubscribeUserPets;
 
-            const fetchUserPosts = async () => {
-                const response = await firestore.collection('posts').where('authorID', '==', userData.uid).get();
-                const postDocs = response.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                setUserPosts(postDocs);
-                setUserPostsLastVisible(response.docs[response.docs.length - 1]);
-                setUserPostsLoaded(true);
+            if (user) {
+                console.log("User is signed in.");
+
+                // fetch current user data
+                unsubscribeCurrentUser = firestore.collection('users').doc(user.uid).onSnapshot((doc) => {
+                    const userData = doc.data()
+                    setCurrentUser(userData);
+                });
+
+                // fetch profile user data
+                unsubscribeProfileUser = firestore.collection('users').where('username', '==', urlParams.username).onSnapshot((querySnapshot) => {
+                    const profileUserData = querySnapshot.docs.map(doc => doc.data())[0];
+                    setUserData(profileUserData);
+
+                    console.log('profile user data:', profileUserData);
+
+                    // fetch profile user pets
+                    unsubscribeUserPets = firestore.collection('pets').where('petOwnerID', '==', profileUserData.uid).onSnapshot((querySnapshot) => {
+                        const userPetsData = querySnapshot.docs.map(doc => doc.data());
+                        setUserPets(userPetsData);
+
+                        console.log('user pets:', userPetsData);
+                    });
+
+                    // fetch profile user posts
+                    const fetchUserPosts = async () => {
+                        const response = await firestore.collection('posts').where('authorID', '==', profileUserData.uid).orderBy("date", "desc").limit(5).get();
+                        const postDocs = response.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        setUserPosts(postDocs);
+                        setUserPostsLastVisible(response.docs[response.docs.length - 1]);
+
+                        console.log('user posts:', postDocs);
+                    };
+                    
+                    fetchUserPosts();
+                });
+
+                setLoading(false);
+            } else {
+                console.log("No user is signed in.");
+                setLoading(false);
             }
 
-            fetchUserPosts();
-        }
-    
-        return () => unsubscribe;
-    }, [userPosts, userData, userFetchFlag]);
+            // Cleanup function to unsubscribe from the document listeners when the component unmounts
+            return () => {
+                unsubscribeCurrentUser();
+                unsubscribeProfileUser();
+                unsubscribeUserPets();
+            };
+        });
+
+        // Cleanup function to unsubscribe from the auth listener when the component unmounts
+        return () => unsubscribeAuth();
+    }, [urlParams]);
 
     const fetchMoreUserPosts = async () => {
-        if (userPostsLastVisible) {
-            setUserPostsLoading(true);
-            const response = await firestore.collection('posts').where('authorID', '==', userData.uid).startAfter(userPostsLastVisible).get();
-            const postDocs = response.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setUserPosts([...userPosts, ...postDocs]);
-            setUserPostsLastVisible(response.docs[response.docs.length - 1]);
-            setUserPostsLoading(false);
+        setLoadingPosts(true);
+        const nextQuery = await firestore.collection('posts')
+        .where('authorID', '==', userData.uid)
+        .orderBy("date", "desc")
+        .startAfter(userPostsLastVisible)
+        .limit(5)
+        .get();
+
+        const newPosts = nextQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const newLastVisible = nextQuery.docs[nextQuery.docs.length - 1];
+
+        // Update state based on whether new posts are fetched
+        if (newPosts.length === 0) {
+            setUserPostsLoaded(true);
+        } else {
+            setUserPostsLastVisible(newLastVisible);
+            setUserPosts(prevPosts => [...prevPosts, ...newPosts]);
+            setUserPostsLoaded(false);
         }
+
+        setLoadingPosts(false);
     }
 
     const refreshUserPosts = async () => {
-        setUserPostsLoading(true);
-        const response = await firestore.collection('posts').where('authorID', '==', userData.uid).get();
-        const postDocs = response.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setUserPosts(postDocs);
-        setUserPostsLastVisible(response.docs[response.docs.length - 1]);
-        setUserPostsLoading(false);
+        setLoadingPosts(true);
+        const refreshQuery = await firestore.collection('posts')
+        .where('authorID', '==', userData.uid)
+        .orderBy("date", "desc")
+        .limit(5)
+        .get();
+
+        const refreshedPosts = refreshQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setUserPosts(refreshedPosts);
+        setUserPostsLastVisible(refreshQuery.docs[refreshQuery.docs.length - 1]);
+        setUserPostsLoaded(false);
+        setLoadingPosts(false);
     }
-    
-    /**
-     * This useEffect hook is responsible for fetching and updating the pets of the user whose profile is being viewed.
-     * It fetches the pets of the user from the Firestore database and updates the user's pets on the page accordingly.
-     * 
-     */
-    useEffect(() => {
-        // Fetch user pets
-        if (userData) {
-
-            const fetchUserPets = async () => {
-                const response = await fetch(`/api/pets/retrieve-user-pets?uid=${userData.uid}`, {
-                    method: 'GET' // Specify GET method
-                });
-    
-                if (response.ok) {
-                    const data = await response.json();
-                    setUserPets(data.userPets);
-                } else {
-                    // Assuming the API returns { message: '...' } on error
-                    const errorData = await response.json();
-                    throw new Error(errorData.message);
-                }
-            };
-
-            fetchUserPets();
-        }
-    }, [userData]);
-
-     /**
-     * This useEffect hook is responsible for fetching and updating the posts of the user whose profile is being viewed.
-     * It fetches the posts of the user from the Firestore database and updates the user's posts on the page accordingly.
-     * 
-     */
-     useEffect(() => {
-        // Fetch user posts
-        if (userData) {
-
-            const fetchUserPosts = async () => {
-                const response = await fetch(`/api/posts/via-authorUsername?username=${userData.username}`, {
-                    method: 'GET' // Specify GET method
-                });
-    
-                if (response.ok) {
-                    const data = await response.json();
-                    setUserPosts(data.postDocs);
-                } else {
-                    // Assuming the API returns { message: '...' } on error
-                    const errorData = await response.json();
-                    throw new Error(errorData.message);
-                }
-            };
-
-            fetchUserPosts();
-        }
-    }, [userData]);
 
     return (
         <>
@@ -304,7 +206,6 @@ function UserProfile() {
                                 <div className="flex h-full items-end justify-end w-[20%]">
                                     {currentUser && currentUser.uid === userData.uid ? (
                                         // Edit Button 
-                                        // <Button className="mx-auto text-lg dark:bg-light_yellow bg-muted_blue px-6 text-dark_gray mt-6 font-medium">Edit</Button>
                                         <EditUserProfile props={{
                                             uid: userData.uid,
                                             displayName: userData.displayName,
@@ -423,35 +324,42 @@ function UserProfile() {
                                                 </Card> : null
                                             }
                                             <div className="flex flex-col min-w-full items-center justify-center gap-6 mb-6">
-                                                {[...userPosts].sort((a, b) => new Date(a.date) - new Date(b.date)).map((post) => {
-                                                    return (
-                                                        (post.postType == 'Original' ?
-                                                            <PostSnippet key={post.postID} post={post} currentUser={currentUser} />
-                                                        
-                                                        : post.postType == 'Repost' ?
-                                                            <RepostSnippet key={post.postID} post={post} currentUser={currentUser} />
-                                                        : null)
-                                                    )
-                                                })}
+
+                                                { !userPosts ? (
+                                                    <div className="flex items-center justify-center">
+                                                        <p>No posts yet.</p>
+                                                    </div>
+                                                ) : (
+                                                    userPosts.map((post) => {
+                                                        return (
+                                                            (post.postType == 'Original' ?
+                                                                <PostSnippet key={post.id} post={post} currentUser={currentUser} />
+                                                            
+                                                            : post.postType == 'Repost' ?
+                                                                <RepostSnippet key={post.id} post={post} currentUser={currentUser} />
+                                                            : null)
+                                                        )
+                                                    })
+                                                )}
 
                                                 {userPostsLoaded ? (
                                                     <button
-                                                        className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${userPostsLoading ? 'hidden' : 'flex'}`}
+                                                        className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
 												        onClick={refreshUserPosts}
                                                     >
                                                         Refresh Posts
                                                     </button>
                                                 ) : (
                                                     <button
-                                                        className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${userPostsLoading ? 'hidden' : 'flex'}`}
+                                                        className={`font-semibold px-4 py-2 dark:bg-light_yellow dark:text-black bg-muted_blue text-off_white rounded-lg text-sm hover:opacity-80 transition-all mb-20 ${loadingPosts ? 'hidden' : 'flex'}`}
 												        onClick={fetchMoreUserPosts}
-                                                        disabled={userPostsLoading}
+                                                        disabled={loadingPosts}
                                                     >
                                                         Load More
                                                     </button>
                                                 )}
 
-											    {userPostsLoading && <div className="mb-20 flex items-center justify-center">Loading...</div>}
+											    {loadingPosts && <div className="mb-20 flex items-center justify-center">Loading...</div>}
                                             </div>
                                         </>
                                     ): (
