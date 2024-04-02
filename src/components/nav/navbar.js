@@ -309,7 +309,10 @@ export default function NavBar({ props }) {
 								) : (
 									<div className="flex flex-col gap-4 h-[450px] overflow-auto">
 										{notifications.map((notification, index) => (
-											<div className="flex items-center p-3 hover:bg-muted-foreground leading-3 ">
+											<div
+												key={index}
+												className="flex items-center p-3 hover:bg-muted-foreground leading-3 "
+											>
 												<Link href={`/user/${notification.username}`}>
 													<Image
 														src={
@@ -323,10 +326,7 @@ export default function NavBar({ props }) {
 														className="w-12 h-12 mr-4 rounded-full hover:drop-shadow-lg cursor-pointer z-10"
 													/>
 												</Link>
-												<Link
-													href={'/post/' + notification.postID}
-													key={index}
-												>
+												<Link href={'/post/' + notification.postID}>
 													<div className="w-full">
 														<div
 															style={{ wordWrap: 'break-word' }}
