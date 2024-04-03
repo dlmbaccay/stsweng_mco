@@ -279,7 +279,7 @@ function UserProfile() {
 													phoneNumber: userData.phoneNumber,
 												}}
 											/>
-										) : (
+										) : userData && (
 											// Follow Button
 											<FollowUserButton
 												props={{

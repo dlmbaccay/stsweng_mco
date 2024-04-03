@@ -276,7 +276,7 @@ function PetProfile() {
 									<div className="md:-translate-y-12 flex items-center justify-center md:w-[20%] w-40">
 										<Image
 											src={
-												petData.petPhotoURL == '' ? '' : petData.petPhotoURL
+												petData.petPhotoURL == '' ? '/images/petPictureHolder.jpg' : petData.petPhotoURL
 											}
 											alt="pet photo"
 											width={175}
