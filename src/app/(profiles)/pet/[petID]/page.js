@@ -68,6 +68,8 @@ function PetProfile() {
 	const [fetchedMilestonesLastVisible, setFetchedMilestonesLastVisible] = useState(null)
 	const [loadingPosts, setLoadingPosts] = useState(false)
 
+	const [visibleDetails, setVisibleDetails] = useState([])
+
 	useEffect(() => {
 		setLoading(true)
 		const unsubscribeAuth = auth.onAuthStateChanged((user) => {
@@ -77,11 +79,13 @@ function PetProfile() {
 			if (user) {
 				console.log('User is signed in.')
 
+				let currentUser
 				// fetch current user data
 				unsubscribeCurrentUser = firestore
 					.collection('users')
 					.doc(user.uid)
 					.onSnapshot((doc) => {
+						currentUser = doc.data()
 						setCurrentUser(doc.data())
 					})
 
@@ -89,8 +93,39 @@ function PetProfile() {
 				unsubscribePetData = firestore
 					.collection('pets')
 					.doc(urlParams.petID)
-					.onSnapshot((doc) => {
+					.onSnapshot(async (doc) => {
 						setPetData(doc.data())
+
+						// Get user data of petOwnerID
+						const petOwnerID = doc.data().petOwnerID
+
+						const getVisibilityDetails = async () => {
+							await firestore
+								.collection('users')
+								.doc(petOwnerID)
+								.get()
+								.then((doc) => {
+									const profileUserData = doc.data()
+									// set visibility
+									const includeFields = []
+
+									for (const field in profileUserData.visibility) {
+										const visibilitySetting = profileUserData.visibility[field]
+
+										if (visibilitySetting === 'public') {
+											includeFields.push(field)
+										} else if (
+											visibilitySetting === 'followers' &&
+											(currentUser.uid in profileUserData.followers ||
+												currentUser.uid === profileUserData.uid)
+										) {
+											includeFields.push(field)
+										}
+									}
+
+									setVisibleDetails(includeFields)
+								})
+						}
 
 						// fetch tagged posts
 						const fetchTaggedPosts = async () => {
@@ -130,7 +165,7 @@ function PetProfile() {
 
 							console.log('Fetched milestones:', milestones)
 						}
-
+						getVisibilityDetails()
 						fetchTaggedPosts()
 						fetchMilestones()
 					})
@@ -276,7 +311,9 @@ function PetProfile() {
 									<div className="md:-translate-y-12 flex items-center justify-center md:w-[20%] w-40">
 										<Image
 											src={
-												petData.petPhotoURL == '' ? '/images/petPictureHolder.jpg' : petData.petPhotoURL
+												petData.petPhotoURL == ''
+													? '/images/petPictureHolder.jpg'
+													: petData.petPhotoURL
 											}
 											alt="pet photo"
 											width={175}
@@ -403,44 +440,54 @@ function PetProfile() {
 
 											<div className="flex items-start flex-col gap-2 break-all">
 												{/* Location */}
-												<div className="flex items-center justify-center gap-1">
-													<i className="flex items-center justify-center  w-[20px] fa-solid fa-location-dot " />
-													<p className="tracking-wide">
-														{petData.petBirthplace}
-													</p>
-												</div>
+												{visibleDetails.includes('petLocation') && (
+													<div className="flex items-center justify-center gap-1">
+														<i className="flex items-center justify-center  w-[20px] fa-solid fa-location-dot " />
+														<p className="tracking-wide">
+															{petData.petBirthplace}
+														</p>
+													</div>
+												)}
 
 												{/* Sex */}
-												<div className="flex items-center justify-center gap-1">
-													<i class="flex items-center justify-center  w-[20px] fa-solid fa-venus-mars" />
-													<p className="tracking-wide">
-														{petData.petSex}
-													</p>
-												</div>
+												{visibleDetails.includes('petGender') && (
+													<div className="flex items-center justify-center gap-1">
+														<i class="flex items-center justify-center  w-[20px] fa-solid fa-venus-mars" />
+														<p className="tracking-wide">
+															{petData.petSex}
+														</p>
+													</div>
+												)}
 
 												{/* Birthday */}
-												<div className="flex items-center justify-center gap-1">
-													<i class="flex items-center justify-center  w-[20px] fa-solid fa-cake-candles" />
-													<p className="tracking-wide">
-														{petData.petBirthdate}
-													</p>
-												</div>
+												{visibleDetails.includes('petBirthdate') && (
+													<div className="flex items-center justify-center gap-1">
+														<i class="flex items-center justify-center  w-[20px] fa-solid fa-cake-candles" />
+														<p className="tracking-wide">
+															{petData.petBirthdate}
+														</p>
+													</div>
+												)}
 
 												{/* Favorite Food */}
-												<div className="flex items-center justify-center gap-1">
-													<i class="flex items-center justify-center  w-[20px] fa-solid fa-utensils" />
-													<p className="tracking-wide">
-														{petData.petFavoriteFood}
-													</p>
-												</div>
+												{visibleDetails.includes('petFaveFood') && (
+													<div className="flex items-center justify-center gap-1">
+														<i class="flex items-center justify-center  w-[20px] fa-solid fa-utensils" />
+														<p className="tracking-wide">
+															{petData.petFavoriteFood}
+														</p>
+													</div>
+												)}
 
 												{/* Hobbies */}
-												<div className="flex items-center justify-center gap-1">
-													<i class="flex items-center justify-center  w-[20px] fa-solid fa-water-ladder" />
-													<p className="tracking-wide">
-														{petData.petHobbies}
-													</p>
-												</div>
+												{visibleDetails.includes('petHobbies') && (
+													<div className="flex items-center justify-center gap-1">
+														<i class="flex items-center justify-center  w-[20px] fa-solid fa-water-ladder" />
+														<p className="tracking-wide">
+															{petData.petHobbies}
+														</p>
+													</div>
+												)}
 											</div>
 										</Card>
 									</div>

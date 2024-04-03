@@ -40,6 +40,8 @@ function UserProfile() {
 	const [activeTab, setActiveTab] = useState('posts')
 	const [currentUser, setCurrentUser] = useState([{}])
 
+	const [visibleDetails, setVisibleDetails] = useState([])
+
 	const [userPets, setUserPets] = useState([])
 
 	const [userPosts, setUserPosts] = useState([])
@@ -76,7 +78,24 @@ function UserProfile() {
 						const profileUserData = querySnapshot.docs.map((doc) => doc.data())[0]
 						setUserData(profileUserData)
 
-						console.log('profile user data:', profileUserData)
+						// set visibility
+						const includeFields = []
+
+						for (const field in profileUserData.visibility) {
+							const visibilitySetting = profileUserData.visibility[field]
+
+							if (visibilitySetting === 'public') {
+								includeFields.push(field)
+							} else if (
+								visibilitySetting === 'followers' &&
+								(currentUser.uid in profileUserData.followers ||
+									currentUser.uid === profileUserData.uid)
+							) {
+								includeFields.push(field)
+							}
+						}
+
+						setVisibleDetails(includeFields)
 
 						// fetch profile user pets
 						unsubscribeUserPets = firestore
@@ -85,8 +104,6 @@ function UserProfile() {
 							.onSnapshot((querySnapshot) => {
 								const userPetsData = querySnapshot.docs.map((doc) => doc.data())
 								setUserPets(userPetsData)
-
-								console.log('user pets:', userPetsData)
 							})
 
 						// fetch profile user posts
@@ -103,8 +120,6 @@ function UserProfile() {
 							}))
 							setUserPosts(postDocs)
 							setUserPostsLastVisible(response.docs[response.docs.length - 1])
-
-							console.log('user posts:', postDocs)
 						}
 
 						fetchUserPosts()
@@ -279,7 +294,7 @@ function UserProfile() {
 													phoneNumber: userData.phoneNumber,
 												}}
 											/>
-										) : userData && (
+										) : (
 											// Follow Button
 											<FollowUserButton
 												props={{
@@ -319,44 +334,53 @@ function UserProfile() {
 
 											<div className="flex items-start flex-col gap-2 break-all">
 												{/* Location */}
-												<div className="flex items-center justify-center gap-1">
-													<i className="flex items-center justify-center  w-[20px] fa-solid fa-location-dot " />
-													<p className="tracking-wide">
-														{userData.location}
-													</p>
-												</div>
+												{visibleDetails.includes('location') && (
+													<div className="flex items-center justify-center gap-1">
+														<i className="flex items-center justify-center  w-[20px] fa-solid fa-location-dot " />
+														<p className="tracking-wide">
+															{userData.location}
+														</p>
+													</div>
+												)}
 
 												{/* Gender */}
-												<div className="flex items-center justify-center gap-1">
-													<i className="flex items-center justify-center  w-[20px] fa-solid fa-venus-mars" />
-													<p className="tracking-wide">
-														{userData.gender}
-													</p>
-												</div>
+												{visibleDetails.includes('gender') && (
+													<div className="flex items-center justify-center gap-1">
+														<i className="flex items-center justify-center  w-[20px] fa-solid fa-venus-mars" />
+														<p className="tracking-wide">
+															{userData.gender}
+														</p>
+													</div>
+												)}
 
 												{/* Birthday */}
-												<div className="flex items-center justify-center gap-1">
-													<i className="flex items-center justify-center  w-[20px] fa-solid fa-cake-candles" />
-													<p className="tracking-wide">
-														{userData.birthdate}
-													</p>
-												</div>
-
+												{visibleDetails.includes('birthdate') && (
+													<div className="flex items-center justify-center gap-1">
+														<i className="flex items-center justify-center  w-[20px] fa-solid fa-cake-candles" />
+														<p className="tracking-wide">
+															{userData.birthdate}
+														</p>
+													</div>
+												)}
 												{/* Phone Number */}
-												<div className="flex items-center justify-center gap-1">
-													<i className="flex items-center justify-center  w-[20px] fa-solid fa-phone" />
-													<p className="tracking-wide">
-														{userData.phoneNumber}
-													</p>
-												</div>
+												{visibleDetails.includes('phoneNumber') && (
+													<div className="flex items-center justify-center gap-1">
+														<i className="flex items-center justify-center  w-[20px] fa-solid fa-phone" />
+														<p className="tracking-wide">
+															{userData.phoneNumber}
+														</p>
+													</div>
+												)}
 
 												{/* Email */}
-												<div className="flex items-center justify-center gap-1">
-													<i className="flex items-center justify-center  w-[20px] fa-solid fa-envelope" />
-													<p className="tracking-wide">
-														{userData.email}
-													</p>
-												</div>
+												{visibleDetails.includes('email') && (
+													<div className="flex items-center justify-center gap-1">
+														<i className="flex items-center justify-center  w-[20px] fa-solid fa-envelope" />
+														<p className="tracking-wide">
+															{userData.email}
+														</p>
+													</div>
+												)}
 											</div>
 										</Card>
 									</div>
