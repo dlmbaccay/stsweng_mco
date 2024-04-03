@@ -81,32 +81,30 @@ export default function NavBar({ props }) {
 	}, [uid])
 
 	useEffect(() => {
-		const fetchLostPetsCount = () => {
-			const q = firestore
-				.collection('posts')
-				.where('category', '==', 'Lost Pets')
-				.where('authorID', '==', uid)
+		if (uid) {
+			const fetchLostPetsCount = () => {
+				const q = firestore
+					.collection('posts')
+					.where('category', '==', 'Lost Pets')
+					.where('authorID', '==', uid)
 
-			// Create the onSnapshot listener
-			const unsubscribe = q.onSnapshot(q, (snapshot) => {
-				const taggedPetsIds = new Set()
-				snapshot.forEach((doc) => {
-					const taggedPets = doc.data().taggedPets
-					taggedPets.forEach((pet) => {
-						taggedPetsIds.add(pet.petID)
+				// Create the onSnapshot listener
+				const unsubscribe = q.onSnapshot(q, (snapshot) => {
+					const taggedPetsIds = new Set()
+					snapshot.forEach((doc) => {
+						const taggedPets = doc.data().taggedPets
+						taggedPets.forEach((pet) => {
+							taggedPetsIds.add(pet.petID)
+						})
 					})
+					setLostPetsCount(taggedPetsIds.size)
 				})
-				setLostPetsCount(taggedPetsIds.size)
-			})
 
-			// Important: Return the unsubscribe function for cleanup
-			return unsubscribe
+				// Important: Return the unsubscribe function for cleanup
+				return unsubscribe
+			}
+			fetchLostPetsCount()
 		}
-
-		const unsubscribe = fetchLostPetsCount() // Call and store unsubscribe
-
-		// Cleanup function for useEffect
-		return () => unsubscribe()
 	}, [uid])
 
 	const fetchNextVisibleNotifications = (e) => {
