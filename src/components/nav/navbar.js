@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { auth, firestore } from '@/lib/firebase'
-import { useCollection } from 'react-firebase-hooks/firestore'
+import { query } from 'react-firebase-hooks/firestore'
 import { handleDateFormat } from '@/lib/helper-functions'
 import { ModeToggle } from '../mode-toggle'
 import {
@@ -57,6 +57,8 @@ export default function NavBar({ props }) {
 	const [lastVisibleNotification, setLastVisibleNotification] = useState(null)
 	const [hasMoreNotifications, setHasMoreNotifications] = useState(true)
 
+	const [lostPetsCount, setLostPetsCount] = useState(0)
+
 	useEffect(() => {
 		const fetchNotifications = async () => {
 			const firstBatch = firestore
@@ -76,6 +78,35 @@ export default function NavBar({ props }) {
 		}
 
 		fetchNotifications()
+	}, [uid])
+
+	useEffect(() => {
+		const fetchLostPetsCount = () => {
+			const q = firestore
+				.collection('posts')
+				.where('category', '==', 'Lost Pets')
+				.where('authorID', '==', uid)
+
+			// Create the onSnapshot listener
+			const unsubscribe = q.onSnapshot(q, (snapshot) => {
+				const taggedPetsIds = new Set()
+				snapshot.forEach((doc) => {
+					const taggedPets = doc.data().taggedPets
+					taggedPets.forEach((pet) => {
+						taggedPetsIds.add(pet.petID)
+					})
+				})
+				setLostPetsCount(taggedPetsIds.size)
+			})
+
+			// Important: Return the unsubscribe function for cleanup
+			return unsubscribe
+		}
+
+		const unsubscribe = fetchLostPetsCount() // Call and store unsubscribe
+
+		// Cleanup function for useEffect
+		return () => unsubscribe()
 	}, [uid])
 
 	const fetchNextVisibleNotifications = (e) => {
@@ -157,6 +188,9 @@ export default function NavBar({ props }) {
 									icon={faPaw}
 									className={`w-6 h-6`}
 								></FontAwesomeIcon>
+								<div className="h-4 translate-x-5 translate-y-1 items-end text-primary absolute">
+									{lostPetsCount}
+								</div>
 							</Link>
 
 							{/* Profile Button */}
@@ -235,6 +269,9 @@ export default function NavBar({ props }) {
 														: 'text-background stroke-[50px] stroke-primary'
 												}`}
 											/>
+											<div className="h-4 translate-x-5 translate-y-1 items-end text-primary absolute">
+												{lostPetsCount}
+											</div>
 											<span className="text-primary font-semibold tracking-wider">
 												Pet Tracker
 											</span>
