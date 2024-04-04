@@ -24,7 +24,9 @@ export default function AdminNotifications({ props }) {
 	const [currentPage, setCurrentPage] = useState(1)
 
 	// Slice notifications based on current page
-	const paginatedNotifications = notifications.slice((currentPage - 1) * 5, currentPage * 5)
+	const paginatedNotifications = notifications
+		? notifications.slice((currentPage - 1) * 5, currentPage * 5)
+		: []
 
 	const nextPage = () => {
 		setCurrentPage((prev) => prev + 1)
@@ -91,7 +93,7 @@ export default function AdminNotifications({ props }) {
 							Previous Page
 						</Button>
 						<Button
-							disabled={currentPage * 5 >= notifications.length}
+							disabled={currentPage * 5 >= (notifications && notifications.length)}
 							onClick={nextPage}
 						>
 							Next Page
