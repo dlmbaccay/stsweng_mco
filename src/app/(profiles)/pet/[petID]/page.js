@@ -295,7 +295,7 @@ function PetProfile() {
 										src={
 											petData.petOwnerCoverPhotoURL
 												? petData.petOwnerCoverPhotoURL
-												: '/images/cover0-image.png'
+												: '/images/coverPhotoHolder.png'
 										}
 										alt={'cover photo'}
 										width={0}

@@ -243,7 +243,7 @@ export function CreatePetProfile({ props }) {
 
 							<div className="flex items-start justify-center w-full md:gap-6 gap-2">
 								{/* pet photo */}
-								<div className="w-1/2 mt-4  border border-red-500">
+								<div className="w-1/2 mt-4">
 									<label
 										htmlFor="profile-pic"
 										className="block text-sm font-medium text-raisin_black"

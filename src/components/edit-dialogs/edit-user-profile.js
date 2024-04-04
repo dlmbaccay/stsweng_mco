@@ -219,7 +219,7 @@ export function EditUserProfile({ props }) {
 												src={
 													coverPreviewUrl
 														? coverPreviewUrl
-														: '/images/cover0-image.png'
+														: '/images/coverPhotoHolder.png'
 												}
 												alt="Cover Photo"
 												layout="fill"
