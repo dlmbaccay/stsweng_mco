@@ -211,7 +211,7 @@ function UserProfile() {
 										src={
 											userData.coverPhotoURL
 												? userData.coverPhotoURL
-												: '/images/cover0-image.png'
+												: '/images/coverPhotoHolder.png'
 										}
 										alt={'cover photo'}
 										width={0}

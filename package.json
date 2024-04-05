@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest --watchAll --verbose"
+    "test": "jest --watchAll --verbose --coverage"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
@@ -59,6 +59,7 @@
     "firebase": "^10.8.1",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "jest-fetch-mock": "^3.0.3",
     "node-fetch": "^3.3.2",
     "postcss": "^8",
     "supertest": "^6.3.4",

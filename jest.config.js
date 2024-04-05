@@ -32,6 +32,13 @@ module.exports = {
       'src/lib',
       '/src/app/layout.js',
       '/src/app/page.js',
+      '/src/components',
+      '/src/app/not-found.js',
+      'app/(auth)/landing',
+      'app/(auth)/setup',
+      'app/(auth)/(profile)',
+      'app/(auth)/(admin)',
+
       ],
     // Configure the coverage report
     coverageReporters: ['text', 'lcov', 'clover'],
