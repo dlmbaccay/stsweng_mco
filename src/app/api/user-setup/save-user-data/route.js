@@ -51,6 +51,7 @@ export async function POST(request) {
 						petFaveFood: 'public',
 						petGender: 'public',
 						petBirthdate: 'public',
+						petBreed: 'public',
 					},
 				}
 				await createUserDocument('users', user.uid, userData)

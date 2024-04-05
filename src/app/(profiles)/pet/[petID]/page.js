@@ -295,7 +295,7 @@ function PetProfile() {
 										src={
 											petData.petOwnerCoverPhotoURL
 												? petData.petOwnerCoverPhotoURL
-												: '/images/cover0-image.png'
+												: '/images/coverPhotoHolder.png'
 										}
 										alt={'cover photo'}
 										width={0}
@@ -342,10 +342,11 @@ function PetProfile() {
 													{petData.petOwnerUsername}
 													<span className="text-secondary">&apos;s</span>
 												</span>
-
-												<span className="text-secondary">
-													{petData.petBreed}
-												</span>
+												{visibleDetails.includes('petBreed') && (
+													<span className="text-secondary">
+														{petData.petBreed}
+													</span>
+												)}
 											</p>
 										</div>
 
@@ -420,7 +421,7 @@ function PetProfile() {
 								<div className="flex flex-col xl:flex-row xl:w-[60%] 2xl:w-[60%] w-full px-10 md:mt-8">
 									{/* About and Details Containers */}
 									<div className="flex flex-col items-start xl:w-[30%] 2xl:w-[30%] w-full gap-6">
-										{petData.about && (
+										{petData.petAbout && (
 											<Card className="drop-shadow-md flex flex-col w-full p-6 text-sm rounded-md">
 												<div className="flex flex-col justify-start gap-4">
 													<h1 className="tracking-wide font-bold text-lg text-muted_blue dark:text-light_yellow">

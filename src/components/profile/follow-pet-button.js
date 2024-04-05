@@ -46,7 +46,11 @@ export function FollowPetButton({ props }) {
 					onClick={handleFollow}
 					className="px-3 h-[35px] bg-primary text-primary-foreground gap-2 flex items-center justify-center"
 				>
-					{pet.followers.includes(currentUser_uid) ? <p>Unfollow</p> : <p>Follow</p>}
+					{pet.followers && pet.followers.includes(currentUser_uid) ? (
+						<p>Unfollow</p>
+					) : (
+						<p>Follow</p>
+					)}
 				</Button>
 			)}
 		</>

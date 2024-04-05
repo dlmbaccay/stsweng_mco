@@ -90,14 +90,7 @@ export default function NavBar({ props }) {
 
 				// Create the onSnapshot listener
 				const unsubscribe = q.onSnapshot(q, (snapshot) => {
-					const taggedPetsIds = new Set()
-					snapshot.forEach((doc) => {
-						const taggedPets = doc.data().taggedPets
-						taggedPets.forEach((pet) => {
-							taggedPetsIds.add(pet.petID)
-						})
-					})
-					setLostPetsCount(taggedPetsIds.size)
+					setLostPetsCount(snapshot.size)
 				})
 
 				// Important: Return the unsubscribe function for cleanup

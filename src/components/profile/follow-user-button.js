@@ -60,7 +60,7 @@ export function FollowUserButton({ props }) {
 					onClick={handleFollow}
 					className="px-3 h-[35px] bg-primary text-primary-foreground gap-2 flex items-center justify-center"
 				>
-					{profileUser_followers.includes(currentUser_uid) ? (
+					{profileUser_followers && profileUser_followers.includes(currentUser_uid) ? (
 						<p>Unfollow</p>
 					) : (
 						<p>Follow</p>

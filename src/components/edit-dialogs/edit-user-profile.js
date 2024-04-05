@@ -1,5 +1,6 @@
 import Image from 'next/image'
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { toast } from 'react-hot-toast'
 import { Loader2 } from 'lucide-react'
 import { handleImageFilePreview } from '@/lib/helper-functions'
@@ -29,6 +30,7 @@ import RoundImage from '@/components/round-image'
 import Loader from '../Loader'
 
 export function EditUserProfile({ props }) {
+	const router = useRouter()
 	const [loading, setLoading] = useState(false)
 
 	const {
@@ -44,8 +46,6 @@ export function EditUserProfile({ props }) {
 	} = props
 
 	const [newDisplayName, setNewDisplayName] = useState(displayName)
-	const [newUserPhotoUrl, setNewUserPhotoUrl] = useState(userPhotoURL)
-	const [newCoverPhotoUrl, setNewCoverPhotoUrl] = useState(coverPhotoURL)
 	const [newAbout, setNewAbout] = useState(about)
 	const [newLocation, setNewLocation] = useState(location)
 	const [newGender, setNewGender] = useState(gender)
@@ -59,6 +59,17 @@ export function EditUserProfile({ props }) {
 	const [coverPhoto, setCoverPhoto] = useState('')
 	const [previewUrl, setPreviewUrl] = useState(userPhotoURL)
 	const [coverPreviewUrl, setCoverPreviewUrl] = useState(coverPhotoURL)
+
+	useEffect(() => {
+		setNewDisplayName(displayName)
+		setNewAbout(about)
+		setNewLocation(location)
+		setPreviewUrl(userPhotoURL)
+		setCoverPreviewUrl(coverPhotoURL)
+		setNewGender(gender)
+		setNewBirthdate(birthdate)
+		setNewPhoneNumber(phoneNumber)
+	}, [displayName, about, location, userPhotoURL, coverPhotoURL, gender, birthdate, phoneNumber])
 
 	const handleUserPhotoChange = (event) => {
 		var temp = handleImageFilePreview(event.target.files[0])
@@ -164,7 +175,7 @@ export function EditUserProfile({ props }) {
 				}
 			})
 			.finally(() => {
-				window.location.reload()
+				router.refresh()
 			})
 	}
 
@@ -219,7 +230,7 @@ export function EditUserProfile({ props }) {
 												src={
 													coverPreviewUrl
 														? coverPreviewUrl
-														: '/images/cover0-image.png'
+														: '/images/coverPhotoHolder.png'
 												}
 												alt="Cover Photo"
 												layout="fill"
