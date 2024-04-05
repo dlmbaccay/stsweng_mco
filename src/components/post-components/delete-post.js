@@ -28,7 +28,8 @@ export function DeletePost({ postID }) {
 
 			toast.dismiss()
 			toast.success('Post deleted successfully!')
-			window.location.reload()
+			setOpen(false)
+			router.refresh()
 		} catch (error) {
 			console.error('Error deleting post:', error)
 			toast.dismiss()

@@ -14,6 +14,16 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+	DialogClose,
+} from '@/components/ui/dialog'
+import {
 	Select,
 	SelectContent,
 	SelectItem,
@@ -22,6 +32,12 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { ChangePassword } from '@/components/settings/change-password'
+import { Textarea } from '@/components/ui/textarea'
+import {
+	EmailAuthProvider,
+	reauthenticateWithCredential,
+	verifyBeforeUpdateEmail,
+} from 'firebase/auth'
 
 function Settings() {
 	const [loading, setLoading] = useState(true)
@@ -46,48 +62,58 @@ function Settings() {
 	const [petBirthdayVisibility, setPetBirthdayVisibility] = useState('')
 	const [petFaveFoodVisibility, setPetFaveFoodVisibility] = useState('')
 	const [petHobbiesVisibility, setPetHobbiesVisibility] = useState('')
+	const [petBreedVisibility, setPetBreedVisibility] = useState('')
+
+	const [reauthenticatePassword, setReauthenticatePassword] = useState('')
+	const [open, setOpen] = useState(false)
+	const [providedPassword, setProvidedPassword] = useState(false)
 
 	useEffect(() => {
 		setLoading(true)
+		setLoading(true)
 
-		const unsubscribeAuth = auth.onAuthStateChanged((user) => {
-			if (user) {
-				console.log('User is signed in.')
+		const fetchData = async () => {
+			try {
+				let unsubscribeUser // Declare outside the if block
 
-				const unsubscribeUser = firestore
-					.collection('users')
-					.doc(user.uid)
-					.onSnapshot((doc) => {
-						const userData = doc.data()
-						setCurrentUser(userData)
-						console.log('current user: ', userData)
-						setNewUsername(userData.username)
-						setNewEmail(userData.email)
-						setLocationVisibility(userData.visibility.location)
-						setGenderVisibility(userData.visibility.gender)
-						setBirthdayVisibility(userData.visibility.birthdate)
-						setEmailVisibility(userData.visibility.email)
-						setPhoneVisibility(userData.visibility.phoneNumber)
-						setPetLocationVisibility(userData.visibility.petLocation)
-						setPetGenderVisibility(userData.visibility.petGender)
-						setPetBirthdayVisibility(userData.visibility.petBirthdate)
-						setPetFaveFoodVisibility(userData.visibility.petFaveFood)
-						setPetHobbiesVisibility(userData.visibility.petHobbies)
-					})
-				setLoading(false)
+				// Listener for admin notifications
+				const user = await auth.currentUser
+				if (user) {
+					unsubscribeUser = firestore
+						.collection('users')
+						.doc(user.uid)
+						.onSnapshot((doc) => {
+							const userData = doc.data()
+							setCurrentUser(userData)
+							console.log('current user: ', userData)
+							setNewUsername(userData.username)
+							setNewEmail(userData.email)
+							setLocationVisibility(userData.visibility.location)
+							setGenderVisibility(userData.visibility.gender)
+							setBirthdayVisibility(userData.visibility.birthdate)
+							setEmailVisibility(userData.visibility.email)
+							setPhoneVisibility(userData.visibility.phoneNumber)
+							setPetLocationVisibility(userData.visibility.petLocation)
+							setPetGenderVisibility(userData.visibility.petGender)
+							setPetBirthdayVisibility(userData.visibility.petBirthdate)
+							setPetFaveFoodVisibility(userData.visibility.petFaveFood)
+							setPetHobbiesVisibility(userData.visibility.petHobbies)
+							setPetBreedVisibility(userData.visibility.petBreed)
+						})
+					setLoading(false)
+				}
 
 				// Cleanup function to unsubscribe from the document listeners when the component unmounts
 				return () => {
 					unsubscribeUser()
 				}
-			} else {
-				console.log('No user is signed in.')
-				setLoading(false)
+			} catch (error) {
+				console.error('Error setting up snapshots:', error)
+				setLoading(false) // Reset loading state in case of error
 			}
-		})
+		}
 
-		// Cleanup function to unsubscribe from the auth listener when the component unmounts
-		return () => unsubscribeAuth()
+		fetchData()
 	}, [])
 
 	// Function to save changes to account username and email address
@@ -150,18 +176,16 @@ function Settings() {
 					await batch.commit()
 				}
 
-				await firestore.collection('users').doc(currentUser.uid).update({
-					username: newUsername,
-					email: newEmail,
-				})
-
 				if (
 					auth.currentUser.email !== newEmail &&
 					auth.currentUser.providerData[0].providerId === 'password'
 				) {
-					toast.loading('Updating email address...')
-					auth.currentUser.updateEmail(newEmail).then(() => {
-						toast.success('Updated email address!')
+					// Prompt user to reauthenticate before updating email
+					setOpen(true)
+					return
+				} else {
+					await firestore.collection('users').doc(currentUser.uid).update({
+						username: newUsername,
 					})
 				}
 				toast.success('Account details successfully updated!')
@@ -169,6 +193,38 @@ function Settings() {
 		} catch (error) {
 			console.error(error)
 			toast.error('An error occurred while saving the account settings.')
+		}
+	}
+
+	async function handleReauthenticate() {
+		toast.loading('Updating email address...')
+
+		try {
+			let credential = await EmailAuthProvider.credential(
+				auth.currentUser.email,
+				reauthenticatePassword, // Use the entered password
+			)
+
+			await reauthenticateWithCredential(auth.currentUser, credential)
+			toast('Please check your new email for verification.')
+			// Proceed with the email update (your original code)
+			await verifyBeforeUpdateEmail(auth.currentUser, newEmail)
+			// ... rest of your update logic
+
+			await firestore.collection('users').doc(currentUser.uid).update({
+				username: newUsername,
+				email: newEmail,
+			})
+
+			toast.dismiss()
+			// toast.success('Updated email address!')
+			setReauthenticatePassword('') // Clear the password field
+			setOpen(false) // Close the modal
+		} catch (error) {
+			console.error(error)
+
+			toast.dismiss()
+			toast.error('Incorrect password. Please try again.')
 		}
 	}
 
@@ -190,8 +246,10 @@ function Settings() {
 						petBirthdate: petBirthdayVisibility,
 						petFaveFood: petFaveFoodVisibility,
 						petHobbies: petHobbiesVisibility,
+						petBreed: petBreedVisibility,
 					},
 				})
+			toast.success('Privacy settings saved successfully!')
 		} catch (error) {
 			console.error(error)
 			toast.error('An error occurred while saving the privacy settings.')
@@ -307,8 +365,9 @@ function Settings() {
 												id="email"
 												value={newEmail}
 												disabled={
+													auth.currentUser &&
 													auth.currentUser.providerData[0].providerId !==
-													'password'
+														'password'
 												}
 												onChange={(e) => setNewEmail(e.target.value)}
 												className="text-primary"
@@ -316,8 +375,10 @@ function Settings() {
 										</div>
 										<span
 											className={`italic text-sm text-gray-500 mt-4 ${
+												auth.currentUser &&
 												auth.currentUser.providerData[0].providerId !==
-													'google.com' && 'hidden'
+													'google.com' &&
+												'hidden'
 											}`}
 										>
 											You are currently logged in with Google. Password change
@@ -343,6 +404,33 @@ function Settings() {
 											Save Changes
 										</Button>
 									</div>
+									<Dialog open={open} onOpenChange={setOpen}>
+										<DialogContent className="sm:max-w-[600px] lg:max-w-[720px]">
+											<DialogHeader>
+												<DialogTitle className="text-center">
+													Re-enter your current Password
+												</DialogTitle>
+											</DialogHeader>
+											<Input
+												label="Current Password"
+												type="password"
+												value={reauthenticatePassword}
+												onChange={(e) =>
+													setReauthenticatePassword(e.target.value)
+												}
+											/>
+											<DialogFooter>
+												<DialogClose>
+													<Button onClick={() => setOpen(false)}>
+														Cancel
+													</Button>
+												</DialogClose>
+												<Button onClick={handleReauthenticate}>
+													Submit
+												</Button>
+											</DialogFooter>
+										</DialogContent>
+									</Dialog>
 								</div>
 
 								{/* Privacy Settings */}
@@ -505,6 +593,36 @@ function Settings() {
 										<h3 className="text-lg italic font-bold mt-2">
 											Pet Profile Privacy
 										</h3>
+										<div className="flex flex-row items-center justify-between md:w-1/2 w-full rounded-lg md:pl-4 pl-2">
+											<label
+												htmlFor="pet-breed"
+												className="font-semibold w-1/3"
+											>
+												Breed
+											</label>
+											<Select
+												required
+												onValueChange={(value) =>
+													setPetBreedVisibility(value)
+												}
+												value={petBreedVisibility}
+											>
+												<SelectTrigger className="w-36 border border-secondary text-primary">
+													{petBreedVisibility === 'public'
+														? 'Public'
+														: petBreedVisibility === 'private'
+														? 'Private'
+														: 'Followers Only'}
+												</SelectTrigger>
+												<SelectContent>
+													<SelectItem value="public">Public</SelectItem>
+													<SelectItem value="private">Private</SelectItem>
+													<SelectItem value="followers">
+														Followers Only
+													</SelectItem>
+												</SelectContent>
+											</Select>
+										</div>
 										<div className="flex flex-row items-center justify-between md:w-1/2 w-full rounded-lg md:pl-4 pl-2">
 											<label
 												htmlFor="pet-location"

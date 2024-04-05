@@ -15,12 +15,14 @@ import {
 import { Loader2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth'
 
 export function ChangePassword({ props }) {
 	const [loading, setLoading] = useState(false)
 	const [open, setOpen] = useState(false)
 	const [isEdited, setIsEdited] = useState(false)
 
+	const [oldPassword, setOldPassword] = useState('')
 	const [newPassword, setNewPassword] = useState('')
 	const [confirmNewPassword, setConfirmNewPassword] = useState('')
 
@@ -43,6 +45,13 @@ export function ChangePassword({ props }) {
 
 		try {
 			setLoading(true)
+			let credential = await EmailAuthProvider.credential(
+				auth.currentUser.email,
+				oldPassword, // Use the entered password
+			)
+
+			await reauthenticateWithCredential(auth.currentUser, credential)
+
 			await auth.currentUser.updatePassword(newPassword)
 			toast.success('Password updated successfully!')
 			setOpen(false)
@@ -58,7 +67,10 @@ export function ChangePassword({ props }) {
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
 				<Button
-					disabled={auth.currentUser.providerData[0].providerId !== 'password'}
+					disabled={
+						auth.currentUser &&
+						auth.currentUser.providerData[0].providerId !== 'password'
+					}
 					className="w-fit px-4"
 				>
 					Change Password
@@ -74,12 +86,23 @@ export function ChangePassword({ props }) {
 					<div className="flex flex-col items-center justify-center gap-4">
 						{/* password */}
 						<div className="w-full flex flex-col">
+							<label className="font-semibold my-2">Old Password</label>
+							<Input
+								type="password"
+								id="old-password"
+								placeholder="Password"
+								value={oldPassword}
+								onChange={(e) => setOldPassword(e.target.value)}
+								className={`border border-slate-400 rounded-lg drop-shadow-sm ml-2`}
+								required
+							/>
 							<label className="font-semibold my-2">New Password</label>
 							<Input
 								type="password"
 								id="password"
 								placeholder="Password"
 								value={newPassword}
+								required
 								onFocus={() => setShowPasswordTooltip(true)}
 								onBlur={() => setShowPasswordTooltip(false)}
 								onChange={(e) => setNewPassword(e.target.value)}
@@ -154,6 +177,7 @@ export function ChangePassword({ props }) {
 							<label className="font-semibold my-2">Confirm New Password</label>
 							<Input
 								type="password"
+								required
 								id="confirm_password"
 								placeholder="Confirm Password"
 								onFocus={() => setShowConfirmPasswordTooltip(true)}

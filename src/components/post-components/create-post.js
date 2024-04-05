@@ -37,15 +37,10 @@ export function CreatePost({ props }) {
 
 	const { uid, username, displayname, userphoto, pets, type } = props
 
-	const [postAuthorID, setPostAuthorID] = useState(uid)
-	const [postAuthorUsername, setPostAuthorUsername] = useState(username)
-	const [postAuthorDisplayName, setPostAuthorDisplayName] = useState(displayname)
-	const [postAuthorPhotoURL, setPostAuthorPhotoURL] = useState(userphoto)
 	const [postContent, setPostContent] = useState('')
 	// const [postCategory, setPostCategory] = useState("General");
-	const initialCategory =
-		type === 'Lost Pets' ? 'Lost Pets' : type === 'Unknown Owners' ? 'Unknown Owner' : 'General'
-	const [postCategory, setPostCategory] = useState(initialCategory)
+
+	const [postCategory, setPostCategory] = useState('')
 	const [postTaggedPets, setPostTaggedPets] = useState([])
 	const [postImageURLs, setPostImageURLs] = useState([])
 	const [postTrackerLocation, setPostTrackerLocation] = useState('')
@@ -126,10 +121,10 @@ export function CreatePost({ props }) {
 			const postDetails = {
 				postType: 'Original',
 				postID: postID,
-				authorID: postAuthorID,
-				authorUsername: postAuthorUsername,
-				authorDisplayName: postAuthorDisplayName,
-				authorPhotoURL: postAuthorPhotoURL,
+				authorID: uid,
+				authorUsername: username,
+				authorDisplayName: displayname,
+				authorPhotoURL: userphoto,
 				content: postContent,
 				category: postCategory,
 				taggedPets: postTaggedPets,
@@ -147,7 +142,8 @@ export function CreatePost({ props }) {
 
 			toast.success('Post created successfully!')
 			setLoading(false)
-			window.location.reload()
+			setOpen(false)
+			router.refresh()
 		} catch (error) {
 			console.error(error)
 			setLoading(false)
@@ -164,6 +160,12 @@ export function CreatePost({ props }) {
 	}, [selectedPetIDs, pets])
 
 	useEffect(() => {
+		const initialCategory =
+			type === 'Lost Pets'
+				? 'Lost Pets'
+				: type === 'Unknown Owners'
+				? 'Unknown Owner'
+				: 'General'
 		setPostCategory(initialCategory)
 	}, [type])
 
